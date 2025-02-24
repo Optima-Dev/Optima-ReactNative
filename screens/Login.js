@@ -18,5 +18,4 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: Colors.SeconderyColor,
     },
-    
-})
+});
