@@ -7,16 +7,20 @@ export default function OnBoardingButton({ type, onPress }) {
       style={({ pressed }) => [
         styles.button,
         type === "skip" ? styles.skip : styles.next,
-        pressed && styles.pressed, 
+        pressed && styles.pressed,
       ]}
-      onPress={onPress}
-    >
+      onPress={onPress}>
       {type === "skip" ? (
         <Text style={styles.skipText}>SKIP</Text>
       ) : (
         <>
-          <Text style={styles.nextText}>{type === 'next' ? 'Next' : 'Start'}</Text>
-          <Image source={require('../../assets/Images/Forward-Icon.png')} style={styles.icon} />
+          <Text style={styles.nextText}>
+            {type === "next" ? "Next" : "Start"}
+          </Text>
+          <Image
+            source={require("../../assets/Images/Forward-Icon.png")}
+            style={styles.icon}
+          />
         </>
       )}
     </Pressable>

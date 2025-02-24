@@ -23,8 +23,10 @@ async function requestPermissions(setModalVisible) {
       ]);
 
       if (
-        granted["android.permission.CAMERA"] === PermissionsAndroid.RESULTS.GRANTED &&
-        granted["android.permission.RECORD_AUDIO"] === PermissionsAndroid.RESULTS.GRANTED
+        granted["android.permission.CAMERA"] ===
+          PermissionsAndroid.RESULTS.GRANTED &&
+        granted["android.permission.RECORD_AUDIO"] ===
+          PermissionsAndroid.RESULTS.GRANTED
       ) {
         console.log("Camera & Mic permissions granted ✅");
       } else {
@@ -43,7 +45,7 @@ function PrivacyTerms1() {
 
   function agreementHandler() {
     requestPermissions(setModalVisible);
-    if(!modalVisible) {
+    if (!modalVisible) {
       navigation.navigate("Login");
     }
   }
@@ -52,9 +54,14 @@ function PrivacyTerms1() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Image source={require("../assets/Images/TermsLogo.png")} style={styles.image} />
+        <Image
+          source={require("../assets/Images/TermsLogo.png")}
+          style={styles.image}
+        />
         <Text style={styles.MainText}>Privacy And Terms</Text>
-        <Text style={styles.SubText}>To use Optima, you agree to the following:</Text>
+        <Text style={styles.SubText}>
+          To use Optima, you agree to the following:
+        </Text>
       </View>
 
       {/* Terms List */}
@@ -68,15 +75,21 @@ function PrivacyTerms1() {
       </View>
 
       {/* Warning Modal */}
-      <Modal visible={modalVisible} transparent animationType="fade">
+      <Modal visible={modalVisible} transparent animationType='fade'>
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Image source={require("../assets/Images/WarningIcon.png")} style={styles.warningIcon} />
+            <Image
+              source={require("../assets/Images/WarningIcon.png")}
+              style={styles.warningIcon}
+            />
             <Text style={styles.modalTitle}>Warning!</Text>
             <Text style={styles.modalMessage}>
-              By canceling, you will have to accept it later if you want to use our app properly.
+              By canceling, you will have to accept it later if you want to use
+              our app properly.
             </Text>
-            <Pressable style={styles.okButton} onPress={() => setModalVisible(false)}>
+            <Pressable
+              style={styles.okButton}
+              onPress={() => setModalVisible(false)}>
               <Text style={styles.okButtonText}>OK</Text>
             </Pressable>
           </View>

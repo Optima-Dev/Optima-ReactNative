@@ -7,12 +7,14 @@ const BackButton = () => {
   const navigation = useNavigation();
 
   return (
-    <Pressable 
-      onPress={() => navigation.goBack()} 
-      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
-    >
+    <Pressable
+      onPress={() => navigation.goBack()}
+      style={({ pressed }) => [styles.container, pressed && styles.pressed]}>
       {/* <Ionicons name="chevron-back" size={24} color={Colors.MainColor} /> */}
-      <Image source={require('../../assets/Images/BackIcon.png')} style={styles.icon} />
+      <Image
+        source={require("../../assets/Images/BackIcon.png")}
+        style={styles.icon}
+      />
       <Text style={styles.text}>Back</Text>
     </Pressable>
   );
