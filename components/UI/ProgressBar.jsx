@@ -1,13 +1,29 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import Colors from '../../constants/Colors'; // Import Colors
+import Colors from "../../constants/Colors"; // Import Colors
 
 export default function ProgressBar({ step }) {
   return (
     <View style={styles.progressBar}>
-      <View style={[styles.segment, step === 1 ? styles.activeSegment : styles.inactiveSegment]} />
-      <View style={[styles.segment, step === 2 ? styles.activeSegment : styles.inactiveSegment]} />
-      <View style={[styles.segment, step === 3 ? styles.activeSegment : styles.inactiveSegment]} />
+      <View
+        style={[
+          styles.segment,
+          step === 1 ? styles.activeSegment : styles.inactiveSegment,
+        ]}
+      />
+      <View
+        style={[
+          styles.segment,
+          step === 2 ? styles.activeSegment : styles.inactiveSegment,
+        ]}
+      />
+
+      <View
+        style={[
+          styles.segment,
+          step === 3 ? styles.activeSegment : styles.inactiveSegment,
+        ]}
+      />
     </View>
   );
 }
@@ -31,6 +47,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white, // Active segment color
   },
   inactiveSegment: {
-    backgroundColor: Colors.InActiveColor // Inactive segment color
+    backgroundColor: Colors.InActiveColor, // Inactive segment color
   },
 });

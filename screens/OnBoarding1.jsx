@@ -1,4 +1,3 @@
-import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import ProgressBar from "../components/UI/ProgressBar";
 import Colors from "../constants/Colors";
@@ -12,21 +11,31 @@ function OnBoarding1({ navigation, step, setStep }) {
       </View>
       <View style={styles.container}>
         <View style={styles.textContainer}>
-          <Text style={styles.text1}>WELCOME {"\n"}TO A NEW {"\n"}WORLD OF VISION !</Text>
+          <Text style={styles.text1}>
+            WELCOME {"\n"}TO A NEW {"\n"}WORLD OF VISION !
+          </Text>
           <Text style={styles.text2}>
-            Optima is your number one choice as a helping tool for all your daily tasks as a human being. It’s all designed carefully for all levels of blindness disability.
+            Optima is your number one choice as a helping tool for all your
+            daily tasks as a human being. It’s all designed carefully for all
+            levels of blindness disability.
           </Text>
         </View>
         <Image
           style={styles.image}
-          source={require('../assets/Images/OnBoarding1.png')} // Correct image path
+          source={require("../assets/Images/OnBoarding1.png")} // Correct image path
         />
         <View style={styles.ButtonsContainer}>
-          <OnBoardingButton type={'skip'} onPress={() => navigation.navigate('Start')} />
-          <OnBoardingButton type={'next'} onPress={() => {
-            setStep(2);
-            navigation.navigate('OnBoarding2');
-          }} />
+          <OnBoardingButton
+            type={"skip"}
+            onPress={() => navigation.navigate("Start")}
+          />
+          <OnBoardingButton
+            type={"next"}
+            onPress={() => {
+              setStep(2);
+              navigation.navigate("OnBoarding2");
+            }}
+          />
         </View>
       </View>
     </>
@@ -36,29 +45,29 @@ function OnBoarding1({ navigation, step, setStep }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   ProgressBar: {
     marginTop: 50,
   },
   textContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   text1: {
     fontSize: 36,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.white,
     marginEnd: 30,
-    textAlign: 'left',
+    textAlign: "left",
   },
   text2: {
     fontSize: 18,
     color: Colors.white,
     marginHorizontal: 10,
-    textAlign: 'left',
+    textAlign: "left",
     marginTop: 5,
   },
   image: {
@@ -67,11 +76,11 @@ const styles = StyleSheet.create({
     marginTop: 150,
   },
   ButtonsContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 60,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "80%",
   },
 });
 

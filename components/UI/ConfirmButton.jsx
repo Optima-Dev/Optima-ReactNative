@@ -3,7 +3,9 @@ import Colors from "../../constants/Colors";
 
 function ConfirmButton({ title, onPress }) {
   return (
-    <Pressable style={({ pressed }) => [styles.button, pressed && styles.pressed]} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      onPress={onPress}>
       <Text style={styles.text}>{title}</Text>
     </Pressable>
   );
