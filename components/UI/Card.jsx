@@ -1,25 +1,26 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
-import Colors from "../../constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 
-function Card({ text, subText, imageSource }) {
-    const navigation = useNavigation();
+import Colors from "@/constants/Colors";
 
-    return (
-        <Pressable 
-            style={({ pressed }) => [styles.card, pressed && styles.pressed]} 
-            onPress={() => navigation.navigate("PrivacyTerms1")}
-        >
-            {/* Image */}
-            <Image source={imageSource} style={styles.image} />
-            
-            {/* Text Content */}
-            <View style={styles.textContainer}>
-                <Text style={styles.text}>{text}</Text>
-                <Text style={styles.subText}>{subText}</Text>
-            </View>
-        </Pressable>
-    );
+
+function Card({ text, subText, imageSource }) {
+  const navigation = useNavigation();
+
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      onPress={() => navigation.navigate("PrivacyTerms1")}>
+      {/* Image */}
+      <Image source={imageSource} style={styles.image} />
+
+      {/* Text Content */}
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>{text}</Text>
+        <Text style={styles.subText}>{subText}</Text>
+      </View>
+    </Pressable>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     opacity: 0.6, // Effect when pressed
   },
   image: {
-    width: 100, 
+    width: 100,
     height: 100,
     marginRight: 15,
     resizeMode: "contain",

@@ -1,9 +1,11 @@
 import { Pressable, Text, StyleSheet } from "react-native";
-import Colors from "../../constants/Colors";
+import Colors from "@/constants/Colors";
 
 function ConfirmButton({ title, onPress }) {
   return (
-    <Pressable style={({ pressed }) => [styles.button, pressed && styles.pressed]} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      onPress={onPress}>
       <Text style={styles.text}>{title}</Text>
     </Pressable>
   );

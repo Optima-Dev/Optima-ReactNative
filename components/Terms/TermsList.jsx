@@ -1,5 +1,6 @@
 import { View, FlatList, StyleSheet } from "react-native";
-import TermItem from './TermItem' // Import the TermItem component
+
+import TermItem from "./TermItem"; // Import the TermItem component
 import DetailItem from "./DetailItem";
 
 const DATA = [
@@ -32,32 +33,32 @@ const DATA = [
     type: "detail",
     icon: require("../../assets/Images/Forward-Arrow.png"),
     text: "Privacy Policy",
-  }
+  },
 ];
 
 function TermsList() {
-    function renderItem({ item }) {
-        if (item.type === "term") {
-            return <TermItem text={item.text} iconSource={item.icon} />;
-        } else {
-            return <DetailItem text={item.text} iconSource={item.icon} />;
-        }
+  function renderItem({ item }) {
+    if (item.type === "term") {
+      return <TermItem text={item.text} iconSource={item.icon} />;
+    } else {
+      return <DetailItem text={item.text} iconSource={item.icon} />;
     }
-return (
+  }
+  return (
     <View style={styles.container}>
-        <FlatList
-            data={DATA}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false} // Hide the scrolling bar
-        />
+      <FlatList
+        data={DATA}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false} // Hide the scrolling bar
+      />
     </View>
-);
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      height: 440,
-    },
-  });
+  container: {
+    height: 440,
+  },
+});
 export default TermsList;
