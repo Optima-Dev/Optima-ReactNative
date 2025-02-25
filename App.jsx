@@ -8,12 +8,9 @@ import Colors from "./constants/Colors";
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
 
-// importing react hooks
-import { useState } from "react";
-
 // importing screens
 import Splash from "@/screens/Splash";
-import OnBoarding from "@/screens/OnBoarding/OnBoarding";
+import OnBoarding from "@/screens/OnBoarding";
 import PrivacyTerms1 from "@/screens/PrivacyTerms1";
 import Start from "@/screens/Start";
 import Login from "@/screens/Authentication/Login";

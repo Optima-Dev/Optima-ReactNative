@@ -1,4 +1,3 @@
-import React from "react";
 import { Text, Pressable, StyleSheet, Image } from "react-native";
 
 export default function OnBoardingButton({ type, onPress }) {

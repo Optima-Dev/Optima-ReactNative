@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-
-import OnBoardingContent from "../../components/UI/OnBoardingContent";
+import OnBoardingContent from "../components/UI/OnBoardingContent";
 import onBoardingImage1 from "@/assets/Images/OnBoarding1.png";
 import onBoardingImage2 from "@/assets/Images/OnBoarding2.png";
 import onBoardingImage3 from "@/assets/Images/OnBoarding3.png";
