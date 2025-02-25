@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import Colors from "../../constants/Colors";
+import Colors from "@/constants/Colors";
 
 function TermItem({ iconSource, text }) {
   return (

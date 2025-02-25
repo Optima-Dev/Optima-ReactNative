@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import Colors from "../constants/Colors";
-import Card from "../components/UI/Card";
+import Colors from "@/constants/Colors";
+import Card from "@/components/UI/Card";
 
 function Start({ navigation }) {
   return (
@@ -11,11 +11,11 @@ function Start({ navigation }) {
         {/* Ellips1 */}
         <Image
           style={styles.backgroundImage}
-          source={require("../assets/Images/Ellipse 1.png")} // Replace with your actual image
+          source={require("@/assets/Images/Ellipse 1.png")} // Replace with your actual image
         />
         <Image
           style={styles.image}
-          source={require("../assets/Images/Main-Logo-blue 1.png")}
+          source={require("@/assets/Images/Main-Logo-blue 1.png")}
         />
       </View>
       <View style={styles.textContainer}>
@@ -28,17 +28,17 @@ function Start({ navigation }) {
       <View style={styles.cardsContainer}>
         <Image
           style={styles.backgroundImage}
-          source={require("../assets/Images/Ellipse 2.png")} // Replace with your actual image
+          source={require("@/assets/Images/Ellipse 2.png")} // Replace with your actual image
         />
         <Card
           text={"I WANT SOMEONE TO HELP ME."}
           subText={"( I have a sight disability)"}
-          imageSource={require("../assets/Images/OnBoarding1.png")}
+          imageSource={require("@/assets/Images/OnBoarding1.png")}
         />
         <Card
           text={"I WANT TO HELP SOMEONE"}
           subText={"( I want to share my sight)"}
-          imageSource={require("../assets/Images/Help.png")}
+          imageSource={require("@/assets/Images/Help.png")}
         />
       </View>
     </View>

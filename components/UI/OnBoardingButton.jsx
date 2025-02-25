@@ -1,4 +1,3 @@
-import React from "react";
 import { Text, Pressable, StyleSheet, Image } from "react-native";
 
 export default function OnBoardingButton({ type, onPress }) {
@@ -9,16 +8,17 @@ export default function OnBoardingButton({ type, onPress }) {
         type === "skip" ? styles.skip : styles.next,
         pressed && styles.pressed,
       ]}
-      onPress={onPress}>
+      onPress={onPress}
+    >
       {type === "skip" ? (
         <Text style={styles.skipText}>SKIP</Text>
       ) : (
         <>
           <Text style={styles.nextText}>
-            {type === "next" ? "Next" : "Start"}
+            {type === "next" ? "NEXT" : "START"}
           </Text>
           <Image
-            source={require("../../assets/Images/Forward-Icon.png")}
+            source={require("@/assets/Images/Forward-Icon.png")}
             style={styles.icon}
           />
         </>

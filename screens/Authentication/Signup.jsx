@@ -1,15 +1,16 @@
-import { View, Text, StyleSheet, Image } from "react-native";
-import Colors from "../constants/Colors";
+import { StyleSheet, Text, View } from "react-native";
 
-function Login() {
+import Colors from "@/constants/Colors";
+
+const Signup = () => {
   return (
     <View style={styles.container}>
-      <Text>Login</Text>
+      <Text >Sign Up</Text>
     </View>
   );
 }
 
-export default Login;
+export default Signup;
 
 const styles = StyleSheet.create({
   container: {
