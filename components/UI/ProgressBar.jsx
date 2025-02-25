@@ -1,6 +1,5 @@
-import React from "react";
 import { View, StyleSheet } from "react-native";
-import Colors from "../../constants/Colors"; // Import Colors
+import Colors from "@/constants/Colors"; // Import Colors
 
 export default function ProgressBar({ step }) {
   return (
