@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import ProgressBar from "../components/UI/ProgressBar";
-import Colors from "../constants/Colors";
-import OnBoardingButton from "../components/UI/OnBoardingButton";
+
+import ProgressBar from "@/components/UI/ProgressBar";
+import Colors from "@/constants/Colors";
+import OnBoardingButton from "@/components/UI/OnBoardingButton";
 
 function OnBoarding1({ navigation, step, setStep }) {
   return (
@@ -22,7 +23,7 @@ function OnBoarding1({ navigation, step, setStep }) {
         </View>
         <Image
           style={styles.image}
-          source={require("../assets/Images/OnBoarding1.png")} // Correct image path
+          source={require("@/assets/Images/OnBoarding1.png")} // Correct image path
         />
         <View style={styles.ButtonsContainer}>
           <OnBoardingButton

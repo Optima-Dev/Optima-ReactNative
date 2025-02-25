@@ -9,14 +9,15 @@ import {
   Modal,
   Pressable,
 } from "react-native";
-import Colors from "../constants/Colors";
-import TermsList from "../components/Terms/TermsList";
-import ConfirmButton from "../components/UI/ConfirmButton";
 import { useNavigation } from "@react-navigation/native";
+
+import Colors from "@/constants/Colors";
+import TermsList from "@/components/Terms/TermsList";
+import ConfirmButton from "@/components/UI/ConfirmButton";
 
 async function requestPermissions(setModalVisible) {
   try {
-    if (Platform.OS === "android") {
+    // if (Platform.OS === "android") {
       const granted = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.CAMERA,
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
@@ -33,7 +34,7 @@ async function requestPermissions(setModalVisible) {
         console.log("Camera or Mic permissions denied ❌");
         setModalVisible(true); // Show warning modal if denied
       }
-    }
+    // }
   } catch (err) {
     console.warn(err);
   }

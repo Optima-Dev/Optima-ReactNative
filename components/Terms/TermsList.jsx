@@ -1,4 +1,5 @@
 import { View, FlatList, StyleSheet } from "react-native";
+
 import TermItem from "./TermItem"; // Import the TermItem component
 import DetailItem from "./DetailItem";
 

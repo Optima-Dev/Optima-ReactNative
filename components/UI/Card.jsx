@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
-import Colors from "../../constants/Colors";
 import { useNavigation } from "@react-navigation/native";
+
+import Colors from "@/constants/Colors";
+
 
 function Card({ text, subText, imageSource }) {
   const navigation = useNavigation();
