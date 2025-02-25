@@ -13,9 +13,7 @@ import { useState } from "react";
 
 // importing screens
 import Splash from "@/screens/Splash";
-import OnBoarding1 from "@/screens/OnBoarding/OnBoarding1";
-import OnBoarding2 from "@/screens/OnBoarding/OnBoarding2";
-import OnBoarding3 from "@/screens/OnBoarding/OnBoarding3";
+import OnBoarding from "@/screens/OnBoarding/OnBoarding";
 import PrivacyTerms1 from "@/screens/PrivacyTerms1";
 import Start from "@/screens/Start";
 import Login from "@/screens/Authentication/Login";
@@ -28,8 +26,6 @@ const Stack = createNativeStackNavigator();
 
 // creating stack navigator function
 function StackNavigator() {
-  // setting progress bar steps
-  const [step, setStep] = useState(1);
 
   return (
     <Stack.Navigator
@@ -56,17 +52,10 @@ function StackNavigator() {
         }}
       />
 
-      <Stack.Screen name="OnBoarding1">
-        {(props) => <OnBoarding1 {...props} step={step} setStep={setStep} />}
-      </Stack.Screen>
-
-      <Stack.Screen name="OnBoarding2">
-        {(props) => <OnBoarding2 {...props} step={step} setStep={setStep} />}
-      </Stack.Screen>
-
-      <Stack.Screen name="OnBoarding3">
-        {(props) => <OnBoarding3 {...props} step={step} setStep={setStep} />}
-      </Stack.Screen>
+      <Stack.Screen
+        name="OnBoarding1"
+        component={OnBoarding}
+      />
 
       <Stack.Screen
         name="Start"

@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import Colors from "@/constants/Colors"; // Import Colors
 
 export default function ProgressBar({ step }) {
@@ -30,16 +30,13 @@ export default function ProgressBar({ step }) {
 const styles = StyleSheet.create({
   progressBar: {
     flexDirection: "row",
-    width: 350,
-    height: 5,
     borderRadius: 18,
-    overflow: "hidden",
-    alignSelf: "center",
-    marginVertical: 20,
+    paddingHorizontal: 20,
   },
   segment: {
     flex: 1,
-    marginHorizontal: 3,
+    height: 6,
+    marginHorizontal: Platform.OS === "ios" ? 5 : 3,
     borderRadius: 5,
   },
   activeSegment: {
