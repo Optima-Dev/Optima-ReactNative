@@ -94,11 +94,14 @@ const styles = StyleSheet.create({
   ButtonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: Platform.OS === 'ios' ? '90%' : '80%',
+    width: Platform.OS === 'ios' ? '90%' : '100%',
+    marginEnd: Platform.OS === 'ios' ? 0 : 20,
+    marginBottom: Platform.OS === 'ios' ? 0 : 10,
   },
   thirdBoarding: {
     marginLeft: "auto",
-    marginBottom: Platform.OS === 'ios' ? 14 : 0,
+    marginBottom: Platform.OS === 'ios' ? 14 : 10,
+    marginEnd: Platform.OS === 'ios' ? 0 : -15,
   }
 });
 

@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, StyleSheet } from "react-native";
+import AuthContent from "../../components/Auth/AuthContent";
 import Colors from "@/constants/Colors";
 
 function Login() {
   return (
     <View style={styles.container}>
-      <Text>Login</Text>
+      <AuthContent type="login" />
     </View>
   );
 }

@@ -8,17 +8,13 @@ import Colors from "./constants/Colors";
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
 
-// importing react hooks
-import { useState } from "react";
-
 // importing screens
-import Splash from "./screens/Splash";
-import OnBoarding1 from "./screens/OnBoarding1";
-import OnBoarding2 from "./screens/OnBoarding2";
-import OnBoarding3 from "./screens/OnBoarding3";
-import PrivacyTerms1 from "./screens/PrivacyTerms1";
-import Start from "./screens/Start";
-import Login from "./screens/Login";
+import Splash from "@/screens/Splash";
+import OnBoarding from "@/screens/OnBoarding";
+import PrivacyTerms1 from "@/screens/PrivacyTerms1";
+import Start from "@/screens/Start";
+import Login from "@/screens/Authentication/Login";
+import Signup from "@/screens/Authentication/Signup";
 
 // importing components
 import BackButton from "./components/UI/BackButton";
@@ -28,9 +24,6 @@ const Stack = createNativeStackNavigator();
 
 // creating stack navigator function
 function StackNavigator() {
-  // setting progress bar steps
-  const [step, setStep] = useState(1);
-
   return (
     <Stack.Navigator
       screenOptions={{
@@ -54,15 +47,9 @@ function StackNavigator() {
           gestureEnabled: false, // Disable going back to Splash
         }}
       />
-      <Stack.Screen name='OnBoarding1'>
-        {(props) => <OnBoarding1 {...props} step={step} setStep={setStep} />}
-      </Stack.Screen>
-      <Stack.Screen name='OnBoarding2'>
-        {(props) => <OnBoarding2 {...props} step={step} setStep={setStep} />}
-      </Stack.Screen>
-      <Stack.Screen name='OnBoarding3'>
-        {(props) => <OnBoarding3 {...props} step={step} setStep={setStep} />}
-      </Stack.Screen>
+
+      <Stack.Screen name='OnBoarding1' component={OnBoarding} />
+
       <Stack.Screen
         name='Start'
         component={Start}
@@ -79,9 +66,18 @@ function StackNavigator() {
           headerLeft: () => <BackButton />,
         }}
       />
+
       <Stack.Screen
         name='Login'
         component={Login}
+        options={{
+          headerShown: true,
+          headerLeft: () => <BackButton />,
+        }}
+      />
+      <Stack.Screen
+        name='Signup'
+        component={Signup}
         options={{
           headerShown: true,
           headerLeft: () => <BackButton />,

@@ -14,12 +14,11 @@ function ConfirmButton({ title, onPress }) {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.MainColor, // Blue color
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    width: "100%", // Adjust width as needed
+    width: 360,
+    height: 55,
   },
   pressed: {
     opacity: 0.7, // Slight fade effect when pressed
