@@ -2,6 +2,9 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+// auth context
+import AuthProvider from "@/store/AuthContext";
+
 // importing constants
 import Colors from "./constants/Colors";
 
@@ -89,8 +92,10 @@ function StackNavigator() {
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <StackNavigator />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <StackNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
