@@ -23,6 +23,16 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "This app needs access to your camera so you can take pictures and do things like that.",
+          "microphonePermission": "This app needs access to your microphone so you can record audio.",
+          "recordAudioAndroid": true
+        }
+      ]
+    ]
   }
 }

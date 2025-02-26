@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 6,
     backgroundColor: Colors.InputBackGround,
-    width: 360,
+    width: '100%',
     height: 55,
   },
   icon: {
@@ -57,7 +57,6 @@ const styles = StyleSheet.create({
     color: Colors.MainColor,
   },
   input: {
-    // flex: 1,
     width: 260,
     fontSize: 15,
     color: Colors.black,

@@ -8,16 +8,18 @@ import {
   Platform,
   Modal,
   Pressable,
+  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
 import Colors from "@/constants/Colors";
 import TermsList from "@/components/Terms/TermsList";
-import ConfirmButton from "@/components/UI/ConfirmButton";
+import PrimaryButton from "@/components/UI/PrimaryButton";
+import { PermissionStatus, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 
-async function requestPermissions(setModalVisible) {
+
+async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
   try {
-    // if (Platform.OS === "android") {
+    if (Platform.OS === "android") {
       const granted = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.CAMERA,
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
@@ -34,17 +36,90 @@ async function requestPermissions(setModalVisible) {
         console.log("Camera or Mic permissions denied ❌");
         setModalVisible(true); // Show warning modal if denied
       }
-    // }
+    }
+    else if(Platform.OS === 'ios') {
+    }
   } catch (err) {
     console.warn(err);
+    return false;
   }
 }
 
-function PrivacyTerms1() {
-  const navigation = useNavigation();
+function PrivacyTerms1({ navigation }) {
+
   const [modalVisible, setModalVisible] = useState(false);
+  const [cameraPermission, requestCamera] = useCameraPermissions();
+  const [micPermission, requestMic] = useMicrophonePermissions();
+
+  // async function verifyPermissionsOnIos() {
+    // try {
+    //   // First check current status without requesting
+    //   if (cameraPermission.status === PermissionStatus.UNDETERMINED || 
+    //       micPermission.status === PermissionStatus.UNDETERMINED) {
+        
+    //     // Request both permissions simultaneously
+    //     const [cameraResponse, micResponse] = await Promise.all([
+    //       requestCamera(),
+    //       requestMic()
+    //     ]);
+  
+    //     // Check immediate responses
+    //     if (!cameraResponse.granted || !micResponse.granted) {
+    //       return false;
+    //     }
+    //   }
+  
+    //  // Final check after potential updates
+    //   const finalCameraStatus = cameraPermission.status === PermissionStatus.GRANTED;
+    //   const finalMicStatus = micPermission.status === PermissionStatus.GRANTED;
+  
+    //   return finalCameraStatus && finalMicStatus;
+      
+    // } catch (error) {
+    //   console.error("Permission error:", error);
+    //   return false;
+    // }
+  // }
+
+  // async function handleAllow() {
+  //   if (Platform.OS === 'ios') {
+  //     // Explicitly request permissions again to trigger native dialog
+  //     const [cameraResponse, micResponse] = await Promise.all([
+  //       requestCamera(),
+  //       requestMic(),
+  //     ]);
+      
+  //     if (!(cameraResponse.granted && micResponse.granted)) {
+  //       setModalVisible(true);
+  //     }
+  //   }
+  //   const granted = await requestPermissions(setModalVisible, verifyPermissionsOnIos);
+  //   if (granted) {
+  //     navigation.navigate("Login");
+  //   } else {
+  //     setModalVisible(true);
+  //   }
+  // }
 
   function agreementHandler() {
+    // Alert.alert(
+    //   "Camera, Video and Microphone",
+    //   "Allow optima to have control over these while using app",
+    //   [
+    //     { 
+    //       text: "Cancel", 
+    //       onPress: () => {
+    //         setModalVisible(true); // Show warning modal
+    //         // Stay on current page
+    //       }
+    //     },
+    //     { 
+    //       text: "Allow", 
+    //       onPress: handleAllow
+    //     },
+    //   ]
+    // );
+
     requestPermissions(setModalVisible);
     if (!modalVisible) {
       navigation.navigate("Login");
@@ -72,7 +147,12 @@ function PrivacyTerms1() {
 
       {/* Confirm Button */}
       <View style={styles.ButtonContainer}>
-        <ConfirmButton title={"I Agree"} onPress={agreementHandler} />
+        <PrimaryButton
+          title={"I Agree"}
+          onPress={agreementHandler}
+          backgroundColor={Colors.MainColor}
+          textColor="white"
+        />
       </View>
 
       {/* Warning Modal */}
@@ -118,7 +198,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     color: Colors.MainColor,
-    marginTop: 5,
+    marginTop: Platform.OS === "android" ? 5 : 12,
   },
   SubText: {
     fontSize: 22,
@@ -129,10 +209,10 @@ const styles = StyleSheet.create({
     width: 280,
   },
   ButtonContainer: {
-    width: 350,
+    width: Platform.OS === "android" ? 350 : 388,
     height: 55,
     position: "absolute",
-    bottom: 20,
+    bottom: Platform.OS === "android" ? 20 : 32,
   },
   TermsContainer: {
     flex: 1,

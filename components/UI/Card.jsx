@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import Colors from "@/constants/Colors";
@@ -30,8 +30,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.MainColor, // Blue color
     padding: 15,
     borderRadius: 20,
-    width: 360,
-    height: 130,
+    width: Platform.OS === "android" ? 360 : 388,
+    height: Platform.OS === "android" ? 130 : 137,
     alignSelf: "center",
     shadowColor: "#000", // Added shadow for better UI
     shadowOffset: { width: 0, height: 2 },

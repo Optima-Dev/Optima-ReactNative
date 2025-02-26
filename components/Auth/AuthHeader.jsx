@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, Platform } from "react-native";
 import Colors from "../../constants/Colors";
 
 function AuthHeader({ title, subtitle, TitleStyle, SubtitleStyle }) {
@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
     width: 82,
     height: 78,
     marginBottom: 15,
+    marginTop: Platform.OS === "android" ? 0 : 20,
   },
   title: {
     fontSize: 38,
@@ -32,12 +33,12 @@ const styles = StyleSheet.create({
     marginEnd: 60,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: Platform.OS === "android" ? 18 : 20,
     color: Colors.black,
     textAlign: "left",
     fontWeight: 300,
-    width: 290,
     marginEnd: 35,
+    marginVertical: Platform.OS === "android" ? 0 : 12,
   },
 });
 

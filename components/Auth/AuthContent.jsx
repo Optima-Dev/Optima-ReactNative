@@ -1,8 +1,8 @@
-import { View, StyleSheet, Pressable, Text, ScrollView } from "react-native";
+import { View, StyleSheet, Pressable, Text, ScrollView, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AuthHeader from "./AuthHeader";
 import AuthForm from "./AuthForm";
-import ConfirmButton from "../UI/ConfirmButton";
+import PrimaryButton from "../UI/PrimaryButton";
 import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 
@@ -22,8 +22,8 @@ function AuthContent({ type }) {
       <AuthHeader
         title={
           type === "login"
-            ? "WELCOME BACK, FRIEND!"
-            : "LET’S GET STARTED, FRIEND!"
+            ? `WELCOME\nBACK, FRIEND!`
+            : `LET’S GET\nSTARTED, FRIEND!`
         }
         subtitle={
           type === "login"
@@ -39,9 +39,11 @@ function AuthContent({ type }) {
 
       {/* Confirm Button */}
       <View style={styles.ButtonContainer}>
-        <ConfirmButton
+        <PrimaryButton
+          backgroundColor={Colors.MainColor}
           title={type === "login" ? "Login" : "Sign up"}
           onPress={() => console.log("Confirm Button Pressed")}
+          textColor="white"
         />
       </View>
 
@@ -83,6 +85,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   ButtonContainer: {
+    width: Platform.OS === "android" ? 350 : 364,
     marginBottom: 10,
   },
   optionContainer: {

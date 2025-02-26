@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import AuthInput from "./AuthInput";
 import Colors from "../../constants/Colors";
+import { useNavigation } from "@react-navigation/native";
 
 function AuthForm({ type }) {
+
+  const navigation = useNavigation();
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -47,7 +51,10 @@ function AuthForm({ type }) {
         onChangeText={(text) => handleChange("password", text)}
       />
       {type === "login" && (
-        <Pressable style={styles.forgotPasswordContainer}>
+        <Pressable
+          style={styles.forgotPasswordContainer}
+          onPress={() => navigation.navigate("ForgetPassword1")}
+        >
           <Text style={styles.forgotPassword}>Forgot Password ?</Text>
         </Pressable>
       )}
@@ -67,6 +74,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginBottom: 5,
     marginRight: 5,
+    marginTop: Platform.OS === "android" ? 0 : 5,
     fontSize: 14,
     fontWeight: "600",
   },

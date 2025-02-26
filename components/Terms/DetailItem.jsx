@@ -1,9 +1,7 @@
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { Text, StyleSheet, Pressable, Image } from "react-native";
 import Colors from "@/constants/Colors";
 
 function DetailItem({ text, iconSource }) {
-  const navigation = useNavigation();
 
   return (
     <Pressable

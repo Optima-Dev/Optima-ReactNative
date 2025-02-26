@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 import Card from "@/components/UI/Card";
 
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 25,
+    fontSize: Platform.OS === "android" ? 25 : 30,
     fontWeight: 600,
     color: Colors.MainColor,
   },
@@ -81,22 +81,26 @@ const styles = StyleSheet.create({
     marginTop: 35,
   },
   Maintext: {
-    fontSize: 35,
+    fontSize: Platform.OS === "android" ? 35 : 38,
     textAlign: "start",
     color: Colors.MainColor,
     fontWeight: 700,
     alignSelf: "flex-start",
   },
   Subtext: {
-    fontSize: 18,
+    fontSize: Platform.OS === "android" ? 18 : 23,
     textAlign: "start",
     color: Colors.black,
     alignSelf: "flex-start",
     fontWeight: 300,
+    marginTop: Platform.OS === "android" ? 0 : 15,
+    lineHeight: 28,
   },
   cardsContainer: {
+    flex: 1,
     alignItems: "center",
-    marginTop: 45,
+    justifyContent: "center",
+    // marginTop: 45,
     gap: 30,
   },
 });

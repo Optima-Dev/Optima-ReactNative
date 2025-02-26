@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 
 function TermItem({ iconSource, text }) {
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 10,
     borderRadius: 15,
-    width: 350,
+    width: Platform.OS === "ios" ? 388 : 350,
     marginBottom: 10,
   },
   iconContainer: {
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   text: {
-    fontSize: 15,
+    fontSize: Platform.OS === "ios" ? 17 : 15,
     color: "black",
     flexShrink: 1, // Ensure text wraps properly
     fontWeight: 300,
