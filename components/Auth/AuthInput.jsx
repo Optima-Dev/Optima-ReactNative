@@ -57,14 +57,12 @@ const styles = StyleSheet.create({
     color: Colors.MainColor,
   },
   input: {
-    width: 260,
+    flex: 1,
+    // width: 260,
     fontSize: 15,
     color: Colors.black,
     fontWeight: 300,
-  },
-  eyeIcon: {
-    marginLeft: 10,
-  },
+  }
 });
 
 export default AuthInput;

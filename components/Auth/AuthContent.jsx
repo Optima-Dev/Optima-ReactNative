@@ -1,4 +1,4 @@
-import { View, StyleSheet, Pressable, Text, ScrollView, Platform } from "react-native";
+import { View, StyleSheet, Pressable, Text, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AuthHeader from "./AuthHeader";
 import AuthForm from "./AuthForm";
@@ -17,66 +17,73 @@ function AuthContent({ type }) {
     }
   }
   return (
-    <View style={styles.container}>
-      {/* Auth Header */}
-      <AuthHeader
-        title={
-          type === "login"
-            ? `WELCOME\nBACK, FRIEND!`
-            : `LET’S GET\nSTARTED, FRIEND!`
-        }
-        subtitle={
-          type === "login"
-            ? "Login now to continue your past experience with us!"
-            : "Create an account to have a full experience with us!"
-        }
-        TitleStyle={{ width: 350, marginStart: 65 }}
-        SubtitleStyle={{ width: 350, marginStart: 35 }}
-      />
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.screen}>
+      <ScrollView style={styles.screen} contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.container}>
+          {/* Auth Header */}
+          <AuthHeader
+            title={
+              type === "login"
+                ? `WELCOME\nBACK, FRIEND!`
+                : `LET’S GET\nSTARTED, FRIEND!`
+            }
+            subtitle={
+              type === "login"
+                ? "Login now to continue your past experience with us!"
+                : "Create an account to have a full experience with us!"
+            }
+            TitleStyle={{ width: 350, marginStart: 65 }}
+            SubtitleStyle={{ width: 350, marginStart: 35 }}
+          />
 
-      {/* Auth Form */}
-      <AuthForm type={type} />
+          {/* Auth Form */}
+          <AuthForm type={type} />
 
-      {/* Confirm Button */}
-      <View style={styles.ButtonContainer}>
-        <PrimaryButton
-          backgroundColor={Colors.MainColor}
-          title={type === "login" ? "Login" : "Sign up"}
-          onPress={() => console.log("Confirm Button Pressed")}
-          textColor="white"
-        />
-      </View>
+          {/* Confirm Button */}
+          <View style={styles.ButtonContainer}>
+            <PrimaryButton
+              backgroundColor={Colors.MainColor}
+              title={type === "login" ? "Login" : "Sign up"}
+              onPress={() => console.log("Confirm Button Pressed")}
+              textColor="white"
+            />
+          </View>
 
-      <View style={styles.optionContainer}>
-        <Text style={styles.optionText}>or continue with</Text>
-      </View>
+          <View style={styles.optionContainer}>
+            <Text style={styles.optionText}>or continue with</Text>
+          </View>
 
-      {/* Google Button */}
-      <GoogleButton onPress={() => console.log("Google Button Pressed")} />
+          {/* Google Button */}
+          <GoogleButton />
 
-      {/* Switch Button */}
-      <Pressable
-        onPress={swithModeHandler}
-        style={({ pressed }) => [
-          styles.switchButton,
-          { opacity: pressed ? 0.6 : 1 },
-        ]}>
-        <View style={styles.textContainer}>
-          <Text style={styles.normalText}>
-            {type === "login"
-              ? "Don't have an account? "
-              : "Already have an account? "}
-          </Text>
-          <Text style={styles.linkText}>
-            {type === "login" ? "Sign Up" : "Login"}
-          </Text>
+          {/* Switch Button */}
+          <Pressable
+            onPress={swithModeHandler}
+            style={({ pressed }) => [
+              styles.switchButton,
+              { opacity: pressed ? 0.6 : 1 },
+            ]}>
+            <View style={styles.textContainer}>
+              <Text style={styles.normalText}>
+                {type === "login"
+                  ? "Don't have an account? "
+                  : "Already have an account? "}
+              </Text>
+              <Text style={styles.linkText}>
+                {type === "login" ? "Sign Up" : "Login"}
+              </Text>
+            </View>
+          </Pressable>
         </View>
-      </Pressable>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -89,7 +96,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   optionContainer: {
-    width: 360,
     marginBottom: 10,
   },
   optionText: {

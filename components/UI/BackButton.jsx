@@ -1,4 +1,4 @@
-import { Pressable, Text, StyleSheet, Image } from "react-native";
+import { Pressable, Text, StyleSheet, Image, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -25,16 +25,16 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-    marginTop: 15,
+    padding: Platform.OS === "android" ? 10 : 0,
+    marginTop: Platform.OS === "android" ? 15 : 0,
   },
   pressed: {
     opacity: 0.5,
   },
   text: {
-    fontSize: 16,
+    fontSize: Platform.OS === "android" ? 16 : 18,
     color: Colors.MainColor,
-    fontWeight: 500,
+    fontWeight: 600,
   },
   icon: {
     marginEnd: 10,

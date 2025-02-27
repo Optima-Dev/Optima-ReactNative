@@ -53,7 +53,7 @@ function AuthForm({ type }) {
       {type === "login" && (
         <Pressable
           style={styles.forgotPasswordContainer}
-          onPress={() => navigation.navigate("ForgetPassword1")}
+          onPress={() => navigation.navigate("ForgetPassword")}
         >
           <Text style={styles.forgotPassword}>Forgot Password ?</Text>
         </Pressable>
@@ -64,6 +64,7 @@ function AuthForm({ type }) {
 
 const styles = StyleSheet.create({
   container: {
+    padding: 10,
     marginVertical: 15,
   },
   forgotPasswordContainer: {

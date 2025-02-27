@@ -1,13 +1,18 @@
+// importing react hooks
+import { useContext, useEffect, useState } from "react";
+
 // importing navigation
+import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Platform, StyleSheet } from "react-native";
+import AppLoading from "expo-app-loading";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// auth context
+import AuthProvider, { AuthContext } from "@/store/AuthContext";
 
 // importing constants
 import Colors from "./constants/Colors";
-
-// importing icons
-import { Ionicons } from "@expo/vector-icons";
 
 // importing screens
 import Splash from "@/screens/Splash";
@@ -16,7 +21,7 @@ import PrivacyTerms1 from "@/screens/PrivacyTerms1";
 import Start from "@/screens/Start";
 import Login from "@/screens/Authentication/Login";
 import Signup from "@/screens/Authentication/Signup";
-import ForgetPassword1 from "./screens/Authentication/ForgetPassword1";
+import ForgetPassword from "./screens/Authentication/ForgetPassword";
 
 // importing components
 import BackButton from "./components/UI/BackButton";
@@ -25,8 +30,9 @@ import BackButton from "./components/UI/BackButton";
 // creating stack navigator
 const Stack = createNativeStackNavigator();
 
+
 // creating stack navigator function
-function StackNavigator() {
+function AuthStack() {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -58,7 +64,7 @@ function StackNavigator() {
         component={Start}
         options={{
           headerShown: true,
-          headerLeft: () => Platform.OS === "android" ? <BackButton /> : null,
+          headerLeft: () => <BackButton />,
         }}
       />
       <Stack.Screen
@@ -66,7 +72,7 @@ function StackNavigator() {
         component={PrivacyTerms1}
         options={{
           headerShown: true,
-          headerLeft: () => Platform.OS === "android" ? <BackButton /> : null,
+          headerLeft: () => <BackButton />,
         }}
       />
 
@@ -75,7 +81,7 @@ function StackNavigator() {
         component={Login}
         options={{
           headerShown: true,
-          headerLeft: () => Platform.OS === "android" ? <BackButton /> : null,
+          headerLeft: () => <BackButton />,
         }}
       />
       <Stack.Screen
@@ -83,15 +89,15 @@ function StackNavigator() {
         component={Signup}
         options={{
           headerShown: true,
-          headerLeft: () => Platform.OS === "android" ? <BackButton /> : null,
+          headerLeft: () => <BackButton />,
         }}
       />
       <Stack.Screen
-        name='ForgetPassword1'
-        component={ForgetPassword1}
+        name='ForgetPassword'
+        component={ForgetPassword}
         options={{
           headerShown: true,
-          headerLeft: () => Platform.OS === "android" ? <BackButton /> : null,
+          headerLeft: () => <BackButton />,
         }}
       />
 
@@ -99,11 +105,63 @@ function StackNavigator() {
   );
 }
 
-export default function App() {
+function AuthenticatedStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name='Splash'
+        component={Splash}
+      />
+
+      <Stack.Screen
+        name="Instructions"
+        component={Instructions}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function Navigation() {
+  const { isAuthenticated } = useContext(AuthContext);
+
   return (
     <NavigationContainer>
-      <StackNavigator />
+      { isAuthenticated ? <AuthenticatedStack /> : <AuthStack />} 
     </NavigationContainer>
+  );
+}
+
+function Root() {
+  const [isTryingLogin, setIsTryingLogin] = useState(true);
+  const { authenticate } = useContext(AuthContext);
+
+  useEffect(() => {
+    async function fetchToken() {
+      const storedToken = await AsyncStorage.getItem('token');
+
+      if(storedToken) {
+        authenticate(storedToken);
+      }
+
+      setIsTryingLogin(false);
+    }
+
+    fetchToken();
+  }, []);
+
+  if(isTryingLogin) {
+    return <AppLoading />;
+  }
+
+  return  <Navigation />;
+}
+
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Root />
+    </AuthProvider>
   );
 }
 

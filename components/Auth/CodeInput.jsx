@@ -4,7 +4,7 @@ import { StyleSheet, TextInput, View } from "react-native";
 import Colors from "../../constants/Colors";
 
 
-const CodeInput = ({ code, handleCodeChange }) => {
+const CodeInput = ({ verificationCode, handleCodeChange }) => {
 
   const refs = useRef([]);
 
@@ -30,13 +30,15 @@ const CodeInput = ({ code, handleCodeChange }) => {
   return (
     <View style={styles.container}>
       {
-        code.map((item, index) => (
+        verificationCode.map((item, index) => (
           <TextInput
-            key={index}
+            key={`code-input-${index}`}
             style={styles.input}
             value={item}
             maxLength={1}
-            keyboardType="numeric"
+            keyboardType="number-pad"
+            autoCapitalize="none"
+            autoCorrect={false}
             onChangeText={(value) => handleChange(value, index)}
             onFocus={() => handleFocus(index)} // Clear the input on focus
             ref={(e) => (refs.current[index] = e)} // Assign ref to each input

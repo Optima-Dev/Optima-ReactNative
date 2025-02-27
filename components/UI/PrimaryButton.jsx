@@ -1,7 +1,7 @@
-import { Pressable, Text, StyleSheet, Dimensions } from "react-native";
+import { Pressable, Text, StyleSheet, Dimensions, ActivityIndicator, Platform } from "react-native";
 import Colors from "../../constants/Colors";
 
-function PrimaryButton({ title, onPress, backgroundColor, textColor }) {
+function PrimaryButton({ onPress, isLoading, title, backgroundColor, textColor }) {
 
   const buttonBackgroundColor = backgroundColor === 'white' ? Colors.MainColor : backgroundColor;
 
@@ -16,7 +16,9 @@ function PrimaryButton({ title, onPress, backgroundColor, textColor }) {
       )}
       onPress={onPress}
     >
-      <Text style={[styles.text, { color: textColor }]}>{title}</Text>
+      <Text style={[styles.text, { color: textColor }]}>
+      { isLoading ? <ActivityIndicator size="large" color={textColor} /> : title }
+      </Text>
     </Pressable>
   );
 }
