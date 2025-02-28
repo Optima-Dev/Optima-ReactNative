@@ -19,10 +19,13 @@ import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
 import { login, signup, GoogleLogin } from "../../util/HttpAuth";
+import { validateEmail, validateName, validatePassword } from "../../util/Validation";
 
 function AuthContent({ type }) {
   const navigation = useNavigation();
+
   const { authenticate, role } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -30,30 +33,37 @@ function AuthContent({ type }) {
     password: "",
   });
 
-  // console.log(role);
-
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   async function handleAuth() {
+    setIsLoading(true);
     try {
+      validateEmail(form.email);
+      validatePassword(form.password);
+
       if (type === "login") {
-        const response = await login(form.email, form.password, role);
+        const response = await login(form.email.toLowerCase(), form.password, role);
         authenticate(response.token);
       } else {
+        validateName(form.firstName);
+        validateName(form.lastName);
+
         const response = await signup(
           form.firstName,
           form.lastName,
-          form.email,
+          form.email.toLowerCase(),
           form.password,
           role
         );
         authenticate(response.token);
       }
     } catch (error) {
+      console.log("error", error);
       Alert.alert("Authentication Failed", error);
     }
+    setIsLoading(false);
   }
 
   async function handleGoogleLogin() {
@@ -105,6 +115,7 @@ function AuthContent({ type }) {
             }
             TitleStyle={{ width: 350, marginStart: 65 }}
             SubtitleStyle={{ width: 350, marginStart: 35 }}
+            login={type === "login"}
           />
 
           {/* Auth Form */}
@@ -117,6 +128,7 @@ function AuthContent({ type }) {
               title={type === "login" ? "Login" : "Sign up"}
               onPress={handleAuth}
               textColor='white'
+              isLoading={isLoading}
             />
           </View>
 

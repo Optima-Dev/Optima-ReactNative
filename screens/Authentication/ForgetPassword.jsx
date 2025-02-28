@@ -13,6 +13,7 @@ import AuthInput from "@/components/Auth/AuthInput";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import CodeInput from "@/components/Auth/CodeInput";
 import { sendingCode, resetPassword, verifyCode } from "@/util/HttpAuth";
+import { validateEmail, validatePassword } from "../../util/Validation";
 
 
 const content = [
@@ -77,13 +78,18 @@ const ForgetPassword = ({ navigation }) => {
       let response;
 
       if(phases === 1) {
+        validateEmail(inputText.email);
+
         response = await sendingCode(inputText.email);
         setPhases(prev => prev + 1);
       }
       else if(phases === 2){
         response = await verifyCode(inputText.email, verificationCode.join(""));
         setPhases(prev => prev + 1);
-      } else {
+      } 
+      else {
+        validatePassword(inputText.newPassword);
+        
         response = await resetPassword(inputText.email, inputText.newPassword);
         navigation.navigate("Login");
       }

@@ -29,7 +29,7 @@ function AuthInput({
       {secureTextEntry && (
         <Pressable onPress={togglePasswordVisibility}>
           <Ionicons
-            name={isPasswordVisible ? "eye" : "eye-off"}
+            name={isPasswordVisible ? "eye-off" : "eye"}
             size={24}
             color= {Colors.grey400}
           />
