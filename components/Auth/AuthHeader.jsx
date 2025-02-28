@@ -1,12 +1,12 @@
 import { View, Text, Image, StyleSheet, Platform } from "react-native";
-import Colors from "../../constants/Colors";
+import Colors from "@/constants/Colors";
 
-function AuthHeader({ title, subtitle, TitleStyle, SubtitleStyle }) {
+function AuthHeader({ title, subtitle, TitleStyle, SubtitleStyle, login }) {
   return (
     <View style={styles.container}>
       <Image
-        source={require("../../assets/Images/Main-Logo-blue 1.png")}
-        style={styles.logo}
+        source={require("@/assets/Images/Main-Logo-blue 1.png")}
+        style={[styles.logo, login ? styles.postion : null]}
       />
       <Text style={[styles.title, TitleStyle]}>{title}</Text>
       <Text style={[styles.subtitle , SubtitleStyle]}>{subtitle}</Text>
@@ -18,11 +18,13 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
   },
+  postion: {
+    marginBottom: Platform.OS === "android" ? 0 : 40,
+  },
   logo: {
-    width: 82,
-    height: 78,
+    width: Platform.OS === "android" ? 82 : 110,
+    height: Platform.OS === "android" ? 78 : 104,
     marginBottom: 15,
-    marginTop: Platform.OS === "android" ? 0 : 20,
   },
   title: {
     fontSize: 38,
