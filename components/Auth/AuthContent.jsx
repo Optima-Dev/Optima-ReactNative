@@ -1,23 +1,92 @@
-import { View, StyleSheet, Pressable, Text, ScrollView, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Text,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Alert,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useContext, useState } from "react";
 import AuthHeader from "./AuthHeader";
 import AuthForm from "./AuthForm";
 import PrimaryButton from "../UI/PrimaryButton";
 import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
+import { AuthContext } from "../../store/AuthContext";
+import { login, signup, GoogleLogin } from "../../util/HttpAuth";
 
-function AuthContent({ type }) {
+function AuthContent({ type, role }) {
   const navigation = useNavigation();
+  const { authenticate } = useContext(AuthContext);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
+
+  function handleChange(key, value) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleAuth() {
+    try {
+      if (type === "login") {
+        const response = await login(form.email, form.password, role);
+        authenticate(response.token);
+      } else {
+        const response = await signup(
+          form.firstName,
+          form.lastName,
+          form.email,
+          form.password,
+          role
+        );
+        authenticate(response.token);
+      }
+    } catch (error) {
+      Alert.alert("Authentication Failed", error);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    try {
+      // Replace these values with actual values from Google login response
+      const googleId = "1234567890";
+      const email = form.email;
+      const firstName = form.firstName;
+      const lastName = form.lastName;
+
+      const response = await GoogleLogin(
+        googleId,
+        email,
+        firstName,
+        lastName,
+        role
+      );
+      authenticate(response.token);
+    } catch (error) {
+      Alert.alert("Google Login Failed", error);
+    }
+  }
 
   function swithModeHandler() {
     if (type === "login") {
-      navigation.replace("Signup");
+      navigation.replace("Signup", { role });
     } else {
-      navigation.replace("Login");
+      navigation.replace("Login", { role });
     }
   }
+
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.screen}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.screen}>
       <ScrollView style={styles.screen} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           {/* Auth Header */}
@@ -37,15 +106,15 @@ function AuthContent({ type }) {
           />
 
           {/* Auth Form */}
-          <AuthForm type={type} />
+          <AuthForm type={type} form={form} onChange={handleChange} />
 
           {/* Confirm Button */}
           <View style={styles.ButtonContainer}>
             <PrimaryButton
               backgroundColor={Colors.MainColor}
               title={type === "login" ? "Login" : "Sign up"}
-              onPress={() => console.log("Confirm Button Pressed")}
-              textColor="white"
+              onPress={handleAuth}
+              textColor='white'
             />
           </View>
 
@@ -54,7 +123,7 @@ function AuthContent({ type }) {
           </View>
 
           {/* Google Button */}
-          <GoogleButton />
+          <GoogleButton onPress={handleGoogleLogin} />
 
           {/* Switch Button */}
           <Pressable

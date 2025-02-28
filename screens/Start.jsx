@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 import Card from "@/components/UI/Card";
 
-function Start({ navigation }) {
+function Start() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -34,11 +34,13 @@ function Start({ navigation }) {
           text={"I WANT SOMEONE TO HELP ME."}
           subText={"( I have a sight disability)"}
           imageSource={require("@/assets/Images/OnBoarding1.png")}
+          role='seeker'
         />
         <Card
           text={"I WANT TO HELP SOMEONE"}
           subText={"( I want to share my sight)"}
           imageSource={require("@/assets/Images/Help.png")}
+          role='helper'
         />
       </View>
     </View>

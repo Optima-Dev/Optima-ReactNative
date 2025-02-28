@@ -8,6 +8,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AppLoading from "expo-app-loading";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// importing icons
+import { Ionicons } from "@expo/vector-icons";
+
 // auth context
 import AuthProvider, { AuthContext } from "@/store/AuthContext";
 
@@ -22,14 +25,13 @@ import Start from "@/screens/Start";
 import Login from "@/screens/Authentication/Login";
 import Signup from "@/screens/Authentication/Signup";
 import ForgetPassword from "./screens/Authentication/ForgetPassword";
+import Instructions from "./screens/Instructions";
 
 // importing components
 import BackButton from "./components/UI/BackButton";
 
-
 // creating stack navigator
 const Stack = createNativeStackNavigator();
-
 
 // creating stack navigator function
 function AuthStack() {
@@ -46,8 +48,7 @@ function AuthStack() {
         },
         headerTitle: "",
         headerTintColor: Colors.MainColor,
-      }}
-    >
+      }}>
       <Stack.Screen
         name='Splash'
         component={Splash}
@@ -100,23 +101,22 @@ function AuthStack() {
           headerLeft: () => <BackButton />,
         }}
       />
-
     </Stack.Navigator>
   );
 }
 
 function AuthenticatedStack() {
+  const { logout } = useContext(AuthContext);
+
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name='Splash'
-        component={Splash}
-      />
-
-      <Stack.Screen
-        name="Instructions"
-        component={Instructions}
-      />
+      <Stack.Screen name='Instructions' component={Instructions} 
+      options={{
+        headerRight: () => (
+          <Ionicons name='log-out' size={24} color='black' onPress={logout} />
+        ),
+      }}  />
+      
     </Stack.Navigator>
   );
 }
@@ -126,7 +126,7 @@ function Navigation() {
 
   return (
     <NavigationContainer>
-      { isAuthenticated ? <AuthenticatedStack /> : <AuthStack />} 
+      {isAuthenticated ? <AuthenticatedStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }
@@ -137,9 +137,9 @@ function Root() {
 
   useEffect(() => {
     async function fetchToken() {
-      const storedToken = await AsyncStorage.getItem('token');
+      const storedToken = await AsyncStorage.getItem("token");
 
-      if(storedToken) {
+      if (storedToken) {
         authenticate(storedToken);
       }
 
@@ -149,13 +149,12 @@ function Root() {
     fetchToken();
   }, []);
 
-  if(isTryingLogin) {
+  if (isTryingLogin) {
     return <AppLoading />;
   }
 
-  return  <Navigation />;
+  return <Navigation />;
 }
-
 
 export default function App() {
   return (
@@ -168,7 +167,7 @@ export default function App() {
 const styles = StyleSheet.create({
   backTitle: {
     fontSize: 18, // Larger font size
-    color: 'red', // Red text color
-    fontWeight: 'bold', // Bold text
+    color: "red", // Red text color
+    fontWeight: "bold", // Bold text
   },
 });

@@ -45,7 +45,8 @@ async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
   }
 }
 
-function PrivacyTerms1({ navigation }) {
+function PrivacyTerms1({ navigation , route }) {
+  const { role } = route.params;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [cameraPermission, requestCamera] = useCameraPermissions();
@@ -122,7 +123,7 @@ function PrivacyTerms1({ navigation }) {
 
     requestPermissions(setModalVisible);
     if (!modalVisible) {
-      navigation.navigate("Login");
+      navigation.navigate("Login" , { role });
     }
   }
 

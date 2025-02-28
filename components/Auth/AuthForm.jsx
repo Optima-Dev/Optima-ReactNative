@@ -1,61 +1,48 @@
-import { useState } from "react";
 import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import AuthInput from "./AuthInput";
 import Colors from "../../constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 
-function AuthForm({ type }) {
-
+function AuthForm({ type, form, onChange }) {
   const navigation = useNavigation();
-
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-  });
-
-  function handleChange(key, value) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
 
   return (
     <View style={styles.container}>
       {type === "signup" && (
         <>
           <AuthInput
-            icon='person-outline'
-            placeholder='First Name'
+            icon="person-outline"
+            placeholder="First Name"
             value={form.firstName}
-            onChangeText={(text) => handleChange("firstName", text)}
+            onChangeText={(text) => onChange("firstName", text)}
           />
           <AuthInput
-            icon='person-outline'
-            placeholder='Last Name'
+            icon="person-outline"
+            placeholder="Last Name"
             value={form.lastName}
-            onChangeText={(text) => handleChange("lastName", text)}
+            onChangeText={(text) => onChange("lastName", text)}
           />
         </>
       )}
       <AuthInput
-        icon='mail-outline'
-        placeholder='example@gmail.com'
+        icon="mail-outline"
+        placeholder="example@gmail.com"
         value={form.email}
-        onChangeText={(text) => handleChange("email", text)}
+        onChangeText={(text) => onChange("email", text)}
       />
       <AuthInput
-        icon='lock-closed-outline'
-        placeholder='********'
+        icon="lock-closed-outline"
+        placeholder="********"
         secureTextEntry={true}
         value={form.password}
-        onChangeText={(text) => handleChange("password", text)}
+        onChangeText={(text) => onChange("password", text)}
       />
       {type === "login" && (
         <Pressable
           style={styles.forgotPasswordContainer}
           onPress={() => navigation.navigate("ForgetPassword")}
         >
-          <Text style={styles.forgotPassword}>Forgot Password ?</Text>
+          <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </Pressable>
       )}
     </View>

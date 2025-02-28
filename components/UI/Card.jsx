@@ -1,16 +1,26 @@
-import { View, Text, StyleSheet, Image, Pressable, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  Platform,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import Colors from "@/constants/Colors";
 
-
-function Card({ text, subText, imageSource }) {
+function Card({ text, subText, imageSource, role }) {
   const navigation = useNavigation();
+
+  function handleNavigation() {
+    navigation.navigate("PrivacyTerms1", { role });
+  }
 
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-      onPress={() => navigation.navigate("PrivacyTerms1")}>
+      onPress={handleNavigation}>
       {/* Image */}
       <Image source={imageSource} style={styles.image} />
 
