@@ -6,12 +6,10 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import AuthHeader from "./AuthHeader";
 import AuthForm from "./AuthForm";
 import PrimaryButton from "../UI/PrimaryButton";
@@ -19,10 +17,14 @@ import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
 import { login, signup, GoogleLogin } from "../../util/HttpAuth";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+
+WebBrowser.maybeCompleteAuthSession();
 
 function AuthContent({ type }) {
   const navigation = useNavigation();
-  const { authenticate, role } = useContext(AuthContext);
+  const { authenticate, role, token } = useContext(AuthContext);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -30,13 +32,53 @@ function AuthContent({ type }) {
     password: "",
   });
 
-  // console.log(role);
+  const GOOGLE_CLIENT_ID =
+    "1055266290918-lj07ug350vv502i04pj11m587ro4mahn.apps.googleusercontent.com";
 
-  function handleChange(key, value) {
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: GOOGLE_CLIENT_ID,
+  });
+
+  // Handle Google Auth Response
+  useEffect(() => {
+    if (response?.type === "success") {
+      const getUserInfo = async () => {
+        try {
+          const { authentication } = response;
+          const userInfoResponse = await fetch(
+            "https://www.googleapis.com/userinfo/v2/me",
+            {
+              headers: {
+                Authorization: `Bearer ${authentication.accessToken}`,
+              },
+            }
+          );
+          const userInfo = await userInfoResponse.json();
+
+          // Call your backend API with Google data
+          const googleLoginResponse = await GoogleLogin(
+            userInfo.id, // Google ID
+            userInfo.email,
+            userInfo.given_name, // First Name
+            userInfo.family_name, // Last Name
+            role
+          );
+
+          // Authenticate the user in your app
+          authenticate(googleLoginResponse.token);
+        } catch (error) {
+          Alert.alert("Google Login Failed", error.message);
+        }
+      };
+      getUserInfo();
+    }
+  }, [response]);
+
+  const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-  }
+  };
 
-  async function handleAuth() {
+  const handleAuth = async () => {
     try {
       if (type === "login") {
         const response = await login(form.email, form.password, role);
@@ -54,36 +96,15 @@ function AuthContent({ type }) {
     } catch (error) {
       Alert.alert("Authentication Failed", error);
     }
-  }
+  };
 
-  async function handleGoogleLogin() {
-    try {
-      // Replace these values with actual values from Google login response
-      const googleId = "1234567890";
-      const email = form.email;
-      const firstName = form.firstName;
-      const lastName = form.lastName;
-
-      const response = await GoogleLogin(
-        googleId,
-        email,
-        firstName,
-        lastName,
-        role
-      );
-      authenticate(response.token);
-    } catch (error) {
-      Alert.alert("Google Login Failed", error);
-    }
-  }
-
-  function swithModeHandler() {
+  const swithModeHandler = () => {
     if (type === "login") {
       navigation.replace("Signup");
     } else {
       navigation.replace("Login");
     }
-  }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -125,7 +146,7 @@ function AuthContent({ type }) {
           </View>
 
           {/* Google Button */}
-          <GoogleButton onPress={handleGoogleLogin} />
+          <GoogleButton onPress={promptAsync} />
 
           {/* Switch Button */}
           <Pressable
