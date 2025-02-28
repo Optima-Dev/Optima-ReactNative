@@ -20,15 +20,17 @@ import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
 import { login, signup, GoogleLogin } from "../../util/HttpAuth";
 
-function AuthContent({ type, role }) {
+function AuthContent({ type }) {
   const navigation = useNavigation();
-  const { authenticate } = useContext(AuthContext);
+  const { authenticate, role } = useContext(AuthContext);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
   });
+
+  // console.log(role);
 
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -77,9 +79,9 @@ function AuthContent({ type, role }) {
 
   function swithModeHandler() {
     if (type === "login") {
-      navigation.replace("Signup", { role });
+      navigation.replace("Signup");
     } else {
-      navigation.replace("Login", { role });
+      navigation.replace("Login");
     }
   }
 

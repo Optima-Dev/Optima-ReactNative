@@ -66,11 +66,12 @@ export async function verifyCode(email, code) {
   }
 }
 
-export async function resetPassword(email, password) {
+export async function resetPassword(email, password, role) {
   try {
     const response = await axios.post(`${API_URL}/reset-password`, {
       email,
       newPassword: password,
+      role,
     });
     return response.data.message;
   } catch (error) {

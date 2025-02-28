@@ -9,13 +9,18 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import Colors from "@/constants/Colors";
+import { useContext } from "react";
+import { AuthContext } from "../../store/AuthContext";
 
 function Card({ text, subText, imageSource, role }) {
   const navigation = useNavigation();
+  const { handleRole } = useContext(AuthContext);
 
   function handleNavigation() {
-    navigation.navigate("PrivacyTerms1", { role });
+    navigation.navigate("PrivacyTerms1");
+    handleRole(role);
   }
+
 
   return (
     <Pressable

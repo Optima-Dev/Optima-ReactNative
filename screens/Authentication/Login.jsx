@@ -2,11 +2,10 @@ import { View, StyleSheet } from "react-native";
 import AuthContent from "../../components/Auth/AuthContent";
 import Colors from "@/constants/Colors";
 
-function Login({ route }) {
-  const { role } = route.params;
+function Login() {
   return (
     <View style={styles.container}>
-      <AuthContent type='login' role={role} />
+      <AuthContent type='login' />
     </View>
   );
 }

@@ -6,10 +6,13 @@ export const AuthContext = createContext({
   isAuthenticated: false,
   authenticate: (token) => {},
   logout: () => {},
+  handleRole: (role) => {},
+  role: "",
 });
 
 function AuthProvider({ children }) {
   const [token, setToken] = useState("");
+  const [role, setRole] = useState("");
 
   function authenticate(token) {
     setToken(token);
@@ -21,18 +24,20 @@ function AuthProvider({ children }) {
     AsyncStorage.removeItem("token");
   }
 
+  function handleRole(role) {
+    setRole(role);
+  }
+
   const value = {
     token,
     isAuthenticated: !!token,
     authenticate,
     logout,
+    handleRole,
+    role,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export default AuthProvider;

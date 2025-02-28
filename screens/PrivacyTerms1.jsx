@@ -14,8 +14,11 @@ import {
 import Colors from "@/constants/Colors";
 import TermsList from "@/components/Terms/TermsList";
 import PrimaryButton from "@/components/UI/PrimaryButton";
-import { PermissionStatus, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
-
+import {
+  PermissionStatus,
+  useCameraPermissions,
+  useMicrophonePermissions,
+} from "expo-camera";
 
 async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
   try {
@@ -36,8 +39,7 @@ async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
         console.log("Camera or Mic permissions denied ❌");
         setModalVisible(true); // Show warning modal if denied
       }
-    }
-    else if(Platform.OS === 'ios') {
+    } else if (Platform.OS === "ios") {
     }
   } catch (err) {
     console.warn(err);
@@ -45,41 +47,39 @@ async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
   }
 }
 
-function PrivacyTerms1({ navigation , route }) {
-  const { role } = route.params;
-
+function PrivacyTerms1({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [cameraPermission, requestCamera] = useCameraPermissions();
   const [micPermission, requestMic] = useMicrophonePermissions();
 
   // async function verifyPermissionsOnIos() {
-    // try {
-    //   // First check current status without requesting
-    //   if (cameraPermission.status === PermissionStatus.UNDETERMINED || 
-    //       micPermission.status === PermissionStatus.UNDETERMINED) {
-        
-    //     // Request both permissions simultaneously
-    //     const [cameraResponse, micResponse] = await Promise.all([
-    //       requestCamera(),
-    //       requestMic()
-    //     ]);
-  
-    //     // Check immediate responses
-    //     if (!cameraResponse.granted || !micResponse.granted) {
-    //       return false;
-    //     }
-    //   }
-  
-    //  // Final check after potential updates
-    //   const finalCameraStatus = cameraPermission.status === PermissionStatus.GRANTED;
-    //   const finalMicStatus = micPermission.status === PermissionStatus.GRANTED;
-  
-    //   return finalCameraStatus && finalMicStatus;
-      
-    // } catch (error) {
-    //   console.error("Permission error:", error);
-    //   return false;
-    // }
+  // try {
+  //   // First check current status without requesting
+  //   if (cameraPermission.status === PermissionStatus.UNDETERMINED ||
+  //       micPermission.status === PermissionStatus.UNDETERMINED) {
+
+  //     // Request both permissions simultaneously
+  //     const [cameraResponse, micResponse] = await Promise.all([
+  //       requestCamera(),
+  //       requestMic()
+  //     ]);
+
+  //     // Check immediate responses
+  //     if (!cameraResponse.granted || !micResponse.granted) {
+  //       return false;
+  //     }
+  //   }
+
+  //  // Final check after potential updates
+  //   const finalCameraStatus = cameraPermission.status === PermissionStatus.GRANTED;
+  //   const finalMicStatus = micPermission.status === PermissionStatus.GRANTED;
+
+  //   return finalCameraStatus && finalMicStatus;
+
+  // } catch (error) {
+  //   console.error("Permission error:", error);
+  //   return false;
+  // }
   // }
 
   // async function handleAllow() {
@@ -89,7 +89,7 @@ function PrivacyTerms1({ navigation , route }) {
   //       requestCamera(),
   //       requestMic(),
   //     ]);
-      
+
   //     if (!(cameraResponse.granted && micResponse.granted)) {
   //       setModalVisible(true);
   //     }
@@ -107,15 +107,15 @@ function PrivacyTerms1({ navigation , route }) {
     //   "Camera, Video and Microphone",
     //   "Allow optima to have control over these while using app",
     //   [
-    //     { 
-    //       text: "Cancel", 
+    //     {
+    //       text: "Cancel",
     //       onPress: () => {
     //         setModalVisible(true); // Show warning modal
     //         // Stay on current page
     //       }
     //     },
-    //     { 
-    //       text: "Allow", 
+    //     {
+    //       text: "Allow",
     //       onPress: handleAllow
     //     },
     //   ]
@@ -123,7 +123,7 @@ function PrivacyTerms1({ navigation , route }) {
 
     requestPermissions(setModalVisible);
     if (!modalVisible) {
-      navigation.navigate("Login" , { role });
+      navigation.navigate("Login");
     }
   }
 
@@ -152,7 +152,7 @@ function PrivacyTerms1({ navigation , route }) {
           title={"I Agree"}
           onPress={agreementHandler}
           backgroundColor={Colors.MainColor}
-          textColor="white"
+          textColor='white'
         />
       </View>
 
