@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 
 // importing navigation
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AppLoading from "expo-app-loading";
@@ -27,11 +27,28 @@ import Signup from "@/screens/Authentication/Signup";
 import ForgetPassword from "./screens/Authentication/ForgetPassword";
 import Instructions from "./screens/Instructions";
 
+// importing seeker screens
+import Support from "./screens/Seeker/Support";
+import MyVision from "./screens/Seeker/MyVision";
+import MyPeople from "./screens/Seeker/MyPeople";
+import SekeerSettings from "./screens/Seeker/Settings";
+
+// importing helper screens
+import Home from "./screens/Helper/Home";
+import Notifications from "./screens/Helper/Notifications";
+import Community from "./screens/Helper/Community";
+import HelperSettings from "./screens/Helper/Settings";
+
 // importing components
 import BackButton from "./components/UI/BackButton";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 // creating stack navigator
 const Stack = createNativeStackNavigator();
+
+// creating bottom tab navigator
+const MyTabs = createBottomTabNavigator();
+
 
 // creating stack navigator function
 function AuthStack() {
@@ -105,28 +122,156 @@ function AuthStack() {
   );
 }
 
-function AuthenticatedStack() {
+function SekeerMap() {
   const { logout } = useContext(AuthContext);
 
   return (
-    <Stack.Navigator>
-      <Stack.Screen name='Instructions' component={Instructions} 
-      options={{
+    <MyTabs.Navigator
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: Colors.MainColor,
         headerRight: () => (
-          <Ionicons name='log-out' size={24} color='black' onPress={logout} />
+          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
         ),
-      }}  />
-      
-    </Stack.Navigator>
+        tabBarStyle: {
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        tabBarLabel: ({ color }) => {
+          return (
+            <Text style={{ fontSize: 15, color, marginTop: 3, }}>
+              {route.name}
+            </Text>
+          );
+        },
+      })}
+    >
+
+      <MyTabs.Screen
+        name='Support'
+        component={Support}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="videocam" size={30} color={color} />
+          ),
+        }}
+      />
+
+      <MyTabs.Screen
+        name='MyVision'
+        component={MyVision}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="camera-outline" size={30} color={color} />
+          ),
+        }}
+      />
+
+      <MyTabs.Screen
+        name='MyPeople'
+        component={MyPeople}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="people" size={30} color={color} />
+          ),
+        }}
+      />
+
+      <MyTabs.Screen
+        name='Settings'
+        component={SekeerSettings}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="settings" size={28} color={color} />
+          ),
+        }}
+      />
+
+    </MyTabs.Navigator>
+  );
+}
+
+function HelperMap() {
+  const { logout } = useContext(AuthContext);
+
+  return (
+    <MyTabs.Navigator
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: Colors.MainColor,
+        tabBarStyle: {
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerRight: () => (
+          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
+        ),
+        tabBarLabel: ({ color }) => {
+          return (
+            <Text style={{ fontSize: 15, color, marginTop: 3, }}>
+              {route.name}
+            </Text>
+          );
+        },
+      })}
+    >
+
+      <MyTabs.Screen
+        name='Home'
+        component={Home}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="videocam" size={30} color={color} />
+          ),
+        }}
+      />
+
+      <MyTabs.Screen
+        name='Notifications'
+        component={Notifications}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="camera-outline" size={30} color={color} />
+          ),
+        }}
+      />
+
+      <MyTabs.Screen
+        name='Community'
+        component={Community}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="people" size={30} color={color} />
+          ),
+        }}
+      />
+
+      <MyTabs.Screen
+        name='Settings'
+        component={HelperSettings}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="settings" size={28} color={color} />
+          ),
+        }}
+      />
+
+    </MyTabs.Navigator>
   );
 }
 
 function Navigation() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, role } = useContext(AuthContext);
+
+  let content  = <AuthStack />
+
+  if(isAuthenticated) {
+    content = role === 'hepler' ? <HelperMap /> : <SekeerMap />
+  }
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <AuthenticatedStack /> : <AuthStack />}
+      { content }
     </NavigationContainer>
   );
 }
