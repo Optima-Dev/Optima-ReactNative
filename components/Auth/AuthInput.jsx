@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, TextInput, Pressable, StyleSheet } from "react-native";
+import { View, TextInput, Pressable, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 
@@ -31,7 +31,7 @@ function AuthInput({
           <Ionicons
             name={isPasswordVisible ? "eye-off" : "eye"}
             size={24}
-            color= {Colors.grey400}
+            color={Colors.grey400}
           />
         </Pressable>
       )}
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 6,
     backgroundColor: Colors.InputBackGround,
-    width: '100%',
+    width: Platform.OS === "android" ? "360" : "100%",
     height: 55,
   },
   icon: {
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.black,
     fontWeight: 300,
-  }
+  },
 });
 
 export default AuthInput;

@@ -1,4 +1,4 @@
-import { Pressable, Text, Image, StyleSheet, View } from "react-native";
+import { Pressable, Text, Image, StyleSheet, View, Platform } from "react-native";
 import Colors from "../../constants/Colors";
 
 function GoogleButton({ onPress }) {
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.MainColor, 
-    width: 360,
+    width: Platform.OS === "android" ? 360 : 364,
     height: 55,
   },
   pressed: {

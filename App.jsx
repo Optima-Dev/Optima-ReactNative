@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 
 // auth context
-import AuthProvider, { AuthContext } from "@/store/AuthContext";
+import AuthProvider, { AuthContext } from "./store/AuthContext";
 
 // importing constants
 import Colors from "./constants/Colors";
@@ -109,14 +109,27 @@ function AuthenticatedStack() {
   const { logout } = useContext(AuthContext);
 
   return (
-    <Stack.Navigator>
-      <Stack.Screen name='Instructions' component={Instructions} 
-      options={{
-        headerRight: () => (
-          <Ionicons name='log-out' size={24} color='black' onPress={logout} />
-        ),
-      }}  />
-      
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerShadowVisible: false, // Remove shadow between content and header
+        headerStyle: {
+          shadowOpacity: 0, // Remove shadow on iOS
+          elevation: 0, // Remove shadow on Android
+          backgroundColor: Colors.SeconderyColor,
+        },
+        headerTitle: "",
+        headerTintColor: Colors.MainColor,
+      }}>
+      <Stack.Screen
+        name='Instructions'
+        component={Instructions}
+        options={{
+          headerRight: () => (
+            <Ionicons name='log-out' size={24} color='black' onPress={logout} />
+          ),
+        }}
+      />
     </Stack.Navigator>
   );
 }

@@ -23,8 +23,9 @@ const styles = StyleSheet.create({
     color: Colors.MainColor,
   },
   subTitle: {
-    fontSize: 20,
-    marginVertical: 10,
+    fontSize: 18,
+    marginVertical: 8,
     textAlign: "center",
+    width: 350,
   }
 });

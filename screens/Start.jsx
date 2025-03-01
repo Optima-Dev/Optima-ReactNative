@@ -32,13 +32,13 @@ function Start() {
         />
         <Card
           text={"I WANT SOMEONE TO HELP ME."}
-          subText={"( I have a sight disability)"}
+          subText={"( I have a sight disability )"}
           imageSource={require("@/assets/Images/OnBoarding1.png")}
           role='seeker'
         />
         <Card
           text={"I WANT TO HELP SOMEONE"}
-          subText={"( I want to share my sight)"}
+          subText={"( I want to share my sight )"}
           imageSource={require("@/assets/Images/Help.png")}
           role='helper'
         />

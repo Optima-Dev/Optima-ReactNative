@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 
 import ProgressBar from "@/components/UI/ProgressBar";
 import Colors from "@/constants/Colors";
-import OnBoardingButton from "@/components/UI/OnBoardingButton";
+import OnBoardingButton from "@/components/OnBoarding/OnBoardingButton";
 
 
 function OnBoardingContent({ step, title, description, imageUri, handleNext }) {

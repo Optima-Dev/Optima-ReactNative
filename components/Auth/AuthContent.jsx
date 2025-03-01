@@ -10,14 +10,32 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useContext, useState, useEffect } from "react";
-import AuthHeader from "./AuthHeader";
+import MainHeader from "../UI/MainHeader";
 import AuthForm from "./AuthForm";
 import PrimaryButton from "../UI/PrimaryButton";
 import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
 import { login, signup, GoogleLogin } from "../../util/HttpAuth";
-import { validateEmail, validateName, validatePassword } from "../../util/Validation";
+import {
+  validateEmail,
+  validateName,
+  validatePassword,
+} from "../../util/Validation";
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
+
+
+// WEB_Client_ID
+const WEB_CLIENT_ID =
+  "680106169592-u4g6ruthliv617p8apu9bv7lfmkt9obm.apps.googleusercontent.com";
+
+// IOS_Client_ID
+const IOS_CLIENT_ID =
+  "680106169592-qabe0b6jam0s509tj39qpk032rcg01o8.apps.googleusercontent.com";
+
+// Android_Client_ID
+const ANDROID_CLIENT_ID =
+  "680106169592-fo8n83div9jru0m8vbci9322ut7ej8rs.apps.googleusercontent.com";
 
 function AuthContent({ type }) {
   const navigation = useNavigation();
@@ -31,9 +49,10 @@ function AuthContent({ type }) {
     password: "",
   });
 
+
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
-  };
+  }
 
   async function handleAuth() {
     setIsLoading(true);
@@ -42,7 +61,11 @@ function AuthContent({ type }) {
       validatePassword(form.password);
 
       if (type === "login") {
-        const response = await login(form.email.toLowerCase(), form.password, role);
+        const response = await login(
+          form.email.toLowerCase(),
+          form.password,
+          role
+        );
         authenticate(response.token);
       } else {
         validateName(form.firstName);
@@ -79,7 +102,7 @@ function AuthContent({ type }) {
       <ScrollView style={styles.screen} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           {/* Auth Header */}
-          <AuthHeader
+          <MainHeader
             title={
               type === "login"
                 ? `WELCOME\nBACK, FRIEND!`
@@ -114,7 +137,7 @@ function AuthContent({ type }) {
           </View>
 
           {/* Google Button */}
-          <GoogleButton onPress={promptAsync} />
+          <GoogleButton />
 
           {/* Switch Button */}
           <Pressable
@@ -152,7 +175,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   ButtonContainer: {
-    width: Platform.OS === "android" ? 350 : 364,
+    width: Platform.OS === "android" ? 360 : 364,
     marginBottom: 10,
   },
   optionContainer: {
