@@ -51,7 +51,7 @@ const MyTabs = createBottomTabNavigator();
 
 
 // creating stack navigator function
-function AuthStack() {
+function UnAuthStack() {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -65,7 +65,8 @@ function AuthStack() {
         },
         headerTitle: "",
         headerTintColor: Colors.MainColor,
-      }}>
+      }}
+    >
       <Stack.Screen
         name='Splash'
         component={Splash}
@@ -122,7 +123,20 @@ function AuthStack() {
   );
 }
 
-function SekeerMap() {
+function AuthenticatedStack() {
+  const { role } = useContext(AuthContext);
+
+  const MyTab = role === 'helper' ? HelperTap : SekeerTap;
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Instructions" component={Instructions} />
+      <Stack.Screen name="MainTabs" component={MyTab} />
+    </Stack.Navigator>
+  );
+}
+
+function SekeerTap() {
   const { logout } = useContext(AuthContext);
 
   return (
@@ -191,21 +205,21 @@ function SekeerMap() {
   );
 }
 
-function HelperMap() {
+function HelperTap() {
   const { logout } = useContext(AuthContext);
 
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: Colors.MainColor,
+        headerRight: () => (
+          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
+        ),
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
         },
-        headerRight: () => (
-          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
-        ),
         tabBarLabel: ({ color }) => {
           return (
             <Text style={{ fontSize: 15, color, marginTop: 3, }}>
@@ -261,31 +275,30 @@ function HelperMap() {
 }
 
 function Navigation() {
-  const { isAuthenticated, role } = useContext(AuthContext);
-
-  let content  = <AuthStack />
-
-  if(isAuthenticated) {
-    content = role === 'hepler' ? <HelperMap /> : <SekeerMap />
-  }
+  const { isAuthenticated } = useContext(AuthContext);
 
   return (
     <NavigationContainer>
-      { content }
+      { isAuthenticated ? <AuthenticatedStack /> : <UnAuthStack /> }
     </NavigationContainer>
   );
 }
 
 function Root() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const { authenticate } = useContext(AuthContext);
+  const { authenticate, handleRole } = useContext(AuthContext);
 
   useEffect(() => {
     async function fetchToken() {
       const storedToken = await AsyncStorage.getItem("token");
+      const storedRole = await AsyncStorage.getItem("role");
 
       if (storedToken) {
         authenticate(storedToken);
+      }
+
+      if (storedRole) {
+        handleRole(storedRole);
       }
 
       setIsTryingLogin(false);

@@ -23,8 +23,6 @@ function PrimaryButton({ onPress, isLoading, title, backgroundColor, textColor }
   );
 }
 
-const screenWidth = Dimensions.get('window').width;
-
 const styles = StyleSheet.create({
   button: {
     borderRadius: 20,

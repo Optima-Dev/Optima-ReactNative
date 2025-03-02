@@ -51,7 +51,6 @@ function AuthForm({ type, form, onChange }) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
     marginVertical: 15,
   },
   forgotPasswordContainer: {

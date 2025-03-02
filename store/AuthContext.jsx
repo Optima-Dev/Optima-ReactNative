@@ -22,10 +22,12 @@ function AuthProvider({ children }) {
   function logout() {
     setToken(null);
     AsyncStorage.removeItem("token");
+    AsyncStorage.removeItem("role");
   }
 
   function handleRole(role) {
     setRole(role);
+    AsyncStorage.setItem("role", role);
   }
 
   const value = {

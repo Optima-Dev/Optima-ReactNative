@@ -1,25 +1,37 @@
 import { View, Text, Image, StyleSheet, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 
-function AuthHeader({ title, subtitle, TitleStyle, SubtitleStyle, login }) {
+function MainHeader({
+  title,
+  subtitle,
+  login,
+  noImage,
+}) {
   return (
     <View style={styles.container}>
-      <Image
-        source={require("@/assets/Images/Main-Logo-blue 1.png")}
-        style={[styles.logo, login ? styles.postion : null]}
-      />
-      <Text style={[styles.title, TitleStyle]}>{title}</Text>
-      <Text style={[styles.subtitle , SubtitleStyle]}>{subtitle}</Text>
+      {!noImage && (
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("@/assets/Images/Main-Logo-blue 1.png")}
+            style={[styles.logo, login ? styles.postion : null]}
+          />
+        </View>
+      )}
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    // alignItems: "center",
   },
   postion: {
-    marginBottom: Platform.OS === "android" ? 0 : 40,
+    marginBottom: Platform.OS === "android" ? 15 : 40,
+  },
+  logoContainer: {
+    alignItems: "center",
   },
   logo: {
     width: Platform.OS === "android" ? 82 : 110,
@@ -30,18 +42,13 @@ const styles = StyleSheet.create({
     fontSize: 38,
     fontWeight: "bold",
     color: Colors.MainColor,
-    textAlign: "left",
-    width: 268,
-    marginEnd: 60,
   },
   subtitle: {
     fontSize: Platform.OS === "android" ? 18 : 20,
     color: Colors.black,
-    textAlign: "left",
-    fontWeight: 300,
-    marginEnd: 35,
+    fontWeight: "300",
     marginVertical: Platform.OS === "android" ? 0 : 12,
   },
 });
 
-export default AuthHeader;
+export default MainHeader;

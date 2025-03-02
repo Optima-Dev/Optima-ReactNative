@@ -1,36 +1,92 @@
-import { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
-
-import { AuthContext } from "../store/AuthContext";
-import PrimaryButton from "../components/UI/PrimaryButton";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import MainHeader from "@/components/UI/MainHeader";
+import InstructionItem from "../components/Instructions/InstructionItem";
 import Colors from "../constants/Colors";
+import PrimaryButton from "../components/UI/PrimaryButton";
 
 
 const Instructions = ({ navigation }) => {
-
-  const { role } = useContext(AuthContext);
-
   return (
     <View style={styles.container}>
-      <Text>Instruction Screen</Text>
+      <View style={styles.TitleContainer}>
+        <Text style={styles.title}>Optima</Text>
+      </View>
 
-      <PrimaryButton
-        title="Got it"
-        backgroundColor={Colors.MainColor}
-        textColor={Colors.white}
-        onPress={() => navigation.navigate(role)}
+      <MainHeader
+        title={`HELLO OUR\nFRIEND !`}
+        subtitle='Here is some instructions on how to use our app in the most efficient way.'
+        noImage
       />
+
+      <ScrollView style={styles.instructions}>
+        <View style={styles.instructionsContainer}>
+          <InstructionItem
+            step={1}
+            text={`You can navigate the whole app by using voice commands.\nJust talk out loud with whatever you want to do.`}
+            ImgSource={require("../assets/Images/voice-command 1.png")}
+          />
+          <InstructionItem
+            step={2}
+            text={`You can call one of our volunteers on a video call by clicking on the button or by reading out loud ”Call a volunteer”.`}
+            ImgSource={require("../assets/Images/video-call 1.png")}
+          />
+          <InstructionItem
+            step={3}
+            ImgSource={require("../assets/Images/camera 1.png")}
+            text={`You can use our AI feature that would describe the whole view in front of you. Just say out loud “Open my vision“ then “Take a picture“.`
+            }
+          />
+        </View>
+      </ScrollView>
+
+
+      <View style={styles.buttonContainer}>
+        <PrimaryButton
+          backgroundColor={Colors.MainColor}
+          textColor={Colors.white}
+          onPress={() => navigation.navigate("MainTabs")}
+          title="Got it !"
+        />
+      </View>
     </View>
   );
-}
+};
 
 export default Instructions;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
+    padding: 20,
+    paddingVertical: 60,
+    gap: 20,
+  },
+  TitleContainer: {
+    alignItems: "center",
+  },
+  title: {
+    fontSize: Platform.OS === "ios" ? 32 : 28,
+    color: Colors.MainColor,
+    fontWeight: "400",
+    fontFamily: "Balgin-Regular",
+  },
+  instructions: {
+    flex: 1,
+    paddingTop: 24,
+  },
+  instructionsContainer: {
+    gap: 30,
+  },
+  buttonContainer: {
+    bottom: -20,
+  },
+  text: {
+    color: Colors.black,
+    fontSize: 18,
+    lineHeight: 26,
+    flexShrink: 1, // Prevents text from overflowing
+  },
+  innerText: {
+    color: Colors.MainColor,
+  },
 });
