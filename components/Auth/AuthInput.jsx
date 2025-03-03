@@ -9,6 +9,8 @@ function AuthInput({
   secureTextEntry,
   value,
   onChangeText,
+  keyboardType,
+  isInvalid,
 }) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(secureTextEntry);
 
@@ -17,14 +19,20 @@ function AuthInput({
   }
 
   return (
-    <View style={styles.container}>
-      <Ionicons style={styles.icon} name={icon} size={25} />
+    <View style={[styles.container, isInvalid && styles.containerInvalid]}>
+      <Ionicons
+        style={[styles.icon, isInvalid && styles.labelInvalid]}
+        name={icon}
+        size={25}
+      />
       <TextInput
-        style={styles.input}
+        style={[styles.input, isInvalid && styles.inputInvalid]}
         placeholder={placeholder}
         secureTextEntry={isPasswordVisible}
         value={value}
+        autoCapitalize='none'
         onChangeText={onChangeText}
+        keyboardType={keyboardType}
       />
       {secureTextEntry && (
         <Pressable onPress={togglePasswordVisibility}>
@@ -49,19 +57,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 6,
     backgroundColor: Colors.InputBackGround,
-    width: Platform.OS === "android" ? "360" : "100%",
+    width: Platform.OS === "android" ? 360 : "100%",
     height: 55,
+  },
+  containerInvalid: {
+    borderColor: Colors.error500,
   },
   icon: {
     marginHorizontal: 10,
     color: Colors.MainColor,
   },
+  labelInvalid: {
+    color: Colors.error500,
+  },
   input: {
     flex: 1,
-    // width: 260,
     fontSize: 15,
     color: Colors.black,
-    fontWeight: 300,
+    fontWeight: "300",
+  },
+  inputInvalid: {
+    backgroundColor: Colors.error100,
   },
 });
 

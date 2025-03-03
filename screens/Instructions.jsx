@@ -36,6 +36,12 @@ const Instructions = ({ navigation }) => {
             text={`You can use our AI feature that would describe the whole view in front of you. Just say out loud “Open my vision“ then “Take a picture“.`
             }
           />
+          <InstructionItem
+            step={4}
+            ImgSource={require("../assets/Images/camera 1.png")}
+            text={`In my people section you willbe able to add your family and friends accounts so you can call them easily by saying out loud “Call person’s name “.`
+            }
+          />
         </View>
       </ScrollView>
 
@@ -58,8 +64,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    paddingVertical: 60,
+    paddingVertical: 50,
     gap: 20,
+    // marginBottom: Platform.OS === "android" ? 30 : 0,
   },
   TitleContainer: {
     alignItems: "center",
@@ -76,9 +83,10 @@ const styles = StyleSheet.create({
   },
   instructionsContainer: {
     gap: 30,
+    marginBottom: 20,
   },
   buttonContainer: {
-    bottom: -20,
+    bottom: -10,
   },
   text: {
     color: Colors.black,

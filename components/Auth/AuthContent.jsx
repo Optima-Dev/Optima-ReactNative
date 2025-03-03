@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -22,20 +22,6 @@ import {
   validateName,
   validatePassword,
 } from "../../util/Validation";
-// import { GoogleSignin } from "@react-native-google-signin/google-signin";
-
-
-// WEB_Client_ID
-const WEB_CLIENT_ID =
-  "680106169592-u4g6ruthliv617p8apu9bv7lfmkt9obm.apps.googleusercontent.com";
-
-// IOS_Client_ID
-const IOS_CLIENT_ID =
-  "680106169592-qabe0b6jam0s509tj39qpk032rcg01o8.apps.googleusercontent.com";
-
-// Android_Client_ID
-const ANDROID_CLIENT_ID =
-  "680106169592-fo8n83div9jru0m8vbci9322ut7ej8rs.apps.googleusercontent.com";
 
 function AuthContent({ type }) {
   const navigation = useNavigation();
@@ -48,7 +34,6 @@ function AuthContent({ type }) {
     email: "",
     password: "",
   });
-
 
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -66,7 +51,7 @@ function AuthContent({ type }) {
           form.password,
           role
         );
-        authenticate(response.token);
+        authenticate(response.token, false);
       } else {
         validateName(form.firstName);
         validateName(form.lastName);
@@ -78,7 +63,7 @@ function AuthContent({ type }) {
           form.password,
           role
         );
-        authenticate(response.token);
+        authenticate(response.token, true);
       }
     } catch (error) {
       console.log("error", error);
@@ -98,8 +83,7 @@ function AuthContent({ type }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}
-    >
+      style={styles.screen}>
       <ScrollView style={styles.screen} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           {/* Auth Header */}
@@ -136,7 +120,7 @@ function AuthContent({ type }) {
           </View>
 
           {/* Google Button */}
-          <GoogleButton onPress={() => {}} />
+          <GoogleButton />
 
           {/* Switch Button */}
           <Pressable

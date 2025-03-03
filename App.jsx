@@ -49,7 +49,6 @@ const Stack = createNativeStackNavigator();
 // creating bottom tab navigator
 const MyTabs = createBottomTabNavigator();
 
-
 // creating stack navigator function
 function UnAuthStack() {
   return (
@@ -65,8 +64,7 @@ function UnAuthStack() {
         },
         headerTitle: "",
         headerTintColor: Colors.MainColor,
-      }}
-    >
+      }}>
       <Stack.Screen
         name='Splash'
         component={Splash}
@@ -126,12 +124,16 @@ function UnAuthStack() {
 function AuthenticatedStack() {
   const { role } = useContext(AuthContext);
 
-  const MyTab = role === 'helper' ? HelperTap : SekeerTap;
+  const MyTab = role === "helper" ? HelperTap : SekeerTap;
+
+  const { isNewUser } = useContext(AuthContext);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Instructions" component={Instructions} />
-      <Stack.Screen name="MainTabs" component={MyTab} />
+      {isNewUser && (
+        <Stack.Screen name='Instructions' component={Instructions} />
+      )}
+      <Stack.Screen name='MainTabs' component={MyTab} />
     </Stack.Navigator>
   );
 }
@@ -139,34 +141,56 @@ function AuthenticatedStack() {
 function SekeerTap() {
   const { logout } = useContext(AuthContext);
 
+  const iconSize = 30;
+
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
-        tabBarActiveTintColor: Colors.MainColor,
-        headerRight: () => (
-          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
-        ),
-        tabBarStyle: {
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
+        headerShown: false,
+        contentStyle: { backgroundColor: Colors.MainColor }, // Correct usage
+        headerShadowVisible: false, // Remove shadow between content and header
+        headerStyle: {
+          shadowOpacity: 0, // Remove shadow on iOS
+          elevation: 0, // Remove shadow on Android
+          backgroundColor: Colors.SeconderyColor,
         },
+        headerTitle: "",
+        headerTintColor: Colors.MainColor,
+        headerRight: () => (
+          <Ionicons
+            name='log-out'
+            size={iconSize}
+            color='black'
+            onPress={logout}
+          />
+        ),
         tabBarLabel: ({ color }) => {
           return (
-            <Text style={{ fontSize: 15, color, marginTop: 3, }}>
+            <Text style={{ fontSize: 12, color, marginTop: 3 }}>
               {route.name}
             </Text>
           );
         },
-      })}
-    >
-
+        tabBarStyle: {
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+          shadowOffset: { height: 0, width: 0 },
+          shadowRadius: 0,
+          shadowColor: "transparent",
+          backgroundColor: Colors.SeconderyColor,
+          height: 80,
+          paddingTop: 5,
+          borderRadius: 20,
+          marginHorizontal: 5,
+        },
+      })}>
       <MyTabs.Screen
         name='Support'
         component={Support}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="videocam" size={30} color={color} />
+            <Ionicons name='videocam' size={30} color={color} />
           ),
         }}
       />
@@ -176,7 +200,7 @@ function SekeerTap() {
         component={MyVision}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="camera-outline" size={30} color={color} />
+            <Ionicons name='camera-outline' size={30} color={color} />
           ),
         }}
       />
@@ -186,7 +210,7 @@ function SekeerTap() {
         component={MyPeople}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="people" size={30} color={color} />
+            <Ionicons name='people' size={30} color={color} />
           ),
         }}
       />
@@ -196,11 +220,10 @@ function SekeerTap() {
         component={SekeerSettings}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="settings" size={28} color={color} />
+            <Ionicons name='settings' size={28} color={color} />
           ),
         }}
       />
-
     </MyTabs.Navigator>
   );
 }
@@ -208,34 +231,56 @@ function SekeerTap() {
 function HelperTap() {
   const { logout } = useContext(AuthContext);
 
+  const iconSize = 30;
+
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
-        tabBarActiveTintColor: Colors.MainColor,
-        headerRight: () => (
-          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
-        ),
-        tabBarStyle: {
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
+        // headerShown: false,
+        contentStyle: { backgroundColor: Colors.MainColor }, // Correct usage
+        headerShadowVisible: false, // Remove shadow between content and header
+        headerStyle: {
+          shadowOpacity: 0, // Remove shadow on iOS
+          elevation: 0, // Remove shadow on Android
+          backgroundColor: Colors.SeconderyColor,
         },
+        headerTitle: "",
+        headerTintColor: Colors.MainColor,
+        headerRight: () => (
+          <Ionicons
+            name='log-out'
+            size={iconSize}
+            color='black'
+            onPress={logout}
+          />
+        ),
         tabBarLabel: ({ color }) => {
           return (
-            <Text style={{ fontSize: 15, color, marginTop: 3, }}>
+            <Text style={{ fontSize: 12, color, marginTop: 3 }}>
               {route.name}
             </Text>
           );
         },
-      })}
-    >
-
+        tabBarStyle: {
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+          shadowOffset: { height: 0, width: 0 },
+          shadowRadius: 0,
+          shadowColor: "transparent",
+          backgroundColor: Colors.SeconderyColor,
+          height: 80,
+          paddingTop: 5,
+          borderRadius: 20,
+          marginHorizontal: 5,
+        },
+      })}>
       <MyTabs.Screen
         name='Home'
         component={Home}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="videocam" size={30} color={color} />
+            <Ionicons name='videocam' size={iconSize} color={color} />
           ),
         }}
       />
@@ -245,7 +290,7 @@ function HelperTap() {
         component={Notifications}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="camera-outline" size={30} color={color} />
+            <Ionicons name='camera-outline' size={iconSize} color={color} />
           ),
         }}
       />
@@ -255,7 +300,7 @@ function HelperTap() {
         component={Community}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="people" size={30} color={color} />
+            <Ionicons name='people' size={iconSize} color={color} />
           ),
         }}
       />
@@ -265,11 +310,10 @@ function HelperTap() {
         component={HelperSettings}
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="settings" size={28} color={color} />
+            <Ionicons name='settings' size={iconSize} color={color} />
           ),
         }}
       />
-
     </MyTabs.Navigator>
   );
 }
@@ -279,7 +323,7 @@ function Navigation() {
 
   return (
     <NavigationContainer>
-      { isAuthenticated ? <AuthenticatedStack /> : <UnAuthStack /> }
+      {isAuthenticated ? <AuthenticatedStack /> : <UnAuthStack />}
     </NavigationContainer>
   );
 }

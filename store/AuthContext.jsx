@@ -8,21 +8,28 @@ export const AuthContext = createContext({
   logout: () => {},
   handleRole: (role) => {},
   role: "",
+  isNewUser: false,
 });
 
 function AuthProvider({ children }) {
   const [token, setToken] = useState("");
   const [role, setRole] = useState("");
+  const [isNewUser, setIsNewUser] = useState(false);
 
-  function authenticate(token) {
+  function authenticate(token, isNewUser) {
     setToken(token);
+    setIsNewUser(isNewUser);
     AsyncStorage.setItem("token", token);
+    AsyncStorage.setItem("isNewUser", JSON.stringify(isNewUser));
   }
 
   function logout() {
     setToken(null);
+    setIsNewUser(false);
     AsyncStorage.removeItem("token");
+    AsyncStorage.removeItem("isNewUser");
     AsyncStorage.removeItem("role");
+    AsyncStorage.removeItem("@user");
   }
 
   function handleRole(role) {
@@ -37,6 +44,7 @@ function AuthProvider({ children }) {
     logout,
     handleRole,
     role,
+    isNewUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
