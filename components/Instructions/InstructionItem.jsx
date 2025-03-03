@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Image } from "react-native";
+import Colors from "../../constants/Colors";
 
 function InstructionItem({ step, text, ImgSource }) {
   return (
@@ -20,44 +21,46 @@ function InstructionItem({ step, text, ImgSource }) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F3F3F3",
-    borderRadius: 15,
+    borderRadius: 22,
     padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5, // For Android shadow
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    backgroundColor: Colors.grey500,
   },
   stepContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#264de4",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.green500,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    borderWidth: 3,
+    borderColor: Colors.MainColor,
+    position: "absolute",
+    top: -24,
   },
   stepText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
+    color: Colors.MainColor,
+    fontWeight: "600",
+    fontSize: 28,
   },
   textContainer: {
     flex: 1,
+    gap: 12,
     flexDirection: "row",
     alignItems: "center",
   },
   icon: {
-    marginRight: 8,
+    width: 70,
+    height: 70,
   },
   text: {
-    color: "#333",
-    fontSize: 14,
+    color: Colors.black,
+    fontSize: 18,
+    lineHeight: 26,
     flexShrink: 1, // Prevents text from overflowing
+  },
+  innerText: {
+    color: Colors.MainColor,
+    fontWeight: "bold",
   },
 });
 

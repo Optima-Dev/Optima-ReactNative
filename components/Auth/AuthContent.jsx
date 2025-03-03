@@ -1,3 +1,4 @@
+import { useContext, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -9,7 +10,6 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useContext, useState, useEffect } from "react";
 import MainHeader from "../UI/MainHeader";
 import AuthForm from "./AuthForm";
 import PrimaryButton from "../UI/PrimaryButton";
@@ -98,7 +98,8 @@ function AuthContent({ type }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}>
+      style={styles.screen}
+    >
       <ScrollView style={styles.screen} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           {/* Auth Header */}
@@ -113,8 +114,6 @@ function AuthContent({ type }) {
                 ? "Login now to continue your past experience with us!"
                 : "Create an account to have a full experience with us!"
             }
-            TitleStyle={{ width: 350, marginStart: 65 }}
-            SubtitleStyle={{ width: 350, marginStart: 35 }}
             login={type === "login"}
           />
 
@@ -137,7 +136,7 @@ function AuthContent({ type }) {
           </View>
 
           {/* Google Button */}
-          <GoogleButton />
+          <GoogleButton onPress={() => {}} />
 
           {/* Switch Button */}
           <Pressable
@@ -171,7 +170,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
+    padding: 20,
     marginBottom: 30,
   },
   ButtonContainer: {

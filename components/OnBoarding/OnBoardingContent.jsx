@@ -3,11 +3,9 @@ import { useNavigation } from "@react-navigation/native";
 
 import ProgressBar from "@/components/UI/ProgressBar";
 import Colors from "@/constants/Colors";
-import OnBoardingButton from "@/components/OnBoarding/OnBoardingButton";
-
+import OnBoardingButton from "./OnBoardingButton";
 
 function OnBoardingContent({ step, title, description, imageUri, handleNext }) {
-
   const navigation = useNavigation();
 
   let buttons = (
@@ -16,22 +14,13 @@ function OnBoardingContent({ step, title, description, imageUri, handleNext }) {
         type={"skip"}
         onPress={() => navigation.navigate("Start")}
       />
-      <OnBoardingButton
-        type={"next"}
-        onPress={handleNext}
-      />
+      <OnBoardingButton type={"next"} onPress={handleNext} />
     </>
-  )
+  );
 
-  if(step === 3) {
-    buttons = (
-      <OnBoardingButton
-        type={"Start"}
-        onPress={handleNext}
-      />
-    )
+  if (step === 3) {
+    buttons = <OnBoardingButton type={"Start"} onPress={handleNext} />;
   }
-
 
   return (
     <>
@@ -41,14 +30,18 @@ function OnBoardingContent({ step, title, description, imageUri, handleNext }) {
 
       <View style={styles.container}>
         <View style={styles.textContainer}>
-          <Text style={styles.text1}>{ title }</Text>
-          <Text style={styles.text2}>{ description }</Text>
+          <Text style={styles.text1}>{title}</Text>
+          <Text style={styles.text2}>{description}</Text>
         </View>
-        
+
         <View style={styles.secondContainer}>
           <Image style={styles.image} source={imageUri} />
-          <View style={[styles.ButtonsContainer, step === 3 ? styles.thirdBoarding : '']}>
-            { buttons }
+          <View
+            style={[
+              styles.ButtonsContainer,
+              step === 3 ? styles.thirdBoarding : "",
+            ]}>
+            {buttons}
           </View>
         </View>
       </View>
@@ -94,15 +87,15 @@ const styles = StyleSheet.create({
   ButtonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: Platform.OS === 'ios' ? '90%' : '100%',
-    marginEnd: Platform.OS === 'ios' ? 0 : 20,
-    marginBottom: Platform.OS === 'ios' ? 0 : 10,
+    width: Platform.OS === "ios" ? "90%" : "100%",
+    marginEnd: Platform.OS === "ios" ? 0 : 20,
+    marginBottom: Platform.OS === "ios" ? 0 : 10,
   },
   thirdBoarding: {
     marginLeft: "auto",
-    marginBottom: Platform.OS === 'ios' ? 14 : 10,
-    marginEnd: Platform.OS === 'ios' ? 0 : -15,
-  }
+    marginBottom: Platform.OS === "ios" ? 14 : 10,
+    marginEnd: Platform.OS === "ios" ? 0 : -15,
+  },
 });
 
 export default OnBoardingContent;
