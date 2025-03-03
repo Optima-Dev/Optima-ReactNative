@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 
 // importing navigation
-import { StyleSheet, Text } from "react-native";
+import { SafeAreaView, StyleSheet, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AppLoading from "expo-app-loading";
@@ -127,25 +127,22 @@ function AuthenticatedStack() {
   const { role } = useContext(AuthContext);
 
   const MyTab = role === 'helper' ? HelperTap : SekeerTap;
+  const Instruction = role === 'helper' ? Instructions : Instructions;
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Instructions" component={Instructions} />
+    <Stack.Navigator screenOptions={{headerShown: false, contentStyle: { backgroundColor: 'white' } }}>
+      <Stack.Screen name="Instructions" component={Instruction} />
       <Stack.Screen name="MainTabs" component={MyTab} />
     </Stack.Navigator>
   );
 }
 
 function SekeerTap() {
-  const { logout } = useContext(AuthContext);
-
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: Colors.MainColor,
-        headerRight: () => (
-          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
-        ),
+        headerShown: false,
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,
@@ -153,7 +150,7 @@ function SekeerTap() {
         },
         tabBarLabel: ({ color }) => {
           return (
-            <Text style={{ fontSize: 15, color, marginTop: 3, }}>
+            <Text style={{ fontSize: 15, color }}>
               {route.name}
             </Text>
           );
@@ -206,15 +203,14 @@ function SekeerTap() {
 }
 
 function HelperTap() {
-  const { logout } = useContext(AuthContext);
-
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
+        headerShown: false,
+        headerStyle: {
+          paddingTop: 60,
+        },
         tabBarActiveTintColor: Colors.MainColor,
-        headerRight: () => (
-          <Ionicons name='log-out' size={30} color='black' onPress={logout} />
-        ),
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,
@@ -222,7 +218,7 @@ function HelperTap() {
         },
         tabBarLabel: ({ color }) => {
           return (
-            <Text style={{ fontSize: 15, color, marginTop: 3, }}>
+            <Text style={{ fontSize: 15, color}}>
               {route.name}
             </Text>
           );
@@ -269,7 +265,6 @@ function HelperTap() {
           ),
         }}
       />
-
     </MyTabs.Navigator>
   );
 }
@@ -317,12 +312,17 @@ function Root() {
 export default function App() {
   return (
     <AuthProvider>
-      <Root />
+      <SafeAreaView style={styles.safeAreaScreen}>
+        <Root />
+      </SafeAreaView>
     </AuthProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  safeAreaScreen: {
+    flex: 1,
+  },
   backTitle: {
     fontSize: 18, // Larger font size
     color: "red", // Red text color

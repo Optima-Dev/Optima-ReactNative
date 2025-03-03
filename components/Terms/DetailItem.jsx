@@ -1,11 +1,13 @@
-import { Text, StyleSheet, Pressable, Image } from "react-native";
+import { Text, StyleSheet, Pressable, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 
-function DetailItem({ text, iconSource }) {
+function DetailItem({ text, iconSource, backgroundColor, onPress }) {
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.container, pressed && styles.pressed]}>
+      onPress={onPress}
+      style={({ pressed }) => [styles.container, pressed && styles.pressed, { backgroundColor }]}
+    >
       <Text style={styles.text}>{text}</Text>
       <Image source={iconSource} style={styles.icon} />
     </Pressable>
@@ -17,14 +19,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#D0CFFC", // Light purple background
     padding: 15,
     borderRadius: 15,
     marginBottom: 10,
   },
   text: {
     color: Colors.MainColor, // Blue text color
-    fontSize: 18,
+    fontSize: Platform.OS === "ios" ? 22 : 18,
     fontWeight: "600",
   },
   pressed: {

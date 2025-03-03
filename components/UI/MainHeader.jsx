@@ -6,18 +6,27 @@ function MainHeader({
   subtitle,
   login,
   noImage,
+  imageTitle
 }) {
+  console.log(imageTitle, title, subtitle, login, noImage);
   return (
     <View style={styles.container}>
       {!noImage && (
         <View style={styles.logoContainer}>
           <Image
             source={require("@/assets/Images/Main-Logo-blue 1.png")}
-            style={[styles.logo, login ? styles.postion : null]}
+            style={[styles.logo, login ? styles.position : null]}
           />
         </View>
       )}
-      <Text style={styles.title}>{title}</Text>
+      
+      {imageTitle && (
+        <View style={styles.logoContainer}>
+          <Text style={styles.imageTitle}>Optima</Text>
+        </View>
+      )}
+
+      { title && <Text style={styles.title}>{title}</Text> }
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
@@ -27,21 +36,28 @@ const styles = StyleSheet.create({
   container: {
     // alignItems: "center",
   },
-  postion: {
+  position: {
     marginBottom: Platform.OS === "android" ? 15 : 40,
   },
   logoContainer: {
     alignItems: "center",
   },
   logo: {
-    width: Platform.OS === "android" ? 82 : 110,
-    height: Platform.OS === "android" ? 78 : 104,
-    marginBottom: 15,
+    width: 82,
+    height: 78,
+    // marginBottom: 15,
+  },
+  imageTitle: {
+    fontSize: Platform.OS === "ios" ? 32 : 28,
+    color: Colors.MainColor,
+    fontWeight: "400",
+    fontFamily: "Balgin-Regular",
   },
   title: {
     fontSize: 38,
     fontWeight: "bold",
     color: Colors.MainColor,
+    marginTop: 10,
   },
   subtitle: {
     fontSize: Platform.OS === "android" ? 18 : 20,

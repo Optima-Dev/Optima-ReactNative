@@ -8,6 +8,7 @@ const Colors = {
   InActiveColor: "#A8A8A8",
   white: "#FFFFFF",
   black: "#000000",
+  black500: "#616161",
 };
 
 export default Colors;

@@ -41,7 +41,7 @@ function TermsList() {
     if (item.type === "term") {
       return <TermItem text={item.text} iconSource={item.icon} />;
     } else {
-      return <DetailItem text={item.text} iconSource={item.icon} />;
+      return <DetailItem text={item.text} iconSource={item.icon} backgroundColor="#D0CFFC" />;
     }
   }
   return (
