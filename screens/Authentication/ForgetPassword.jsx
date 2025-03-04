@@ -1,5 +1,5 @@
 // importing react hooks
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 // importing react-native components
 import { Alert, StyleSheet, Text, View } from "react-native";
@@ -14,6 +14,8 @@ import PrimaryButton from "@/components/UI/PrimaryButton";
 import CodeInput from "@/components/Auth/CodeInput";
 import { sendingCode, resetPassword, verifyCode } from "@/util/HttpAuth";
 import { validateEmail, validatePassword } from "../../util/Validation";
+import BackButton from "../../components/UI/BackButton";
+import { AuthContext } from "../../store/AuthContext";
 
 
 const content = [
@@ -36,6 +38,7 @@ const content = [
 
 const ForgetPassword = ({ navigation }) => {
 
+  const { isAuthenticated } = useContext(AuthContext);
   const [inputText, setInputText] = useState({
     email: "",
     newPassword: "",
@@ -91,7 +94,7 @@ const ForgetPassword = ({ navigation }) => {
         validatePassword(inputText.newPassword);
         
         response = await resetPassword(inputText.email, inputText.newPassword);
-        navigation.navigate("Login");
+        navigation.navigate(isAuthenticated ? "Account" : "Login");
       }
 
       Alert.alert("Success", response);
@@ -103,7 +106,8 @@ const ForgetPassword = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      
+      <BackButton />
+
       <ForgetPassHeader
         title={content[phases - 1].title}
         subTitle={content[phases - 1].subTitle}
@@ -153,7 +157,6 @@ const ForgetPassword = ({ navigation }) => {
           isLoading={isLoading}
         />
       )}
-
     </View>
   );
 }
@@ -164,11 +167,10 @@ export default ForgetPassword;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
     rowGap: 20,
-    backgroundColor: Colors.SeconderyColor,
+    backgroundColor: 'white',
     paddingHorizontal: 30,
-    paddingVertical: 20,
+    // paddingVertical: 20,
   },
   instructionsContainer: {
     paddingLeft: 10,

@@ -15,7 +15,6 @@ export default ForgetPassHeader;
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: Colors.SeconderyColor,
   },
   title: {
     fontSize: 38,

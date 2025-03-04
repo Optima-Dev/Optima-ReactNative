@@ -1,7 +1,7 @@
 import { View, FlatList, StyleSheet } from "react-native";
 
 import TermItem from "./TermItem"; // Import the TermItem component
-import ArrowButton from "../UI/ArrowButton";
+import DetailItem from "./DetailItem";
 
 const DATA = [
   {
@@ -25,11 +25,13 @@ const DATA = [
   {
     id: "4",
     type: "detail",
+    icon: require("../../assets/Images/Forward-Arrow.png"),
     text: "Terms Of Service",
   },
   {
     id: "5",
     type: "detail",
+    icon: require("../../assets/Images/Forward-Arrow.png"),
     text: "Privacy Policy",
   },
 ];
@@ -39,7 +41,7 @@ function TermsList() {
     if (item.type === "term") {
       return <TermItem text={item.text} iconSource={item.icon} />;
     } else {
-      return <ArrowButton text={item.text} />;
+      return <DetailItem text={item.text} iconSource={item.icon} backgroundColor="#D0CFFC" />;
     }
   }
   return (

@@ -11,7 +11,9 @@ function InstructionItem({ step, text, ImgSource }) {
 
       {/* Icon and Text */}
       <View style={styles.textContainer}>
-        <Image source={ImgSource} style={styles.icon} />
+        <View style={styles.imageContainer}>
+          <Image source={ImgSource} style={styles.icon} />
+        </View>
         <Text style={styles.text}>{text}</Text>
       </View>
     </View>
@@ -48,9 +50,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  icon: {
-    width: 70,
-    height: 70,
+  imageContainer: {
+    width: "20%",
+    alignItems: "center",
   },
   text: {
     color: Colors.black,

@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 
 // importing navigation
-import { StyleSheet, Text } from "react-native";
+import { SafeAreaView, StyleSheet, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AppLoading from "expo-app-loading";
@@ -32,12 +32,15 @@ import Support from "./screens/Seeker/Support";
 import MyVision from "./screens/Seeker/MyVision";
 import MyPeople from "./screens/Seeker/MyPeople";
 import SekeerSettings from "./screens/Seeker/Settings";
+import VoiceControl from "./screens/Seeker/VoiceControl";
 
 // importing helper screens
 import Home from "./screens/Helper/Home";
 import Notifications from "./screens/Helper/Notifications";
 import Community from "./screens/Helper/Community";
 import HelperSettings from "./screens/Helper/Settings";
+import Account from "./screens/Account";
+import Language from "./screens/Language";
 
 // importing components
 import BackButton from "./components/UI/BackButton";
@@ -121,76 +124,27 @@ function UnAuthStack() {
   );
 }
 
-function AuthenticatedStack() {
-  const { role } = useContext(AuthContext);
-
-  const MyTab = role === "helper" ? HelperTap : SekeerTap;
-
-  const { isNewUser } = useContext(AuthContext);
-
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {isNewUser && (
-        <Stack.Screen name='Instructions' component={Instructions} />
-      )}
-      <Stack.Screen name='MainTabs' component={MyTab} />
-    </Stack.Navigator>
-  );
-}
-
 function SekeerTap() {
-  const { logout } = useContext(AuthContext);
-
-  const iconSize = 30;
-
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
+        tabBarActiveTintColor: Colors.MainColor,
         headerShown: false,
-        contentStyle: { backgroundColor: Colors.MainColor }, // Correct usage
-        headerShadowVisible: false, // Remove shadow between content and header
-        headerStyle: {
-          shadowOpacity: 0, // Remove shadow on iOS
-          elevation: 0, // Remove shadow on Android
-          backgroundColor: Colors.SeconderyColor,
-        },
-        headerTitle: "",
-        headerTintColor: Colors.MainColor,
-        headerRight: () => (
-          <Ionicons
-            name='log-out'
-            size={iconSize}
-            color='black'
-            onPress={logout}
-          />
-        ),
-        tabBarLabel: ({ color }) => {
-          return (
-            <Text style={{ fontSize: 12, color, marginTop: 3 }}>
-              {route.name}
-            </Text>
-          );
-        },
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          shadowOffset: { height: 0, width: 0 },
-          shadowRadius: 0,
-          shadowColor: "transparent",
-          backgroundColor: Colors.SeconderyColor,
-          height: 80,
-          paddingTop: 5,
-          borderRadius: 20,
-          marginHorizontal: 5,
         },
-      })}>
+        tabBarLabel: ({ color }) => <Text style={{ fontSize: 15, color}}>{route.name}</Text>,
+      })}
+    >
+
       <MyTabs.Screen
         name='Support'
         component={Support}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='videocam' size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`videocam${focused ? '' : '-outline'}`} size={30} color={color} />
           ),
         }}
       />
@@ -199,8 +153,8 @@ function SekeerTap() {
         name='MyVision'
         component={MyVision}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='camera-outline' size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`camera${focused ? '' : '-outline'}`} size={30} color={color} />
           ),
         }}
       />
@@ -209,18 +163,18 @@ function SekeerTap() {
         name='MyPeople'
         component={MyPeople}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='people' size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`people${focused ? '' : '-outline'}`} size={30} color={color} />
           ),
         }}
       />
 
       <MyTabs.Screen
         name='Settings'
-        component={SekeerSettings}
+        component={SettingsScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='settings' size={28} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`settings${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
@@ -229,58 +183,26 @@ function SekeerTap() {
 }
 
 function HelperTap() {
-  const { logout } = useContext(AuthContext);
-
-  const iconSize = 30;
-
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
-        // headerShown: false,
-        contentStyle: { backgroundColor: Colors.MainColor }, // Correct usage
-        headerShadowVisible: false, // Remove shadow between content and header
-        headerStyle: {
-          shadowOpacity: 0, // Remove shadow on iOS
-          elevation: 0, // Remove shadow on Android
-          backgroundColor: Colors.SeconderyColor,
-        },
-        headerTitle: "",
-        headerTintColor: Colors.MainColor,
-        headerRight: () => (
-          <Ionicons
-            name='log-out'
-            size={iconSize}
-            color='black'
-            onPress={logout}
-          />
-        ),
-        tabBarLabel: ({ color }) => {
-          return (
-            <Text style={{ fontSize: 12, color, marginTop: 3 }}>
-              {route.name}
-            </Text>
-          );
-        },
+        headerShown: false,
+        tabBarActiveTintColor: Colors.MainColor,
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          shadowOffset: { height: 0, width: 0 },
-          shadowRadius: 0,
-          shadowColor: "transparent",
-          backgroundColor: Colors.SeconderyColor,
-          height: 80,
-          paddingTop: 5,
-          borderRadius: 20,
-          marginHorizontal: 5,
         },
-      })}>
+        tabBarLabel: ({ color }) => <Text style={{ fontSize: 15, color}}>{route.name}</Text>,
+      })}
+    >
+
       <MyTabs.Screen
         name='Home'
-        component={Home}
+        component={HelperHomeScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='videocam' size={iconSize} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`home${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
@@ -289,8 +211,8 @@ function HelperTap() {
         name='Notifications'
         component={Notifications}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='camera-outline' size={iconSize} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`notifications${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
@@ -299,18 +221,18 @@ function HelperTap() {
         name='Community'
         component={Community}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='people' size={iconSize} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`people${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
 
       <MyTabs.Screen
         name='Settings'
-        component={HelperSettings}
+        component={SettingsScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name='settings' size={iconSize} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`settings${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
@@ -318,12 +240,45 @@ function HelperTap() {
   );
 }
 
+function SettingsScreen() {
+
+  const { role } = useContext(AuthContext);
+  const Settings = role === 'helper' ? HelperSettings : SekeerSettings;
+
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="Account" component={Account} />
+      <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
+      <Stack.Screen name="Language" component={Language} />
+      <Stack.Screen name="VoiceControl" component={VoiceControl} />
+    </Stack.Navigator>
+  );
+}
+
+function HelperHomeScreen() {
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Instructions" component={Instructions} />
+    </Stack.Navigator>
+  );
+}
+
 function Navigation() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, role } = useContext(AuthContext);
+  const MyTab = role === 'helper' ? <HelperTap /> : <SekeerTap />;
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <AuthenticatedStack /> : <UnAuthStack />}
+      { isAuthenticated ? (
+        <SafeAreaView style={styles.safeAreaScreen}>
+          { MyTab }
+        </SafeAreaView>
+        )
+          :
+        <UnAuthStack />
+      }
     </NavigationContainer>
   );
 }
@@ -367,6 +322,9 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  safeAreaScreen: {
+    flex: 1,
+  },
   backTitle: {
     fontSize: 18, // Larger font size
     color: "red", // Red text color
