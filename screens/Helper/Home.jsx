@@ -9,6 +9,7 @@ const Home = ({ navigation }) => {
       <MainHeader
         title="Hello, Sabrina Donnelly!"
         subtitle="We would like to thank you for investing your precious time in helping people."
+        imageTitle
       />
 
         <Pressable style={styles.buttonContainer}>
@@ -63,6 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.MainColor,
     justifyContent: 'space-between',
     marginBottom: 20,
+    marginTop: 16,
     overflow: 'hidden',
   },
   buttonText: {

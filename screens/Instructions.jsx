@@ -6,6 +6,7 @@ import InstructionItem from "@/components/Instructions/InstructionItem";
 import Colors from "@/constants/Colors";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import { AuthContext } from "@/store/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
 
 const INSTRUCTIONS = {
@@ -80,7 +81,7 @@ const Instructions = ({ navigation }) => {
         <PrimaryButton
           backgroundColor={Colors.MainColor}
           textColor={Colors.white}
-          onPress={() => navigation.navigate("MainTabs")}
+          onPress={() => navigation.goBack()}
           title="Got it !"
         />
       </View>
@@ -94,6 +95,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
+    backgroundColor: 'white',
   },
   instructions: {
     flex: 1,
@@ -113,6 +115,6 @@ const styles = StyleSheet.create({
     color: Colors.MainColor,
   },
   buttonContainer: {
-    paddingTop: 12,
+    paddingVertical: 16,
   },
 });

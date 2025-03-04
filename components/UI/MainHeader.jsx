@@ -26,7 +26,7 @@ function MainHeader({
         </View>
       )}
 
-      { title && <Text style={styles.title}>{title}</Text> }
+      { title && <Text style={[styles.title, imageTitle && { fontSize:26 }]}>{title}</Text> }
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     fontSize: 38,
     fontWeight: "bold",
     color: Colors.MainColor,
-    marginTop: 10,
+    marginTop: 20,
   },
   subtitle: {
     fontSize: Platform.OS === "android" ? 18 : 20,

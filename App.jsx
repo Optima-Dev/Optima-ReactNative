@@ -38,6 +38,8 @@ import Home from "./screens/Helper/Home";
 import Notifications from "./screens/Helper/Notifications";
 import Community from "./screens/Helper/Community";
 import HelperSettings from "./screens/Helper/Settings";
+import Account from "./screens/Account";
+import Language from "./screens/Language";
 
 // importing components
 import BackButton from "./components/UI/BackButton";
@@ -130,8 +132,7 @@ function AuthenticatedStack() {
   const Instruction = role === 'helper' ? Instructions : Instructions;
 
   return (
-    <Stack.Navigator screenOptions={{headerShown: false, contentStyle: { backgroundColor: 'white' } }}>
-      <Stack.Screen name="Instructions" component={Instruction} />
+    <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name="MainTabs" component={MyTab} />
     </Stack.Navigator>
   );
@@ -148,13 +149,7 @@ function SekeerTap() {
           elevation: 0,
           shadowOpacity: 0,
         },
-        tabBarLabel: ({ color }) => {
-          return (
-            <Text style={{ fontSize: 15, color }}>
-              {route.name}
-            </Text>
-          );
-        },
+        tabBarLabel: ({ color }) => <Text style={{ fontSize: 15, color}}>{route.name}</Text>,
       })}
     >
 
@@ -202,36 +197,47 @@ function SekeerTap() {
   );
 }
 
+function HelperSettingsScreen() {
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Settings" component={HelperSettings} />
+      <Stack.Screen name="Account" component={Account} />
+      <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
+      <Stack.Screen name="Language" component={Language} />
+    </Stack.Navigator>
+  );
+}
+
+function HelperHomeScreen() {
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Instructions" component={Instructions} />
+    </Stack.Navigator>
+  );
+}
+
 function HelperTap() {
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        headerStyle: {
-          paddingTop: 60,
-        },
         tabBarActiveTintColor: Colors.MainColor,
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
         },
-        tabBarLabel: ({ color }) => {
-          return (
-            <Text style={{ fontSize: 15, color}}>
-              {route.name}
-            </Text>
-          );
-        },
+        tabBarLabel: ({ color }) => <Text style={{ fontSize: 15, color}}>{route.name}</Text>,
       })}
     >
 
       <MyTabs.Screen
         name='Home'
-        component={Home}
+        component={HelperHomeScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="videocam" size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`home${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
@@ -240,8 +246,8 @@ function HelperTap() {
         name='Notifications'
         component={Notifications}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="camera-outline" size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`notifications${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
@@ -250,18 +256,18 @@ function HelperTap() {
         name='Community'
         component={Community}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="people" size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`people${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
 
       <MyTabs.Screen
         name='Settings'
-        component={HelperSettings}
+        component={HelperSettingsScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="settings" size={28} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`settings${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
@@ -274,7 +280,14 @@ function Navigation() {
 
   return (
     <NavigationContainer>
-      { isAuthenticated ? <AuthenticatedStack /> : <UnAuthStack /> }
+      { isAuthenticated ? (
+        <SafeAreaView style={styles.safeAreaScreen}>
+          <AuthenticatedStack />
+        </SafeAreaView>
+        )
+        : 
+        <UnAuthStack />
+      }
     </NavigationContainer>
   );
 }
@@ -312,9 +325,7 @@ function Root() {
 export default function App() {
   return (
     <AuthProvider>
-      <SafeAreaView style={styles.safeAreaScreen}>
-        <Root />
-      </SafeAreaView>
+      <Root />
     </AuthProvider>
   );
 }

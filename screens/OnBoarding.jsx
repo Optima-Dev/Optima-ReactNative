@@ -4,6 +4,8 @@ import OnBoardingContent from "../components/OnBoarding/OnBoardingContent";
 import onBoardingImage1 from "@/assets/Images/OnBoarding1.png";
 import onBoardingImage2 from "@/assets/Images/OnBoarding2.png";
 import onBoardingImage3 from "@/assets/Images/OnBoarding3.png";
+import { SafeAreaView } from "react-native";
+import Colors from "../constants/Colors";
 
 function OnBoarding1({ navigation }) {
 
