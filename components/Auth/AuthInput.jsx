@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 10,
     marginVertical: 6,
-    backgroundColor: Colors.InputBackGround,
+    // backgroundColor: Colors.InputBackGround,
     width: Platform.OS === "android" ? 360 : "100%",
     height: 55,
   },

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Platform } from "react-native";
 import BackButton from "../components/UI/BackButton";
 import Colors from "../constants/Colors";
 import AuthInput from "../components/Auth/AuthInput";
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 20 : 0,
   },
   title: {
     color: Colors.MainColor,

@@ -1,7 +1,6 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import BackButton from '../../components/UI/BackButton';
-import Colors from '../../constants/Colors';
-
+import { StyleSheet, Text, View, ScrollView, Platform } from "react-native";
+import BackButton from "../../components/UI/BackButton";
+import Colors from "../../constants/Colors";
 
 const VOICE_CONTROL = {
   "Nav Bar": [
@@ -10,28 +9,12 @@ const VOICE_CONTROL = {
     `"Open My People"`,
     `"Open Settings"`,
   ],
-  "Support": [
-    `"Call A Volunteer"`,
-    `"Open My Vision"`,
-    `"Open My People"`,
-  ],
-  "Call A Volunteer": [
-    `"End Call"`,
-    `"Flip Camera"`,
-  ],
-  "Report": [
-    `"Report Call"`,
-    `"No, Thank You"`,
-  ],
-  "My Vision": [
-    `"Take A Picture"`,
-    `"Repeat"`,
-  ],
-  "My People": [
-    `"Call PERSON'S NAME"`,
-  ]
-}
-
+  Support: [`"Call A Volunteer"`, `"Open My Vision"`, `"Open My People"`],
+  "Call A Volunteer": [`"End Call"`, `"Flip Camera"`],
+  Report: [`"Report Call"`, `"No, Thank You"`],
+  "My Vision": [`"Take A Picture"`, `"Repeat"`],
+  "My People": [`"Call PERSON'S NAME"`],
+};
 
 const VoiceControl = () => {
   return (
@@ -39,31 +22,32 @@ const VoiceControl = () => {
       <BackButton />
       <Text style={styles.title}>Voice Control</Text>
       <Text style={styles.subTitle}>
-        We preferer to use your native language as 
-        main language to make it easier for us to
-        assign you with people with the same
-        native language as yours.  
+        We preferer to use your native language as main language to make it
+        easier for us to assign you with people with the same native language as
+        yours.
       </Text>
 
       <ScrollView style={styles.VoiceControlContainer}>
-        {
-          Object.keys(VOICE_CONTROL).map((key, index) => (
-            <View key={index}>
-              <Text style={styles.VoiceControlTitle}>{key}</Text>
-              {
-                VOICE_CONTROL[key].map((item, index) => (
-                  <Text key={index} style={[styles.VoiceControlSubtitle, index !== VOICE_CONTROL[key].length - 1 && styles.borderBottom]}>
-                    {item}
-                  </Text>
-                ))
-              }
-            </View>
-          ))
-        }
+        {Object.keys(VOICE_CONTROL).map((key, index) => (
+          <View key={index}>
+            <Text style={styles.VoiceControlTitle}>{key}</Text>
+            {VOICE_CONTROL[key].map((item, index) => (
+              <Text
+                key={index}
+                style={[
+                  styles.VoiceControlSubtitle,
+                  index !== VOICE_CONTROL[key].length - 1 &&
+                    styles.borderBottom,
+                ]}>
+                {item}
+              </Text>
+            ))}
+          </View>
+        ))}
       </ScrollView>
     </View>
   );
-}
+};
 
 export default VoiceControl;
 
@@ -71,29 +55,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
+    paddingTop: Platform.OS === "android" ? 20 : 0,
   },
   title: {
     fontSize: 38,
-    fontWeight: '700',
+    fontWeight: "700",
     color: Colors.MainColor,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subTitle: {
-    color: '#50555C',
+    color: "#50555C",
     fontSize: 20,
-    fontWeight: '300',
+    fontWeight: "300",
     marginTop: 10,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 28,
   },
   VoiceControlContainer: {
     marginTop: 20,
   },
   VoiceControlTitle: {
-    color: '#50555C',
+    color: "#50555C",
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     paddingVertical: 10,
   },
   VoiceControlSubtitle: {
@@ -105,6 +90,6 @@ const styles = StyleSheet.create({
   },
   borderBottom: {
     borderBottomWidth: 1,
-    borderBottomColor: '#CBCBCB',
-  }
+    borderBottomColor: "#CBCBCB",
+  },
 });

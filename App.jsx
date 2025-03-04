@@ -131,20 +131,25 @@ function SekeerTap() {
         tabBarActiveTintColor: Colors.MainColor,
         headerShown: false,
         tabBarStyle: {
+          marginBottom: 10,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
         },
-        tabBarLabel: ({ color }) => <Text style={{ fontSize: 15, color}}>{route.name}</Text>,
-      })}
-    >
-
+        tabBarLabel: ({ color }) => (
+          <Text style={{ fontSize: 14, color }}>{route.name}</Text>
+        ),
+      })}>
       <MyTabs.Screen
         name='Support'
         component={Support}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`videocam${focused ? '' : '-outline'}`} size={30} color={color} />
+            <Ionicons
+              name={`videocam${focused ? "" : "-outline"}`}
+              size={30}
+              color={color}
+            />
           ),
         }}
       />
@@ -154,7 +159,11 @@ function SekeerTap() {
         component={MyVision}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`camera${focused ? '' : '-outline'}`} size={30} color={color} />
+            <Ionicons
+              name={`camera${focused ? "" : "-outline"}`}
+              size={30}
+              color={color}
+            />
           ),
         }}
       />
@@ -164,7 +173,11 @@ function SekeerTap() {
         component={MyPeople}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`people${focused ? '' : '-outline'}`} size={30} color={color} />
+            <Ionicons
+              name={`people${focused ? "" : "-outline"}`}
+              size={30}
+              color={color}
+            />
           ),
         }}
       />
@@ -174,7 +187,11 @@ function SekeerTap() {
         component={SettingsScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`settings${focused ? '' : '-outline'}`} size={28} color={color} />
+            <Ionicons
+              name={`settings${focused ? "" : "-outline"}`}
+              size={28}
+              color={color}
+            />
           ),
         }}
       />
@@ -189,20 +206,25 @@ function HelperTap() {
         headerShown: false,
         tabBarActiveTintColor: Colors.MainColor,
         tabBarStyle: {
+          marginBottom: 10,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
         },
-        tabBarLabel: ({ color }) => <Text style={{ fontSize: 15, color}}>{route.name}</Text>,
-      })}
-    >
-
+        tabBarLabel: ({ color }) => (
+          <Text style={{ fontSize: 14, color }}>{route.name}</Text>
+        ),
+      })}>
       <MyTabs.Screen
         name='Home'
         component={HelperHomeScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`home${focused ? '' : '-outline'}`} size={28} color={color} />
+            <Ionicons
+              name={`home${focused ? "" : "-outline"}`}
+              size={28}
+              color={color}
+            />
           ),
         }}
       />
@@ -212,7 +234,11 @@ function HelperTap() {
         component={Notifications}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`notifications${focused ? '' : '-outline'}`} size={28} color={color} />
+            <Ionicons
+              name={`notifications${focused ? "" : "-outline"}`}
+              size={28}
+              color={color}
+            />
           ),
         }}
       />
@@ -222,7 +248,11 @@ function HelperTap() {
         component={Community}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`people${focused ? '' : '-outline'}`} size={28} color={color} />
+            <Ionicons
+              name={`people${focused ? "" : "-outline"}`}
+              size={28}
+              color={color}
+            />
           ),
         }}
       />
@@ -232,7 +262,11 @@ function HelperTap() {
         component={SettingsScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={`settings${focused ? '' : '-outline'}`} size={28} color={color} />
+            <Ionicons
+              name={`settings${focused ? "" : "-outline"}`}
+              size={28}
+              color={color}
+            />
           ),
         }}
       />
@@ -241,44 +275,40 @@ function HelperTap() {
 }
 
 function SettingsScreen() {
-
   const { role } = useContext(AuthContext);
-  const Settings = role === 'helper' ? HelperSettings : SekeerSettings;
+  const Settings = role === "helper" ? HelperSettings : SekeerSettings;
 
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Settings" component={Settings} />
-      <Stack.Screen name="Account" component={Account} />
-      <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
-      <Stack.Screen name="Language" component={Language} />
-      <Stack.Screen name="VoiceControl" component={VoiceControl} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Settings' component={Settings} />
+      <Stack.Screen name='Account' component={Account} />
+      <Stack.Screen name='ForgetPassword' component={ForgetPassword} />
+      <Stack.Screen name='Language' component={Language} />
+      <Stack.Screen name='VoiceControl' component={VoiceControl} />
     </Stack.Navigator>
   );
 }
 
 function HelperHomeScreen() {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="Instructions" component={Instructions} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Home' component={Home} />
+      <Stack.Screen name='Instructions' component={Instructions} />
     </Stack.Navigator>
   );
 }
 
 function Navigation() {
   const { isAuthenticated, role } = useContext(AuthContext);
-  const MyTab = role === 'helper' ? <HelperTap /> : <SekeerTap />;
+  const MyTab = role === "helper" ? <HelperTap /> : <SekeerTap />;
 
   return (
     <NavigationContainer>
-      { isAuthenticated ? (
-        <SafeAreaView style={styles.safeAreaScreen}>
-          { MyTab }
-        </SafeAreaView>
-        )
-          :
+      {isAuthenticated ? (
+        <SafeAreaView style={styles.safeAreaScreen}>{MyTab}</SafeAreaView>
+      ) : (
         <UnAuthStack />
-      }
+      )}
     </NavigationContainer>
   );
 }
