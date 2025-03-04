@@ -25,6 +25,11 @@ const LANGAUGES = [
     name: 'Deutsch',
     name2: '(German)',
   },
+  {
+    id: 5,
+    name: 'Français',
+    name2: '(French)',
+  }
 ]
 
 
@@ -58,7 +63,7 @@ const Language = () => {
 
           <View style={styles.languagesContainer}>
             {LANGAUGES.map((lang) => (
-              <View key={lang.id} style={[styles.languageContainer, lang.id !== 4 && styles.applyBorder]}>
+              <View key={lang.id} style={[styles.languageContainer, lang.id !== 5 && styles.applyBorder]}>
                 <Text style={styles.languageText}>{lang.name}</Text>
                 <Text style={styles.languageText2}>{lang.name2}</Text>
                 { lang.id === 1 && (
@@ -118,7 +123,9 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   languagesContainer: {
-    marginTop: 20,
+    borderRadius: 20,
+    backgroundColor: Colors.SeconderyColor,
+    marginTop: 34,
     padding: 10,
   },
   languageContainer: {

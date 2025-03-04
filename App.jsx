@@ -32,6 +32,7 @@ import Support from "./screens/Seeker/Support";
 import MyVision from "./screens/Seeker/MyVision";
 import MyPeople from "./screens/Seeker/MyPeople";
 import SekeerSettings from "./screens/Seeker/Settings";
+import VoiceControl from "./screens/Seeker/VoiceControl";
 
 // importing helper screens
 import Home from "./screens/Helper/Home";
@@ -125,19 +126,6 @@ function UnAuthStack() {
   );
 }
 
-function AuthenticatedStack() {
-  const { role } = useContext(AuthContext);
-
-  const MyTab = role === 'helper' ? HelperTap : SekeerTap;
-  const Instruction = role === 'helper' ? Instructions : Instructions;
-
-  return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="MainTabs" component={MyTab} />
-    </Stack.Navigator>
-  );
-}
-
 function SekeerTap() {
   return (
     <MyTabs.Navigator
@@ -157,8 +145,8 @@ function SekeerTap() {
         name='Support'
         component={Support}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="videocam" size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`videocam${focused ? '' : '-outline'}`} size={30} color={color} />
           ),
         }}
       />
@@ -167,8 +155,8 @@ function SekeerTap() {
         name='MyVision'
         component={MyVision}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="camera-outline" size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`camera${focused ? '' : '-outline'}`} size={30} color={color} />
           ),
         }}
       />
@@ -177,43 +165,23 @@ function SekeerTap() {
         name='MyPeople'
         component={MyPeople}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="people" size={30} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`people${focused ? '' : '-outline'}`} size={30} color={color} />
           ),
         }}
       />
 
       <MyTabs.Screen
         name='Settings'
-        component={SekeerSettings}
+        component={SettingsScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="settings" size={28} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={`settings${focused ? '' : '-outline'}`} size={28} color={color} />
           ),
         }}
       />
 
     </MyTabs.Navigator>
-  );
-}
-
-function HelperSettingsScreen() {
-  return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Settings" component={HelperSettings} />
-      <Stack.Screen name="Account" component={Account} />
-      <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
-      <Stack.Screen name="Language" component={Language} />
-    </Stack.Navigator>
-  );
-}
-
-function HelperHomeScreen() {
-  return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="Instructions" component={Instructions} />
-    </Stack.Navigator>
   );
 }
 
@@ -264,7 +232,7 @@ function HelperTap() {
 
       <MyTabs.Screen
         name='Settings'
-        component={HelperSettingsScreen}
+        component={SettingsScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={`settings${focused ? '' : '-outline'}`} size={28} color={color} />
@@ -275,17 +243,43 @@ function HelperTap() {
   );
 }
 
+function SettingsScreen() {
+
+  const { role } = useContext(AuthContext);
+  const Settings = role === 'helper' ? HelperSettings : SekeerSettings;
+
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="Account" component={Account} />
+      <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
+      <Stack.Screen name="Language" component={Language} />
+      <Stack.Screen name="VoiceControl" component={VoiceControl} />
+    </Stack.Navigator>
+  );
+}
+
+function HelperHomeScreen() {
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Instructions" component={Instructions} />
+    </Stack.Navigator>
+  );
+}
+
 function Navigation() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, role } = useContext(AuthContext);
+  const MyTab = role === 'helper' ? <HelperTap /> : <SekeerTap />;
 
   return (
     <NavigationContainer>
       { isAuthenticated ? (
         <SafeAreaView style={styles.safeAreaScreen}>
-          <AuthenticatedStack />
+          { MyTab }
         </SafeAreaView>
         )
-        : 
+          :
         <UnAuthStack />
       }
     </NavigationContainer>
