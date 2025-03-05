@@ -1,51 +1,60 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import MainHeader from '../../components/UI/MainHeader';
-import DetailItem from '../../components/Terms/DetailItem';
-import Colors from '../../constants/Colors';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+} from "react-native";
+import MainHeader from "../../components/UI/MainHeader";
+import DetailItem from "../../components/Terms/DetailItem";
+import Colors from "../../constants/Colors";
 
 const Home = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <MainHeader
-        title="Hello, Sabrina Donnelly!"
-        subtitle="We would like to thank you for investing your precious time in helping people."
+        title='Hello, Sabrina Donnelly!'
+        subtitle='We would like to thank you for investing your precious time in helping people.'
         imageTitle
       />
 
-        <Pressable style={styles.buttonContainer}>
-          <Text style={styles.buttonText}>
-            People who are waiting today for help from all over the world
-          </Text>
+      <Pressable style={styles.buttonContainer}>
+        <Text style={styles.buttonText}>
+          People who are waiting today for help from all over the world
+        </Text>
 
-          <View style={styles.numberContainer}>
-            <Image
-              source={require('../../assets/Images/Ellipse 10.png')}
-              style={styles.boxShadow}
-            />
-            <Text style={styles.numberText}>200</Text>
-          </View>
-
+        <View style={styles.numberContainer}>
           <Image
-            source={require('../../assets/Images/Ellipse 11.png')}
-            style={[styles.boxShadow, { bottom: 0 }]}
+            source={require("../../assets/Images/Ellipse 10.png")}
+            style={styles.boxShadow}
           />
-        </Pressable>
+          <Text style={styles.numberText}>200</Text>
+        </View>
 
-        <DetailItem
-          onPress={() => {navigation.navigate('Instructions')}}
-          text="How to pick-up a call"
-          backgroundColor={Colors.green500}
-          iconSource={require('../../assets/Images/Forward-Arrow.png')}
+        <Image
+          source={require("../../assets/Images/Ellipse 11.png")}
+          style={[styles.boxShadow, { bottom: 0 }]}
         />
+      </Pressable>
+
+      <DetailItem
+        onPress={() => {
+          navigation.navigate("Instructions");
+        }}
+        text='How to pick-up a call'
+        backgroundColor={Colors.green500}
+        iconSource={require("../../assets/Images/Forward-Arrow.png")}
+      />
 
       <View style={styles.textContainer}>
         <Text style={styles.bottomText}>
-          We will notify you when someone needs help. 
+          We will notify you when someone needs help.
         </Text>
       </View>
     </View>
   );
-}
+};
 
 export default Home;
 
@@ -53,29 +62,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     gap: 10,
+    paddingTop: Platform.OS === "android" ? 60 : 0,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderRadius: 20,
     paddingHorizontal: 30,
     paddingVertical: 40,
     backgroundColor: Colors.MainColor,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     marginBottom: 20,
     marginTop: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   buttonText: {
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.white,
     fontSize: 22,
-    width: '54%',
+    width: "54%",
   },
   numberContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     width: 96,
     height: 96,
     backgroundColor: Colors.white,
@@ -84,22 +94,22 @@ const styles = StyleSheet.create({
   numberText: {
     color: Colors.MainColor,
     fontSize: 30,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   boxShadow: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: -1,
   },
   textContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   bottomText: {
     color: Colors.black500,
-    fontWeight: '300',
-    fontSize: 18,
-    fontFamily: 'SF UI Display',
-    textAlign: 'center',
+    fontWeight: "300",
+    fontSize: 14,
+    fontFamily: "SF UI Display",
+    textAlign: "center",
     marginBottom: 20,
-  }
+  },
 });

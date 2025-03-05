@@ -63,7 +63,6 @@ function UnAuthStack() {
         headerStyle: {
           shadowOpacity: 0, // Remove shadow on iOS
           elevation: 0, // Remove shadow on Android
-          backgroundColor: Colors.SeconderyColor,
         },
         headerTitle: "",
         headerTintColor: Colors.MainColor,
@@ -135,6 +134,7 @@ function SekeerTap() {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
+          borderRadius: 20,
         },
         tabBarLabel: ({ color }) => (
           <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -210,6 +210,7 @@ function HelperTap() {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
+          borderRadius: 20,
         },
         tabBarLabel: ({ color }) => (
           <Text style={{ fontSize: 14, color }}>{route.name}</Text>

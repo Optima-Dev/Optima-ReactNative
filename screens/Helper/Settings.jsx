@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Platform } from 'react-native';
 import Colors from '../../constants/Colors';
 import SettingsItem from '../../components/Terms/SettingsItem';
 import DetailItem from '../../components/Terms/DetailItem';
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: Platform.OS === 'android' ? 60 : 10,
     backgroundColor: 'white',
     gap: 20,
   },

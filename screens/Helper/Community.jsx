@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Platform } from "react-native";
 
 const Community = () => {
   return (
@@ -6,7 +6,7 @@ const Community = () => {
       <Text>Community</Text>
     </View>
   );
-}
+};
 
 export default Community;
 
@@ -14,7 +14,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+  },
 });

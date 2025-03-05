@@ -1,5 +1,12 @@
 import { useContext } from "react";
-import { Image, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import MainHeader from "@/components/UI/MainHeader";
 import InstructionItem from "@/components/Instructions/InstructionItem";
@@ -8,9 +15,8 @@ import PrimaryButton from "@/components/UI/PrimaryButton";
 import { AuthContext } from "@/store/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 
-
 const INSTRUCTIONS = {
-  "seeker": [
+  seeker: [
     {
       step: 1,
       text: `You can navigate the whole app by using voice commands.\nJust talk out loud with whatever you want to do.`,
@@ -26,8 +32,13 @@ const INSTRUCTIONS = {
       ImgSource: require("../assets/Images/camera 1.png"),
       text: `You can use our AI feature that would describe the whole view in front of you. Just say out loud “Open my vision“ then “Take a picture“.`,
     },
+    {
+      step: 4,
+      ImgSource: require("../assets/Images/family 1.png"),
+      text: `In my people section you will be able to add your family andfriends accounts so you can call them easily by saying out loud “Call person’s name “.`,
+    },
   ],
-  "helper": [
+  helper: [
     {
       step: 1,
       text: `We will send you a notification whenever someone needs help specifically people who speaks your native language.`,
@@ -46,23 +57,22 @@ const INSTRUCTIONS = {
     {
       step: 4,
       text: `Now you can help the person we assigned you to help.\nDo not forget our warnings.`,
-      ImgSource: require("../assets/Images/Vector.png"),
-    }
-  ]
+      ImgSource: require("../assets/Images/Vector (1).png"),
+    },
+  ],
 };
 
 const HEADER = {
-  "seeker": {
+  seeker: {
     title: `HELLO OUR\nFRIEND !`,
     subtitle: `Here is some instructions on how to use our app in the most efficient way.`,
     noimage: true,
   },
-  "helper": {
+  helper: {
     subtitle: `Here is some instructions on how to pick-up a call :`,
     imageTitle: true,
-  }
-}
-
+  },
+};
 
 const Instructions = ({ navigation }) => {
   const { role } = useContext(AuthContext);
@@ -71,9 +81,13 @@ const Instructions = ({ navigation }) => {
     <View style={styles.container}>
       <MainHeader {...HEADER[role]} />
 
-      <ScrollView style={styles.instructions} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.instructions}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.instructionsContainer}>
-          { INSTRUCTIONS[role].map(instruction => <InstructionItem key={instruction.step} {...instruction} /> )}
+          {INSTRUCTIONS[role].map((instruction) => (
+            <InstructionItem key={instruction.step} {...instruction} />
+          ))}
         </View>
       </ScrollView>
 
@@ -82,7 +96,7 @@ const Instructions = ({ navigation }) => {
           backgroundColor={Colors.MainColor}
           textColor={Colors.white}
           onPress={() => navigation.goBack()}
-          title="Got it !"
+          title='Got it !'
         />
       </View>
     </View>
@@ -95,15 +109,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
+    paddingTop: Platform.OS === "android" ? 60 : 0,
   },
   instructions: {
     flex: 1,
-    paddingTop: 24,
+    paddingTop: 10,
+    marginTop: 10,
   },
   instructionsContainer: {
     gap: 34,
-    paddingVertical: 10,
+    paddingVertical: 20,
   },
   text: {
     color: Colors.black,

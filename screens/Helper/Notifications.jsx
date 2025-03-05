@@ -1,20 +1,21 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View, Platform } from "react-native";
+import NotificationsContent from "../../components/helper/Notifications/NotificationsContent";
 
 const Notifications = () => {
   return (
     <View style={styles.container}>
-      <Text>Notifications</Text>
+      <NotificationsContent />
     </View>
   );
-}
+};
 
 export default Notifications;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
+    alignItems: "center",
+    backgroundColor: "white",
+    paddingTop: Platform.OS === "android" ? 60 : 0,
+  },
 });

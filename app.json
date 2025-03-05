@@ -16,7 +16,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/Images/Main-Logo-blue 1.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "white"
       },
       "permissions": [
         "android.permission.CAMERA",
