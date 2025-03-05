@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, Alert, Platform } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
 import AuthInput from "../../Auth/AuthInput";
 import Colors from "../../../constants/Colors";
@@ -16,11 +16,8 @@ function MyPeopleForm({ onAddPerson, onHideForm }) {
     if (peopleForm.firstName && peopleForm.lastName && peopleForm.email) {
       console.log("Form submitted");
       onAddPerson(peopleForm);
-      setPeopleForm({
-        firstName: "",
-        lastName: "",
-        email: "",
-      });
+    } else {
+      Alert.alert("Error", "Please fill all the fields", [{ text: "Okay" }]);
     }
   }
 
@@ -70,11 +67,11 @@ function MyPeopleForm({ onAddPerson, onHideForm }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: Platform.OS === "ios" ? 0 : 16,
   },
   InputsContainer: {
     marginBottom: 20,
-    gap: 10,
+    gap: 8,
   },
   ButtonsContainer: {
     gap: 15,

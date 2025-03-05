@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import MyPeopleContent from "../../components/seeker/MyPeople/MyPeopleContent";
 import Colors from "../../constants/Colors";
 
@@ -15,9 +15,6 @@ export default MyPeople;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: Colors.white,
   },
 });

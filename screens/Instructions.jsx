@@ -1,12 +1,11 @@
 import { useContext } from "react";
-import { Image, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import MainHeader from "@/components/UI/MainHeader";
 import InstructionItem from "@/components/Instructions/InstructionItem";
 import Colors from "@/constants/Colors";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import { AuthContext } from "@/store/AuthContext";
-import { useNavigation } from "@react-navigation/native";
 
 
 const INSTRUCTIONS = {
@@ -26,6 +25,11 @@ const INSTRUCTIONS = {
       ImgSource: require("../assets/Images/camera 1.png"),
       text: `You can use our AI feature that would describe the whole view in front of you. Just say out loud “Open my vision“ then “Take a picture“.`,
     },
+    {
+      step: 4,
+      text: `In my people section you will be able to add your family and friends accounts so you can call them easily by saying out loud “Call person’s name “.`,
+      ImgSource: require("../assets/Images/family 1.png"),
+    }
   ],
   "helper": [
     {
@@ -67,6 +71,14 @@ const HEADER = {
 const Instructions = ({ navigation }) => {
   const { role } = useContext(AuthContext);
 
+  function handlePressGotit() {
+    if(role === "seeker") {
+      navigation.navigate('MyTabs');
+    } else {
+      navigation.goBack();
+    }
+  }
+
   return (
     <View style={styles.container}>
       <MainHeader {...HEADER[role]} />
@@ -81,7 +93,7 @@ const Instructions = ({ navigation }) => {
         <PrimaryButton
           backgroundColor={Colors.MainColor}
           textColor={Colors.white}
-          onPress={() => navigation.goBack()}
+          onPress={handlePressGotit}
           title="Got it !"
         />
       </View>

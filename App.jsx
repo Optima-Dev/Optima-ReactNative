@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 
 // importing navigation
-import { SafeAreaView, StyleSheet, Text } from "react-native";
+import { Platform, SafeAreaView, StyleSheet, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AppLoading from "expo-app-loading";
@@ -124,14 +124,14 @@ function UnAuthStack() {
   );
 }
 
-function SekeerTap() {
+function SeekerTap() {
   return (
     <MyTabs.Navigator
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: Colors.MainColor,
         headerShown: false,
         tabBarStyle: {
-          marginBottom: 10,
+          marginBottom: Platform.OS === "ios" ? 0 : 10,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
@@ -206,7 +206,7 @@ function HelperTap() {
         headerShown: false,
         tabBarActiveTintColor: Colors.MainColor,
         tabBarStyle: {
-          marginBottom: 10,
+          marginBottom: Platform.OS === "ios" ? 0 : 10,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
@@ -300,7 +300,16 @@ function HelperHomeScreen() {
 
 function Navigation() {
   const { isAuthenticated, role } = useContext(AuthContext);
-  const MyTab = role === "helper" ? <HelperTap /> : <SekeerTap />;
+  let MyTab = <HelperTap />;
+
+  if(role === 'seeker') {
+    MyTab = (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name='Instructions' component={Instructions} />
+        <Stack.Screen name='MyTabs' component={SeekerTap} />
+      </Stack.Navigator>
+    );
+  }
 
   return (
     <NavigationContainer>

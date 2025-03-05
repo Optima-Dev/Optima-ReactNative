@@ -1,6 +1,5 @@
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, Text, StyleSheet, Platform } from "react-native";
 import Colors from "../../constants/Colors";
-import ArrowButton from "../UI/ArrowButton";
 
 function CallButton({ onPress }) {
   return (
@@ -14,10 +13,11 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.MainColor,
     borderRadius: 20,
-    alignItems: "center",
     justifyContent: "center",
-    width: 350,
-    height: 340,
+    alignItems: "center",
+    flex: Platform.OS === "ios" ? 1 : null,
+    width: Platform.OS === "ios" ? '100%' : 350,
+    height: Platform.OS === "ios" ? null : 340,
     marginBottom: 10,
   },
   text: {

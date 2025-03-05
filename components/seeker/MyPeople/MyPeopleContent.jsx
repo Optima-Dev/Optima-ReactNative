@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import ForgetPassHeader from "../../Auth/ForgetPassHeader";
-import PrimaryButton from "../../UI/PrimaryButton";
 import MyPeopleForm from "./MyPeopleForm";
 import MyPeopleList from "./MyPeopleList";
-import Colors from "../../../constants/Colors";
 
 
 function MyPeopleContent() {
@@ -38,10 +36,9 @@ function MyPeopleContent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    marginTop: 40,
+    paddingHorizontal: 20,
+    paddingVertical: Platform.OS === "ios" ? 8 : 20,
+    marginTop: Platform.OS === "ios" ? 0 : 40,
   },
 });
 

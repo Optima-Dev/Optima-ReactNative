@@ -1,4 +1,4 @@
-import { Text, StyleSheet, Pressable, Image } from "react-native";
+import { Text, StyleSheet, Pressable, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 
 function ArrowButton({ text, type, onPress }) {
@@ -49,15 +49,17 @@ const styles = StyleSheet.create({
   },
   visionContainer: {
     backgroundColor: "#CCF47D",
-    width: 350,
-    height: 120,
+    width: Platform.OS === "android" ? 350 : "100%",
+    height: Platform.OS === "android" ? 120 : null,
+    padding: Platform.OS === "android" ? null : 38,
     borderRadius: 20,
     marginTop: 10,
   },
   peopleContainer: {
     backgroundColor: "transparent",
-    width: 350,
-    height: 120,
+    width: Platform.OS === "android" ? 350 : "100%",
+    height: Platform.OS === "android" ? 120 : null,
+    padding: Platform.OS === "android" ? null : 38,
     borderRadius: 20,
     marginTop: 10,
     borderWidth: 4,
