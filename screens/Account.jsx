@@ -6,10 +6,11 @@ import { Ionicons } from "@expo/vector-icons";
 import PrimaryButton from "../components/UI/PrimaryButton";
 import { useContext } from "react";
 import { AuthContext } from "../store/AuthContext";
-
+import { useUser } from "../store/UserContext";
 
 const Account = ({ navigation }) => {
   const { logout } = useContext(AuthContext);
+  const { user } = useUser();
 
   return (
     <View style={styles.container}>
@@ -18,24 +19,24 @@ const Account = ({ navigation }) => {
       <Text style={styles.title}>Account</Text>
 
       <View style={styles.logoContainer}>
-        <Ionicons name="person-outline" size={40} color={Colors.MainColor} />
+        <Ionicons name='person-outline' size={40} color={Colors.MainColor} />
       </View>
 
       <View style={styles.authContainer}>
         <AuthInput
           icon='person-outline'
           onChangeText={() => {}}
-          value="Sabrina"
+          value={user.firstName}
         />
         <AuthInput
           icon='person-outline'
           onChangeText={() => {}}
-          value="Donnelly"
+          value={user.lastName}
         />
         <AuthInput
           icon='mail-outline'
           onChangeText={() => {}}
-          value="Sabrina21d@gmail.com"
+          value={user.email}
         />
       </View>
 
@@ -43,36 +44,36 @@ const Account = ({ navigation }) => {
         <PrimaryButton
           backgroundColor={Colors.MainColor}
           isLoading={false}
-          onPress={() => navigation.navigate('ForgetPassword')}
-          textColor="white"
-          title="Change Password"
+          onPress={() => navigation.navigate("ForgetPassword")}
+          textColor='white'
+          title='Change Password'
         />
         <PrimaryButton
           backgroundColor={Colors.red600}
           isLoading={false}
           onPress={logout}
-          textColor="white"
-          title="Logout"
+          textColor='white'
+          title='Logout'
         />
       </View>
     </View>
   );
-}
+};
 
 export default Account;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 20 : 0,
+    paddingTop: Platform.OS === "android" ? 20 : 0,
   },
   title: {
     color: Colors.MainColor,
     fontSize: 30,
-    fontWeight: '700',
-    textAlign: 'center',
+    fontWeight: "700",
+    textAlign: "center",
     marginBottom: 30,
   },
   logoContainer: {
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.MainColor,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 20,
   },
   authContainer: {
@@ -90,5 +91,5 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     gap: 15,
     marginTop: 40,
-  }
+  },
 });

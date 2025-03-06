@@ -50,7 +50,7 @@ function Start() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.SeconderyColor,
+    backgroundColor: Colors.white,
     paddingHorizontal: 20,
   },
   headerContainer: {

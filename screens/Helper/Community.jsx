@@ -45,9 +45,8 @@ const Community = () => {
   return (
     <View style={styles.container}>
 
-      <ForgetPassHeader title="Community" subTitle={subTitle} />
+      <ForgetPassHeader title="Community" subTitle={subTitle} community />
       <SearchInput />
-
 
       <FlatList
         data={ARTICLE_DATA}

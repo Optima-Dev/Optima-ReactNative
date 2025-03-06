@@ -28,7 +28,7 @@ const INSTRUCTIONS = {
     {
       step: 4,
       text: `In my people section you will be able to add your family and friends accounts so you can call them easily by saying out loud “Call person’s name “.`,
-      ImgSource: require("../assets/Images/family 1.png"),
+      ImgSource: require("../assets/Images/family 2.png"),
     }
   ],
   "helper": [
