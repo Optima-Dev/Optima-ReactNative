@@ -2,8 +2,9 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import Colors from "../../constants/Colors";
 import SettingsItem from "../../components/Terms/SettingsItem";
 import DetailItem from "../../components/Terms/DetailItem";
-
+import { useUser } from "../../store/UserContext";
 const Settings = ({ navigation }) => {
+  const { user } = useUser();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
@@ -11,8 +12,8 @@ const Settings = ({ navigation }) => {
       <Text style={styles.subTitle}>Account</Text>
       <Pressable onPress={() => navigation.navigate("Account")}>
         <SettingsItem
-          title='Sabrina Donnelly'
-          subTitle='Sabrina21d@gmail.com'
+          title={`${user.firstName} ${user.lastName}`}
+          subTitle={user.email}
           leftLogo={require("../../assets/Images/ion_person-outline.png")}
           rightLogo={require("../../assets/Images/Forward-Arrow.png")}
         />

@@ -2,6 +2,7 @@ import {
   Image,
   Pressable,
   StyleSheet,
+  ActivityIndicator,
   Text,
   View,
   Platform,
@@ -9,12 +10,15 @@ import {
 import MainHeader from "../../components/UI/MainHeader";
 import DetailItem from "../../components/Terms/DetailItem";
 import Colors from "../../constants/Colors";
+import { useUser } from "../../store/UserContext";
 
 const Home = ({ navigation }) => {
+  const { user } = useUser();
+
   return (
     <View style={styles.container}>
       <MainHeader
-        title='Hello, Sabrina Donnelly!'
+        title={`Hello, ${user.firstName} ${user.lastName}!`}
         subtitle='We would like to thank you for investing your precious time in helping people.'
         imageTitle
       />
@@ -111,5 +115,10 @@ const styles = StyleSheet.create({
     fontFamily: "SF UI Display",
     textAlign: "center",
     marginBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
