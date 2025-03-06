@@ -312,13 +312,13 @@ function HelperCommunityScreen() {
 }
 
 function Navigation() {
-  const { isAuthenticated, role } = useContext(AuthContext);
+  const { isAuthenticated, role, isNewUser } = useContext(AuthContext);
   let MyTab = <HelperTap />;
 
   if(role === 'seeker') {
     MyTab = (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='Instructions' component={Instructions} />
+        { isNewUser && <Stack.Screen name='Instructions' component={Instructions} /> }
         <Stack.Screen name='MyTabs' component={SeekerTap} />
       </Stack.Navigator>
     );
@@ -345,7 +345,7 @@ function Root() {
       setIsTryingLogin(true);
       const storedToken = await AsyncStorage.getItem("token");
       const storedRole = await AsyncStorage.getItem("role");
-
+      
       if (storedToken) {
         authenticate(storedToken);
         handleRole(storedRole);

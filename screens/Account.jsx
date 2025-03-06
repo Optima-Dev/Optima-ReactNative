@@ -4,13 +4,29 @@ import Colors from "../constants/Colors";
 import AuthInput from "../components/Auth/AuthInput";
 import { Ionicons } from "@expo/vector-icons";
 import PrimaryButton from "../components/UI/PrimaryButton";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../store/AuthContext";
 import { useUser } from "../store/UserContext";
+import { deleteUser } from "../util/HttpUser";
 
 const Account = ({ navigation }) => {
-  const { logout } = useContext(AuthContext);
+
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const { logout, token } = useContext(AuthContext);
   const { user } = useUser();
+
+
+  async function deleteAccount() {
+    setIsDeletingAccount(true);
+    try {
+      await deleteUser(token);
+      logout();
+      console.log("account deleted");
+    } catch (error) {
+      console.log("can't delete account", error);
+    }
+    setIsDeletingAccount(false);
+  }
 
   return (
     <View style={styles.container}>
@@ -54,6 +70,13 @@ const Account = ({ navigation }) => {
           onPress={logout}
           textColor='white'
           title='Logout'
+        />
+        <PrimaryButton
+          backgroundColor="#555555"
+          isLoading={isDeletingAccount}
+          onPress={deleteAccount}
+          textColor='white'
+          title='Delete Account'
         />
       </View>
     </View>

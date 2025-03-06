@@ -16,6 +16,8 @@ import PrimaryButton from "../UI/PrimaryButton";
 import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
+import { getUser } from "../../util/HttpUser";
+import { useUser } from "../../store/UserContext";
 import { login, signup, GoogleLogin } from "../../util/HttpAuth";
 import {
   validateEmail,
@@ -26,7 +28,8 @@ import {
 function AuthContent({ type }) {
   const navigation = useNavigation();
 
-  const { authenticate, role } = useContext(AuthContext);
+  const { authenticate, role, setNewUser } = useContext(AuthContext);
+  const { setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
@@ -45,28 +48,37 @@ function AuthContent({ type }) {
       validateEmail(form.email);
       validatePassword(form.password);
 
+      let response;
+
       if (type === "login") {
-        const response = await login(
+        response = await login(
           form.email.toLowerCase(),
           form.password,
           role
         );
-        authenticate(response.token, false);
-      } else {
+      }
+      else {
         validateName(form.firstName);
         validateName(form.lastName);
 
-        const response = await signup(
+        response = await signup(
           form.firstName,
           form.lastName,
           form.email.toLowerCase(),
           form.password,
           role
         );
-        authenticate(response.token, true);
+
       }
-    } catch (error) {
-      console.log("error in auth context", error);
+
+      authenticate(response.token);
+      setNewUser(true);
+      
+      const userData = await getUser(response.token);
+      setUser(userData.user);
+    }
+    catch (error) {
+      console.log("error in auth content", error);
       Alert.alert("Authentication Failed", error);
     }
     setIsLoading(false);

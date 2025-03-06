@@ -17,10 +17,11 @@ export async function getUser(token) {
 
 export async function updateUser(token, data) {
   try {
-    const response = await axios.put(API_URL, data, {
+    const response = await axios.put(API_URL, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      data,
     });
     return response.data;
   } catch (error) {
