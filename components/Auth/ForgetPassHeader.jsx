@@ -25,6 +25,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginVertical: 8,
     textAlign: "center",
-    width: 350,
+    lineHeight: 25,
   }
 });

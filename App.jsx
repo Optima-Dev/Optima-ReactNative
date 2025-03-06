@@ -41,6 +41,7 @@ import Community from "./screens/Helper/Community";
 import HelperSettings from "./screens/Helper/Settings";
 import Account from "./screens/Account";
 import Language from "./screens/Language";
+import Article from "./screens/Helper/Atricle";
 
 // importing components
 import BackButton from "./components/UI/BackButton";
@@ -245,7 +246,7 @@ function HelperTap() {
 
       <MyTabs.Screen
         name='Community'
-        component={Community}
+        component={HelperCommunityScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
@@ -294,6 +295,15 @@ function HelperHomeScreen() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='Home' component={Home} />
       <Stack.Screen name='Instructions' component={Instructions} />
+    </Stack.Navigator>
+  );
+}
+
+function HelperCommunityScreen() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Community' component={Community} />
+      <Stack.Screen name='Article' component={Article} />
     </Stack.Navigator>
   );
 }
