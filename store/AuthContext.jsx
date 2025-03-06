@@ -18,18 +18,18 @@ function AuthProvider({ children }) {
 
   function authenticate(token, isNewUser) {
     setToken(token);
-    setIsNewUser(isNewUser);
     AsyncStorage.setItem("token", token);
-    AsyncStorage.setItem("isNewUser", JSON.stringify(isNewUser));
+    // setIsNewUser(isNewUser);
+    // AsyncStorage.setItem("isNewUser", JSON.stringify(isNewUser));
   }
 
   function logout() {
     setToken(null);
     setIsNewUser(false);
     AsyncStorage.removeItem("token");
-    AsyncStorage.removeItem("isNewUser");
-    AsyncStorage.removeItem("role");
-    AsyncStorage.removeItem("@user");
+    // AsyncStorage.removeItem("role");
+    // AsyncStorage.removeItem("isNewUser");
+    // AsyncStorage.removeItem("@user");
   }
 
   function handleRole(role) {

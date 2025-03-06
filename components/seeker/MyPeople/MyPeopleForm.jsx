@@ -14,7 +14,7 @@ function MyPeopleForm({ onAddPerson, onHideForm }) {
 
   function handleSubmit() {
     if (peopleForm.firstName && peopleForm.lastName && peopleForm.email) {
-      console.log("Form submitted");
+      console.log("Form submitted in my people");
       onAddPerson(peopleForm);
     } else {
       Alert.alert("Error", "Please fill all the fields", [{ text: "Okay" }]);

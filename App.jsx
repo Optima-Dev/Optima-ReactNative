@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 // importing contexts
 import AuthProvider, { AuthContext } from "./store/AuthContext";
-import UserProvider from "./store/UserContext";
+import UserProvider, { useUser } from "./store/UserContext";
 
 // importing constants
 import Colors from "./constants/Colors";
@@ -47,6 +47,7 @@ import Article from "./screens/Helper/Atricle";
 // importing components
 import BackButton from "./components/UI/BackButton";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { getUser } from "./util/HttpUser";
 
 // creating stack navigator
 const Stack = createNativeStackNavigator();
@@ -283,7 +284,7 @@ function SettingsScreen() {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Settings' component={Settings} />
+      <Stack.Screen name='SettingsScreen' component={Settings} />
       <Stack.Screen name='Account' component={Account} />
       <Stack.Screen name='ForgetPassword' component={ForgetPassword} />
       <Stack.Screen name='Language' component={Language} />
@@ -295,7 +296,7 @@ function SettingsScreen() {
 function HelperHomeScreen() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Home' component={Home} />
+      <Stack.Screen name='HomeScreen' component={Home} />
       <Stack.Screen name='Instructions' component={Instructions} />
     </Stack.Navigator>
   );
@@ -304,7 +305,7 @@ function HelperHomeScreen() {
 function HelperCommunityScreen() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Community' component={Community} />
+      <Stack.Screen name='CommunityScreen' component={Community} />
       <Stack.Screen name='Article' component={Article} />
     </Stack.Navigator>
   );
@@ -337,18 +338,24 @@ function Navigation() {
 function Root() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
   const { authenticate, handleRole } = useContext(AuthContext);
+  const { setUser } = useUser();
 
   useEffect(() => {
     async function fetchToken() {
+      setIsTryingLogin(true);
       const storedToken = await AsyncStorage.getItem("token");
       const storedRole = await AsyncStorage.getItem("role");
 
       if (storedToken) {
         authenticate(storedToken);
-      }
-
-      if (storedRole) {
         handleRole(storedRole);
+
+        try { 
+          const userData = await getUser(storedToken);
+          setUser(userData.user);
+        } catch(error) {
+          console.error("Failed to fetch user data:", error);
+        }
       }
 
       setIsTryingLogin(false);

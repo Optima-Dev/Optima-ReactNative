@@ -66,7 +66,7 @@ function AuthContent({ type }) {
         authenticate(response.token, true);
       }
     } catch (error) {
-      console.log("error", error);
+      console.log("error in auth context", error);
       Alert.alert("Authentication Failed", error);
     }
     setIsLoading(false);
