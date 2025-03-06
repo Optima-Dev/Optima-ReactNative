@@ -2,7 +2,6 @@ import {
   Pressable,
   Text,
   StyleSheet,
-  Dimensions,
   ActivityIndicator,
   Platform,
 } from "react-native";

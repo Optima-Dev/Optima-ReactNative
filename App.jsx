@@ -11,8 +11,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
 
-// auth context
+// importing contexts
 import AuthProvider, { AuthContext } from "./store/AuthContext";
+import UserProvider from "./store/UserContext";
 
 // importing constants
 import Colors from "./constants/Colors";
@@ -347,7 +348,9 @@ function Root() {
 export default function App() {
   return (
     <AuthProvider>
-      <Root />
+      <UserProvider>
+        <Root />
+      </UserProvider>
     </AuthProvider>
   );
 }
