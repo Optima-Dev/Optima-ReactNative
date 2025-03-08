@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, StyleSheet, Text } from "react-native";
+import { View, Image, StyleSheet, Text, Platform } from "react-native";
 import Colors from "../../../constants/Colors";
 
 function HelpIcon({ isAskingForHelp }) {
@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "relative",
     zIndex: 1,
+    paddingTop: Platform.OS === "android" ? 50 : 0,
   },
   circle: {
     justifyContent: "center",

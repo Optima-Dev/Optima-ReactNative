@@ -58,6 +58,7 @@ function MyPeopleForm({ onAddPerson, onHideForm }) {
           title='Cancel'
           onPress={onHideForm}
           backgroundColor={"white"}
+          style={{borderWidth: 4}}
         />
       </View>
     </View>

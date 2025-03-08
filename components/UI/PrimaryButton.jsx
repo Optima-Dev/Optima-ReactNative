@@ -13,6 +13,7 @@ function PrimaryButton({
   title,
   backgroundColor,
   textColor,
+  style,
 }) {
   const buttonBackgroundColor =
     backgroundColor === "white" ? Colors.MainColor : backgroundColor;
@@ -23,6 +24,7 @@ function PrimaryButton({
         styles.button,
         pressed && styles.pressed,
         { backgroundColor, borderColor: buttonBackgroundColor, borderWidth: 2 },
+        style,
       ]}
       onPress={onPress}>
       <Text style={[styles.text, { color: textColor }]}>

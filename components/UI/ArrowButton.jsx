@@ -21,10 +21,9 @@ function ArrowButton({ text, type, onPress }) {
         getTypeStyle(),
       ]}
       onPress={onPress}>
-      <Text style={[styles.text , styles.secText]}>{text}</Text>
+      <Text style={[styles.text, styles.secText]}>{text}</Text>
       <Image
         source={require("../../assets/Images/Forward-Arrow.png")}
-        style={styles.icon}
       />
     </Pressable>
   );
@@ -51,7 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#CCF47D",
     width: Platform.OS === "android" ? 350 : "100%",
     height: Platform.OS === "android" ? 120 : null,
-    padding: Platform.OS === "android" ? null : 38,
+    padding: Platform.OS === "android" ? 15 : 38,
     borderRadius: 20,
     marginTop: 10,
   },
@@ -59,7 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     width: Platform.OS === "android" ? 350 : "100%",
     height: Platform.OS === "android" ? 120 : null,
-    padding: Platform.OS === "android" ? null : 38,
+    padding: Platform.OS === "android" ? 15 : 38,
     borderRadius: 20,
     marginTop: 10,
     borderWidth: 4,

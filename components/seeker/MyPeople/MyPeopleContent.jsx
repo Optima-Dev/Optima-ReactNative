@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: Platform.OS === "ios" ? 8 : 20,
     marginTop: Platform.OS === "ios" ? 0 : 40,
+    alignItems: Platform.OS === "android" ? "center" : null,
   },
 });
 

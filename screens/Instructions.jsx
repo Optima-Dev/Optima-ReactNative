@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, Platform } from "react-native";
 
 import MainHeader from "@/components/UI/MainHeader";
 import InstructionItem from "@/components/Instructions/InstructionItem";
@@ -108,6 +108,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     backgroundColor: 'white',
+    paddingTop: Platform.OS === 'android' ? 60 : 0,
+    // marginBottom: 20,
   },
   instructions: {
     flex: 1,
@@ -116,6 +118,7 @@ const styles = StyleSheet.create({
   instructionsContainer: {
     gap: 34,
     paddingVertical: 10,
+    paddingBottom: 30,
   },
   text: {
     color: Colors.black,
