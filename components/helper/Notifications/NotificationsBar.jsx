@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
 import Colors from "../../../constants/Colors";
 
 function NotificationsBar({ activeTab, setActiveTab }) {
@@ -41,7 +40,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.grey600,
     borderRadius: 25,
     padding: 4,
-    width: 360,
+    width: Platform.OS === "android" ? "360" : null,
     zIndex: 2,
   },
   tab: {

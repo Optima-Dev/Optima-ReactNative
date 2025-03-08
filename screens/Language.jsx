@@ -4,12 +4,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../constants/Colors";
 import BackButton from "../components/UI/BackButton";
+import SearchInput from "../components/UI/SearchInput";
 
 const LANGAUGES = [
   {
@@ -52,15 +52,7 @@ const Language = () => {
           <BackButton />
 
           <Text style={styles.title}>Language</Text>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name='search' size={28} color={"#8A8A8A"} />
-            <TextInput
-              placeholder='Search'
-              placeholderTextColor='#8A8A8A'
-              style={styles.input}
-            />
-          </View>
+          <SearchInput />
 
           <Text style={styles.subTitle}>
             We preferer to use your native language as main language to make it
@@ -115,19 +107,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 30,
     marginBottom: 30,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 14,
-    backgroundColor: "#F5F6F3",
-    borderRadius: 18,
-    gap: 10,
-    borderWidth: 2,
-    borderColor: Colors.MainColor,
-  },
-  input: {
-    flex: 1,
-    fontSize: 18,
   },
   subTitle: {
     color: "#50555C",

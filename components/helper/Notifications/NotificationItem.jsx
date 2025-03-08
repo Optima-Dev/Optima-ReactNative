@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 
 const NotificationItem = ({
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 1 },
     elevation: 2,
-    width: 360,
+    width: Platform.OS === "ios" ? '100%' : 360,
     marginBottom: 15,
   },
   profileContainer: {

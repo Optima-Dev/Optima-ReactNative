@@ -17,12 +17,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/Images/Main-Logo-blue 1.png",
         "backgroundColor": "white"
-      },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ],
-      "package": "com.anonymous.Optima"
+      }
     },
     "web": {
       "favicon": "./assets/Images/Main-Logo-blue 1.png"
@@ -37,10 +32,6 @@
         }
       ]
     ],
-    "extra": {
-      "eas": {
-        "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
-      }
-    }
+    "newArchEnabled": true
   }
 }

@@ -5,6 +5,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
@@ -69,7 +70,7 @@ function MyPeopleList({ people, onShowForm }) {
       <View style={styles.personContainer}>
         {/* Avatar */}
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{item.firstName.charAt(0)}</Text>
+          <Text style={styles.avatarText}>{item.firstName.charAt(0).toUpperCase()}</Text>
         </View>
 
         {/* Name */}
@@ -77,7 +78,7 @@ function MyPeopleList({ people, onShowForm }) {
 
         {/* Call Button */}
         <TouchableOpacity style={styles.callButton}>
-          <Ionicons name='call-outline' size={20} color='blue' />
+          <Ionicons name='call-outline' size={Platform.OS === 'ios' ? 28 : 20} color={Colors.MainColor} />
         </TouchableOpacity>
       </View>
     );
@@ -109,7 +110,8 @@ function MyPeopleList({ people, onShowForm }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 16,
+    padding: Platform.OS === "ios" ? 0 : 16,
+    marginVertical: Platform.OS === "ios" ? 22 : 0,
   },
   personContainer: {
     flexDirection: "row",

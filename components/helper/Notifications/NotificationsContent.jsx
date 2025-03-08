@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Platform } from "react-native";
 import NotificationsBar from "./NotificationsBar";
 import Colors from "../../../constants/Colors";
 import HelpRequests from "./HelpRequests";
@@ -26,14 +26,15 @@ function NotificationsContent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    alignItems: Platform.OS === "android" ? "center" : null,
+    paddingHorizontal: Platform.OS === "android" ? 0 : 20,
   },
   headerText: {
     marginBottom: 20,
-    textAlign: "center",
+    alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: Platform.OS === "android" ? 28 : 30,
     fontWeight: "bold",
     color: Colors.MainColor,
     fontWeight: "700",

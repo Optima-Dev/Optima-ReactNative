@@ -11,6 +11,8 @@ function AuthInput({
   onChangeText,
   keyboardType,
   isInvalid,
+  textStyle,
+  isDisabled,
 }) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(secureTextEntry);
 
@@ -26,13 +28,14 @@ function AuthInput({
         size={25}
       />
       <TextInput
-        style={[styles.input, isInvalid && styles.inputInvalid]}
+        style={[styles.input, isInvalid && styles.inputInvalid, textStyle]}
         placeholder={placeholder}
         secureTextEntry={isPasswordVisible}
         value={value}
         autoCapitalize='none'
         onChangeText={onChangeText}
         keyboardType={keyboardType}
+        editable={!isDisabled}
       />
       {secureTextEntry && (
         <Pressable onPress={togglePasswordVisibility}>

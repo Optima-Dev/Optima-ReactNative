@@ -14,7 +14,7 @@ export default Notifications;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    alignItems: Platform.OS === "android" ? "center" : null,
     backgroundColor: "white",
     paddingTop: Platform.OS === "android" ? 60 : 0,
   },

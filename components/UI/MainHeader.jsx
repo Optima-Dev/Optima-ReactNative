@@ -8,7 +8,6 @@ function MainHeader({
   noImage,
   imageTitle
 }) {
-  console.log(imageTitle, title, subtitle, login, noImage);
   return (
     <View style={styles.container}>
       {!noImage && (

@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import HelpIcon from "./HelpIcon";
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
@@ -22,11 +22,15 @@ function HelpRequests({ isAskingForHelp }) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginVertical: Platform.OS === "ios" ? 68 : null,
+  },
   askForHelpIcon: {
-    marginTop: 80,
+    flex: Platform.OS === "ios" ? 1 : null,
   },
   buttonContainer: {
-    marginTop: 80,
+    marginTop: Platform.OS === "ios" ? null : 80,
     zIndex: 2,
   },
 });

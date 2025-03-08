@@ -2,9 +2,9 @@ import { StyleSheet, Text, View, Platform } from "react-native";
 import CallButton from "../../components/seeker/CallButton";
 import Colors from "../../constants/Colors";
 import ArrowButton from "../../components/UI/ArrowButton";
-import { useNavigation } from "@react-navigation/native";
-const Support = () => {
-  const Navigation = useNavigation();
+
+
+const Support = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.TitleContainer}>
@@ -14,12 +14,12 @@ const Support = () => {
       <ArrowButton
         text={"MY VISION"}
         type={"MyVision"}
-        onPress={() => Navigation.navigate("MyVision")}
+        onPress={() => navigation.navigate("MyVision")}
       />
       <ArrowButton
         text={"MY PEOPLE"}
         type={"MyPeople"}
-        onPress={() => Navigation.navigate("MyPeople")}
+        onPress={() => navigation.navigate("MyPeople")}
       />
       <Text style={styles.regularText}>
         You can use your voice to control the whole app.
@@ -33,8 +33,9 @@ export default Support;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: "center",
+    paddingHorizontal: Platform.OS === "ios" ? 20 : null,
+    padding: Platform.OS === "ios" ? null : 20,
+    justifyContent: Platform.OS === "ios" ? null : "center",
     alignItems: "center",
     backgroundColor: Colors.white,
   },
@@ -49,9 +50,10 @@ const styles = StyleSheet.create({
     fontFamily: "Balgin-Regular",
   },
   regularText: {
-    fontSize: 13,
+    fontSize: Platform.OS === "ios" ? 18 : 13,
     color: "#616161",
-    // fontWeight: "300",
+    fontWeight: "300",
     textAlign: "center",
+    marginVertical: Platform.OS === "ios" ? 10 : 0,
   },
 });

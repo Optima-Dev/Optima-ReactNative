@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Platform } from "react-native";
 import NotificationsList from "./NotificationsList";
 
 function FriendRequests() {
@@ -12,7 +12,7 @@ function FriendRequests() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    alignItems: Platform.OS === "ios" ? null : 'center',
     backgroundColor: "white",
     paddingTop: 30,
   },

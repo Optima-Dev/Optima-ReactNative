@@ -16,16 +16,20 @@ export async function getUser(token) {
 }
 
 export async function updateUser(token, data) {
-  try {
-    const response = await axios.put(API_URL, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data?.message || "Invalid token";
+  const response = await fetch(API_URL, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update user data");
   }
+
+  return await response.json();
 }
 
 export async function deleteUser(token) {
