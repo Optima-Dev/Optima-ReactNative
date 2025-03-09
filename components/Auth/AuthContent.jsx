@@ -37,19 +37,23 @@ function AuthContent({ type }) {
     email: "",
     password: "",
   });
+  const [isError, setIsError] = useState({
+    email: null,
+    password: null,
+    firstName: null,
+    lastName: null,
+  });
 
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handleAuth() {
+  async function sendingForm() {
     setIsLoading(true);
+
     try {
-      validateEmail(form.email);
-      validatePassword(form.password);
-
       let response;
-
+      
       if (type === "login") {
         response = await login(
           form.email.toLowerCase(),
@@ -58,9 +62,6 @@ function AuthContent({ type }) {
         );
       }
       else {
-        validateName(form.firstName);
-        validateName(form.lastName);
-
         response = await signup(
           form.firstName,
           form.lastName,
@@ -68,7 +69,6 @@ function AuthContent({ type }) {
           form.password,
           role
         );
-
       }
 
       authenticate(response.token);
@@ -78,10 +78,31 @@ function AuthContent({ type }) {
       setUser(userData.user);
     }
     catch (error) {
-      console.log("error in auth content", error);
-      Alert.alert("Authentication Failed", error);
+      if(type === 'login') {
+        setIsError({ email: error, password: error });
+      } else {
+        setIsError({ email: error });
+      }
     }
+
     setIsLoading(false);
+  }
+
+  async function handleFormSubmission() {
+    let errorsList = {};
+    errorsList.email = validateEmail(form.email);
+    errorsList.password = validatePassword(form.password);
+    
+    if (type === "signup") {
+      errorsList.firstName = validateName(form.firstName);
+      errorsList.lastName = validateName(form.lastName);
+    }
+
+    if (Object.values(errorsList).some((value) => value)) {
+      setIsError(errorsList);
+    } else {
+      await sendingForm();
+    }
   }
 
   const swithModeHandler = () => {
@@ -95,7 +116,8 @@ function AuthContent({ type }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}>
+      style={styles.screen}
+    >
       <ScrollView style={styles.screen} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           {/* Auth Header */}
@@ -114,14 +136,14 @@ function AuthContent({ type }) {
           />
 
           {/* Auth Form */}
-          <AuthForm type={type} form={form} onChange={handleChange} />
+          <AuthForm type={type} form={form} onChange={handleChange} errors={isError} />
 
           {/* Confirm Button */}
           <View style={styles.ButtonContainer}>
             <PrimaryButton
               backgroundColor={Colors.MainColor}
               title={type === "login" ? "Login" : "Sign up"}
-              onPress={handleAuth}
+              onPress={handleFormSubmission}
               textColor='white'
               isLoading={isLoading}
             />

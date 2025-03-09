@@ -3,7 +3,7 @@ import AuthInput from "./AuthInput";
 import Colors from "../../constants/Colors";
 import { useNavigation } from "@react-navigation/native";
 
-function AuthForm({ type, form, onChange }) {
+function AuthForm({ type, form, onChange, errors }) {
   const navigation = useNavigation();
 
   return (
@@ -15,12 +15,14 @@ function AuthForm({ type, form, onChange }) {
             placeholder="First Name"
             value={form.firstName}
             onChangeText={(text) => onChange("firstName", text)}
+            error={errors.firstName}
           />
           <AuthInput
             icon="person-outline"
             placeholder="Last Name"
             value={form.lastName}
             onChangeText={(text) => onChange("lastName", text)}
+            error={errors.lastName}
           />
         </>
       )}
@@ -29,6 +31,7 @@ function AuthForm({ type, form, onChange }) {
         placeholder="example@gmail.com"
         value={form.email}
         onChangeText={(text) => onChange("email", text)}
+        error={errors.email}
       />
       <AuthInput
         icon="lock-closed-outline"
@@ -36,6 +39,7 @@ function AuthForm({ type, form, onChange }) {
         secureTextEntry={true}
         value={form.password}
         onChangeText={(text) => onChange("password", text)}
+        error={errors.password}
       />
       {type === "login" && (
         <Pressable

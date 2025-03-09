@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Platform } from "react-native";
+import { StyleSheet, Text, View, Platform, KeyboardAvoidingView, ScrollView } from "react-native";
 import BackButton from "../components/UI/BackButton";
 import Colors from "../constants/Colors";
 import AuthInput from "../components/Auth/AuthInput";
@@ -97,45 +97,52 @@ const Account = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <BackButton />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.container}>
+          <BackButton />
 
-      <Text style={styles.title}>Account</Text>
+          <Text style={styles.title}>Account</Text>
 
-      <View style={styles.logoContainer}>
-        <Ionicons name='person-outline' size={40} color={Colors.MainColor} />
-      </View>
+          <View style={styles.logoContainer}>
+            <Ionicons name='person-outline' size={40} color={Colors.MainColor} />
+          </View>
 
-      <View style={styles.authContainer}>
-        <AuthInput
-          icon='person-outline'
-          onChangeText={(value) => {
-            onChange("firstName", value);
-          }}
-          value={updatedUser.firstName}
-          textStyle={styles.mainInputText}
-          isDisabled={isDisabled}
-        />
-        <AuthInput
-          icon='person-outline'
-          onChangeText={(value) => {
-            onChange("lastName", value);
-          }}
-          value={updatedUser.lastName}
-          textStyle={styles.mainInputText}
-          isDisabled={isDisabled}
-        />
-        <AuthInput
-          icon='mail-outline'
-          onChangeText={() => {}}
-          value={user.email}
-          textStyle={{ color: Colors.MainColor, fontWeight: "300" }}
-          isDisabled={true}
-        />
-      </View>
+          <View style={styles.authContainer}>
+            <AuthInput
+              icon='person-outline'
+              onChangeText={(value) => {
+                onChange("firstName", value);
+              }}
+              value={updatedUser.firstName}
+              textStyle={styles.mainInputText}
+              isDisabled={isDisabled}
+            />
+            <AuthInput
+              icon='person-outline'
+              onChangeText={(value) => {
+                onChange("lastName", value);
+              }}
+              value={updatedUser.lastName}
+              textStyle={styles.mainInputText}
+              isDisabled={isDisabled}
+            />
+            <AuthInput
+              icon='mail-outline'
+              onChangeText={() => {}}
+              value={user.email}
+              textStyle={{ color: Colors.MainColor, fontWeight: "300" }}
+              isDisabled={true}
+            />
+          </View>
 
-      <View style={styles.buttonsContainer}>{buttons}</View>
-    </View>
+          <View style={styles.buttonsContainer}>{buttons}</View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
