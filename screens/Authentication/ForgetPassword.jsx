@@ -16,6 +16,7 @@ import { sendingCode, resetPassword, verifyCode } from "@/util/HttpAuth";
 import { validateEmail, validatePassword } from "../../util/Validation";
 import BackButton from "../../components/UI/BackButton";
 import { AuthContext } from "../../store/AuthContext";
+import Modal from "../../components/UI/Modal";
 
 
 const content = [
@@ -47,7 +48,12 @@ const ForgetPassword = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  function handleOnDone() {
+    navigation.goBack();
+    setIsModalOpen(prevState => !prevState);
+  }
 
   function handleInputChange(value) {
     const field = phases === 1 ? "email" : "newPassword";
@@ -103,11 +109,8 @@ const ForgetPassword = ({ navigation }) => {
         if(error) throw error;
         
         response = await resetPassword(inputText.email, inputText.newPassword);
-        navigation.navigate(isAuthenticated ? "Account" : "Login");
+        setIsModalOpen(prevState => !prevState);
       }
-
-      // showing modal instead
-      Alert.alert("Success", response);
     } catch(error) {
       setIsError(error);
     }
@@ -116,7 +119,10 @@ const ForgetPassword = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      { isAuthenticated && <BackButton /> }
+
+      <View style={{ marginBottom: 10 }}>
+        { isAuthenticated && <BackButton /> }
+      </View>
 
       <ForgetPassHeader
         title={content[phases - 1].title}
@@ -144,7 +150,7 @@ const ForgetPassword = ({ navigation }) => {
 
       {
         phases === 3 && (
-          <View style={[styles.instructionsContainer, isError && { marginTop: 10 }]}>
+          <View style={styles.instructionsContainer}>
             <Text style={styles.insetructionText}>Your password must include: </Text>
             <Text style={styles.insetructionText}>At least 8 charachters</Text>
             <Text style={styles.insetructionText}>At least one Number and one symbol</Text>
@@ -170,6 +176,14 @@ const ForgetPassword = ({ navigation }) => {
             isLoading={isLoading}
           />
         )}
+
+        <Modal
+          onPress={handleOnDone}
+          isModalOpen={isModalOpen}
+          logo={require("../../assets/Images/lets-icons_done-ring-round.png")}
+          subTitle="Your password was reset successfully."
+          buttonText="Done"
+        />
       </View>
     </View>
   );
@@ -181,12 +195,11 @@ export default ForgetPassword;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // rowGap: 20,
     backgroundColor: 'white',
     paddingHorizontal: 30,
-    // paddingVertical: 20,
   },
   instructionsContainer: {
+    marginTop: 10,
     paddingLeft: 10,
     marginRight: 'auto',
     gap: 5,
