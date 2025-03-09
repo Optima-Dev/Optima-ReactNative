@@ -45,6 +45,7 @@ const ForgetPassword = ({ navigation }) => {
   });
   const [phases, setPhases] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
 
 
@@ -81,32 +82,41 @@ const ForgetPassword = ({ navigation }) => {
       let response;
 
       if(phases === 1) {
-        validateEmail(inputText.email);
+        const error = validateEmail(inputText.email);
+        if(error) throw error;
 
         response = await sendingCode(inputText.email);
         setPhases(prev => prev + 1);
+        setIsError(false);
       }
       else if(phases === 2){
+        if(verificationCode.includes("")) {
+          throw "Please fill all the fields";
+        }
+
         response = await verifyCode(inputText.email, verificationCode.join(""));
         setPhases(prev => prev + 1);
+        setIsError(false);
       } 
       else {
-        validatePassword(inputText.newPassword);
+        const error = validatePassword(inputText.newPassword);
+        if(error) throw error;
         
         response = await resetPassword(inputText.email, inputText.newPassword);
         navigation.navigate(isAuthenticated ? "Account" : "Login");
       }
 
+      // showing modal instead
       Alert.alert("Success", response);
     } catch(error) {
-      Alert.alert("Error", error);
+      setIsError(error);
     }
     setIsLoading(false);
   }
 
   return (
     <View style={styles.container}>
-      <BackButton />
+      { isAuthenticated && <BackButton /> }
 
       <ForgetPassHeader
         title={content[phases - 1].title}
@@ -118,6 +128,7 @@ const ForgetPassword = ({ navigation }) => {
           <CodeInput
             verificationCode={verificationCode}
             handleCodeChange={handleCodeChange}
+            error={isError}
           />
         ) : (
           <AuthInput
@@ -126,13 +137,14 @@ const ForgetPassword = ({ navigation }) => {
             secureTextEntry={ phases === 3 }
             value={ phases === 1 ? inputText.email : inputText.newPassword }
             onChangeText={handleInputChange}
+            error={isError}
           />
         )
       }
 
       {
         phases === 3 && (
-          <View style={styles.instructionsContainer}>
+          <View style={[styles.instructionsContainer, isError && { marginTop: 10 }]}>
             <Text style={styles.insetructionText}>Your password must include: </Text>
             <Text style={styles.insetructionText}>At least 8 charachters</Text>
             <Text style={styles.insetructionText}>At least one Number and one symbol</Text>
@@ -140,23 +152,25 @@ const ForgetPassword = ({ navigation }) => {
         )
       }
 
-      <PrimaryButton
-        title={content[phases - 1].buttonText}
-        backgroundColor={Colors.MainColor}
-        onPress={handleSumbit}
-        textColor="white"
-        isLoading={isLoading}
-      />
-
-      { phases === 2 && (
+      <View style={{ marginTop: 24, gap: 14 }}>
         <PrimaryButton
-          title="Send Again"
-          backgroundColor='white'
-          onPress={sendCodeAgain}
-          textColor={Colors.MainColor}
+          title={content[phases - 1].buttonText}
+          backgroundColor={Colors.MainColor}
+          onPress={handleSumbit}
+          textColor="white"
           isLoading={isLoading}
         />
-      )}
+
+        { phases === 2 && (
+          <PrimaryButton
+            title="Send Again"
+            backgroundColor='white'
+            onPress={sendCodeAgain}
+            textColor={Colors.MainColor}
+            isLoading={isLoading}
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -167,7 +181,7 @@ export default ForgetPassword;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    rowGap: 20,
+    // rowGap: 20,
     backgroundColor: 'white',
     paddingHorizontal: 30,
     // paddingVertical: 20,
