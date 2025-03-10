@@ -3,7 +3,6 @@ import { View, StyleSheet, Alert, Platform } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
 import AuthInput from "../../Auth/AuthInput";
 import Colors from "../../../constants/Colors";
-import { validateEmail, validateName } from "../../../util/Validation";
 
 function MyPeopleForm({ onAddPerson, onHideForm }) {
   const [peopleForm, setPeopleForm] = useState({
@@ -14,8 +13,7 @@ function MyPeopleForm({ onAddPerson, onHideForm }) {
 
   function handleSubmit() {
     if (peopleForm.firstName && peopleForm.lastName && peopleForm.email) {
-      console.log("Form submitted in my people");
-      onAddPerson(peopleForm);
+      onAddPerson(peopleForm); // Pass the full object
     } else {
       Alert.alert("Error", "Please fill all the fields", [{ text: "Okay" }]);
     }
@@ -58,7 +56,7 @@ function MyPeopleForm({ onAddPerson, onHideForm }) {
           title='Cancel'
           onPress={onHideForm}
           backgroundColor={"white"}
-          style={{borderWidth: 4}}
+          style={{ borderWidth: 4 }}
         />
       </View>
     </View>

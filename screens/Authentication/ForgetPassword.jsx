@@ -12,7 +12,7 @@ import ForgetPassHeader from "@/components/Auth/ForgetPassHeader";
 import AuthInput from "@/components/Auth/AuthInput";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import CodeInput from "@/components/Auth/CodeInput";
-import { sendingCode, resetPassword, verifyCode } from "@/util/HttpAuth";
+import { sendingCode, resetPassword, verifyCode } from "@/util/AuthHttp";
 import { validateEmail, validatePassword } from "../../util/Validation";
 import BackButton from "../../components/UI/BackButton";
 import { AuthContext } from "../../store/AuthContext";

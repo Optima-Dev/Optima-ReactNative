@@ -3,15 +3,45 @@ import { View, StyleSheet, Platform } from "react-native";
 import ForgetPassHeader from "../../Auth/ForgetPassHeader";
 import MyPeopleForm from "./MyPeopleForm";
 import MyPeopleList from "./MyPeopleList";
-
+import { useFriends } from "../../../store/FriendsContext";
+import { sendFriendRequest } from "../../../util/FriendsHttp";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function MyPeopleContent() {
   const [showForm, setShowForm] = useState(false);
-  const [people, setPeople] = useState([]);
+  const { addFriend } = useFriends();
 
-  function handleAddPerson(person) {
-    setPeople((prevPeople) => [...prevPeople, person]);
-    setShowForm(false);
+  // console.log("Stored Token", storedToken);
+
+  async function handleAddPerson(personData) {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      // Prepare the request body matching the required format
+      const requestBody = {
+        customFirstName: personData.firstName,
+        customLastName: personData.lastName,
+        helperEmail: personData.email,
+      };
+
+      const response = await sendFriendRequest(token, requestBody);
+
+      addFriend({
+        id: response.userId || personData.email,
+        email: personData.email,
+        status: "pending",
+        firstName: personData.firstName,
+        lastName: personData.lastName,
+      });
+
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      alert(
+        "Failed to send friend request: " + (error.message || "Unknown error")
+      );
+    }
   }
 
   const Subtitle = !showForm
@@ -27,7 +57,7 @@ function MyPeopleContent() {
           onHideForm={() => setShowForm(false)}
         />
       ) : (
-        <MyPeopleList people={people} onShowForm={() => setShowForm(true)} />
+        <MyPeopleList onShowForm={() => setShowForm(true)} />
       )}
     </View>
   );

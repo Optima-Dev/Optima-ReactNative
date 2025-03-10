@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import {
   View,
   Text,
@@ -10,75 +10,34 @@ import {
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useFriends } from "../../../store/FriendsContext";
 
-const DUMMY_PEOPLE = [
-  {
-    id: 1,
-    firstName: "John",
-    lastName: "Doe",
-  },
-  {
-    id: 2,
-    firstName: "Jane",
-    lastName: "Doe",
-  },
-  {
-    id: 3,
-    firstName: "James",
-    lastName: "Doe",
-  },
-  {
-    id: 4,
-    firstName: "Jenny",
-    lastName: "Doe",
-  },
-  {
-    id: 5,
-    firstName: "Jared",
-    lastName: "Doe",
-  },
-  {
-    id: 6,
-    firstName: "Jesse",
-    lastName: "Doe",
-  },
-  {
-    id: 7,
-    firstName: "Jill",
-    lastName: "Doe",
-  },
-  {
-    id: 8,
-    firstName: "Jack",
-    lastName: "Doe",
-  },
-  {
-    id: 9,
-    firstName: "Jasmine",
-    lastName: "Doe",
-  },
-  {
-    id: 10,
-    firstName: "Jasper",
-    lastName: "Doe",
-  },
-];
+function MyPeopleList({ onShowForm }) {
+  const { friends } = useFriends();
 
-function MyPeopleList({ people, onShowForm }) {
-  function renderItem({ item }) {
+  console.log(friends);
+
+  function renderFriend({ friend }) {
     return (
       <View style={styles.personContainer}>
         {/* Avatar */}
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{item.firstName.charAt(0).toUpperCase()}</Text>
+          <Text style={styles.avatarText}>
+            {friend.firstName.charAt(0).toUpperCase()}
+          </Text>
         </View>
 
         {/* Name */}
-        <Text style={styles.name}>{`${item.firstName} ${item.lastName}`}</Text>
+        <Text
+          style={styles.name}>{`${friend.firstName} ${friend.lastName}`}</Text>
 
         {/* Call Button */}
         <TouchableOpacity style={styles.callButton}>
-          <Ionicons name='call-outline' size={Platform.OS === 'ios' ? 28 : 20} color={Colors.MainColor} />
+          <Ionicons
+            name='call-outline'
+            size={Platform.OS === "ios" ? 28 : 20}
+            color={Colors.MainColor}
+          />
         </TouchableOpacity>
       </View>
     );
@@ -91,11 +50,11 @@ function MyPeopleList({ people, onShowForm }) {
         backgroundColor={Colors.MainColor}
         textColor={"white"}
       />
-      {people.length > 0 ? (
+      {friends.length > 0 ? (
         <FlatList
-          data={people}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={renderItem}
+          data={friends}
+          keyExtractor={(friend, index) => index.toString()}
+          renderItem={renderFriend}
           style={{ marginTop: 15 }}
         />
       ) : (

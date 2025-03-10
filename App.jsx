@@ -11,10 +11,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
 
-// importing contexts
-import AuthProvider, { AuthContext } from "./store/AuthContext";
-import UserProvider, { useUser } from "./store/UserContext";
-
 // importing constants
 import Colors from "./constants/Colors";
 
@@ -47,7 +43,15 @@ import Article from "./screens/Helper/Atricle";
 // importing components
 import BackButton from "./components/UI/BackButton";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { getUser } from "./util/HttpUser";
+
+// importing contexts
+import AuthProvider, { AuthContext } from "./store/AuthContext";
+import UserProvider, { useUser } from "./store/UserContext";
+import FriendsProvider, { useFriends } from "./store/FriendsContext";
+
+// importing util functions
+import { getUser } from "./util/UserHttp";
+import { getFriends } from "./util/FriendsHttp";
 
 // creating stack navigator
 const Stack = createNativeStackNavigator();
@@ -315,10 +319,12 @@ function Navigation() {
   const { isAuthenticated, role, isNewUser } = useContext(AuthContext);
   let MyTab = <HelperTap />;
 
-  if(role === 'seeker') {
+  if (role === "seeker") {
     MyTab = (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        { isNewUser && <Stack.Screen name='Instructions' component={Instructions} /> }
+        {isNewUser && (
+          <Stack.Screen name='Instructions' component={Instructions} />
+        )}
         <Stack.Screen name='MyTabs' component={SeekerTap} />
       </Stack.Navigator>
     );
@@ -338,6 +344,7 @@ function Navigation() {
 function Root() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
   const { authenticate, handleRole } = useContext(AuthContext);
+  const { setFriends } = useFriends();
   const { setUser } = useUser();
 
   useEffect(() => {
@@ -345,16 +352,23 @@ function Root() {
       setIsTryingLogin(true);
       const storedToken = await AsyncStorage.getItem("token");
       const storedRole = await AsyncStorage.getItem("role");
-      
+
       if (storedToken) {
         authenticate(storedToken);
         handleRole(storedRole);
 
-        try { 
+        try {
           const userData = await getUser(storedToken);
           setUser(userData.user);
-        } catch(error) {
+        } catch (error) {
           console.error("Failed to fetch user data:", error);
+        }
+
+        try {
+          const friendsData = await getFriends(storedToken);
+          setFriends(friendsData.friends);
+        } catch (error) {
+          console.error("Failed to fetch friends data:", error);
         }
       }
 
@@ -374,9 +388,11 @@ function Root() {
 export default function App() {
   return (
     <AuthProvider>
-      <UserProvider>
-        <Root />
-      </UserProvider>
+      <FriendsProvider>
+        <UserProvider>
+          <Root />
+        </UserProvider>
+      </FriendsProvider>
     </AuthProvider>
   );
 }

@@ -1,14 +1,21 @@
-import { StyleSheet, Text, View, Platform, KeyboardAvoidingView, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
 import BackButton from "../components/UI/BackButton";
 import Colors from "../constants/Colors";
 import AuthInput from "../components/Auth/AuthInput";
 import { Ionicons } from "@expo/vector-icons";
 import PrimaryButton from "../components/UI/PrimaryButton";
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useCallback } from "react";
 import { AuthContext } from "../store/AuthContext";
 import { useUser } from "../store/UserContext";
-import { deleteUser, updateUser } from "../util/HttpUser";
-import { useDebounce } from "../hooks/useDebounce";
+import { deleteUser, updateUser } from "../util/UserHttp";
+// import { useDebounce } from "../hooks/useDebounce";
 
 const Account = ({ navigation }) => {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
@@ -99,8 +106,7 @@ const Account = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
+      style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           <BackButton />
@@ -108,7 +114,11 @@ const Account = ({ navigation }) => {
           <Text style={styles.title}>Account</Text>
 
           <View style={styles.logoContainer}>
-            <Ionicons name='person-outline' size={40} color={Colors.MainColor} />
+            <Ionicons
+              name='person-outline'
+              size={40}
+              color={Colors.MainColor}
+            />
           </View>
 
           <View style={styles.authContainer}>

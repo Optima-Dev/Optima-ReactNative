@@ -16,9 +16,9 @@ import PrimaryButton from "../UI/PrimaryButton";
 import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
-import { getUser } from "../../util/HttpUser";
+import { getUser } from "../../util/UserHttp";
 import { useUser } from "../../store/UserContext";
-import { login, signup, GoogleLogin } from "../../util/HttpAuth";
+import { login, signup, GoogleLogin } from "../../util/AuthHttp";
 import {
   validateEmail,
   validateName,
@@ -53,15 +53,10 @@ function AuthContent({ type }) {
 
     try {
       let response;
-      
+
       if (type === "login") {
-        response = await login(
-          form.email.toLowerCase(),
-          form.password,
-          role
-        );
-      }
-      else {
+        response = await login(form.email.toLowerCase(), form.password, role);
+      } else {
         response = await signup(
           form.firstName,
           form.lastName,
@@ -73,12 +68,11 @@ function AuthContent({ type }) {
 
       authenticate(response.token);
       setNewUser(true);
-      
+
       const userData = await getUser(response.token);
       setUser(userData.user);
-    }
-    catch (error) {
-      if(type === 'login') {
+    } catch (error) {
+      if (type === "login") {
         setIsError({ email: error, password: error });
       } else {
         setIsError({ email: error });
@@ -92,7 +86,7 @@ function AuthContent({ type }) {
     let errorsList = {};
     errorsList.email = validateEmail(form.email);
     errorsList.password = validatePassword(form.password);
-    
+
     if (type === "signup") {
       errorsList.firstName = validateName(form.firstName);
       errorsList.lastName = validateName(form.lastName);
@@ -116,8 +110,7 @@ function AuthContent({ type }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}
-    >
+      style={styles.screen}>
       <ScrollView style={styles.screen} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           {/* Auth Header */}
@@ -136,7 +129,12 @@ function AuthContent({ type }) {
           />
 
           {/* Auth Form */}
-          <AuthForm type={type} form={form} onChange={handleChange} errors={isError} />
+          <AuthForm
+            type={type}
+            form={form}
+            onChange={handleChange}
+            errors={isError}
+          />
 
           {/* Confirm Button */}
           <View style={styles.ButtonContainer}>
