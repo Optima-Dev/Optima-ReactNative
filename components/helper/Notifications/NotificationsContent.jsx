@@ -6,7 +6,7 @@ import HelpRequests from "./HelpRequests";
 import FriendRequests from "./FriendRequests";
 
 function NotificationsContent() {
-  const [isAskingForHelp, setIsAskingForHelp] = useState(true);
+  const [isAskingForHelp, setIsAskingForHelp] = useState(false);
   const [activeTab, setActiveTab] = useState("Help Requests");
   return (
     <View style={styles.container}>
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     marginBottom: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: Platform.OS === "android" ? 28 : 30,

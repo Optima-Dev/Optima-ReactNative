@@ -307,7 +307,6 @@ function SettingsScreen() {
 function HelperHomeScreen() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='Splash' component={Splash} />
       <Stack.Screen name='HomeScreen' component={Home} />
       <Stack.Screen name='Instructions' component={Instructions} />
     </Stack.Navigator>
@@ -372,7 +371,7 @@ function Root() {
           const userData = await getUser(storedToken);
           setUser(userData.user);
 
-          if(storedRole === 'seeker') {
+          if (storedRole === "seeker") {
             const friendsData = await getFriends(storedToken);
             setFriends(friendsData.friends);
           } else {

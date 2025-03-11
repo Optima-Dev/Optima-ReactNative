@@ -7,7 +7,6 @@ import { editFriend, removeFriend } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
 import { useFriends } from "../../../store/FriendsContext";
 
-
 const FriendList = ({ customFirstName, customLastName, user }) => {
   const [showModal, setShowModal] = useState(false);
 
@@ -19,7 +18,8 @@ const FriendList = ({ customFirstName, customLastName, user }) => {
     await removeFriend(token, friendId);
   }
 
-  async function handleEditUser(friendId, data) { // data is an object containing customFirstName and customLastName
+  async function handleEditUser(friendId, data) {
+    // data is an object containing customFirstName and customLastName
     await editFriend(friendId, data);
   }
 
@@ -28,38 +28,29 @@ const FriendList = ({ customFirstName, customLastName, user }) => {
       {/* Avatar */}
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
-          {customFirstName.charAt(0).toUpperCase()}
+          {user.firstName.charAt(0).toUpperCase()}
         </Text>
       </View>
 
       {/* Name */}
-      <Text style={styles.name}>
-        {`${customFirstName} ${customLastName}`}
-      </Text>
+      <Text style={styles.name}>{`${user.firstName} ${user.lastName}`}</Text>
 
       {/* Call Button */}
       <TouchableOpacity
         style={styles.callButton}
-        onPress={() => setShowModal(true)}
-      >
-        <Octicons
-          name="pencil"
-          size={24}
-          color={Colors.MainColor}
-        />
+        onPress={() => setShowModal(true)}>
+        <Octicons name='pencil' size={24} color={Colors.MainColor} />
       </TouchableOpacity>
 
       <EditFriendsModal
         visible={showModal}
         onChangeMode={(mode) => setShowModal(mode)}
-        customFirstName={customFirstName}
-        customLastName={customLastName}
         user={user}
         onRemove={handleRemoveUser}
       />
     </View>
   );
-}
+};
 
 export default FriendList;
 
