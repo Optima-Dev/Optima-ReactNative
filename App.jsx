@@ -136,15 +136,20 @@ function SeekerTap() {
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: Colors.MainColor,
         headerShown: false,
+        backgroundColor: "white",
         tabBarStyle: {
-          marginBottom: Platform.OS === "ios" ? 0 : 10,
+          // paddingBottom: Platform.OS === "ios" ? 0 : 10,
+          height: Platform.OS === "ios" ? 0 : 60,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          borderRadius: 20,
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
-          <Text style={{ fontSize: 14, color }}>{route.name}</Text>
+          <Text style={{ fontSize: 14, color, marginBottom: 20 }}>
+            {route.name}
+          </Text>
         ),
       })}>
       <MyTabs.Screen
@@ -212,12 +217,14 @@ function HelperTap() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: Colors.MainColor,
+        backgroundColor: "white",
         tabBarStyle: {
-          marginBottom: Platform.OS === "ios" ? 0 : 10,
+          height: Platform.OS === "ios" ? 0 : 60,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          borderRadius: 20,
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
           <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -300,6 +307,7 @@ function SettingsScreen() {
 function HelperHomeScreen() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='Splash' component={Splash} />
       <Stack.Screen name='HomeScreen' component={Home} />
       <Stack.Screen name='Instructions' component={Instructions} />
     </Stack.Navigator>
@@ -368,7 +376,7 @@ function Root() {
         }
 
         try {
-          if(storedRole === 'seeker') {
+          if (storedRole === "seeker") {
             const friendsData = await getFriends(storedToken);
             setFriends(friendsData.friends);
           } else {

@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Image,
 } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
@@ -16,7 +17,7 @@ function MyPeopleList({ onShowForm }) {
 
   function renderFriend({ item }) {
     const { customFirstName, customLastName } = item;
-    
+
     return (
       <View style={styles.personContainer}>
         {/* Avatar */}
@@ -33,10 +34,8 @@ function MyPeopleList({ onShowForm }) {
 
         {/* Call Button */}
         <TouchableOpacity style={styles.callButton}>
-          <Ionicons
-            name='call-outline'
-            size={Platform.OS === "ios" ? 28 : 20}
-            color={Colors.MainColor}
+          <Image
+            source={require("../../../assets/Images/line-md_edit-filled.png")}
           />
         </TouchableOpacity>
       </View>
