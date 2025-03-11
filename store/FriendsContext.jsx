@@ -15,9 +15,9 @@ function FriendsProvider({ children }) {
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
 
-  const removeFriend = (userId) => {
+  const removeFriend = (friendId) => {
     setFriends((prevFriends) =>
-      prevFriends.filter((friend) => friend.id !== userId)
+      prevFriends.filter((friend) => friend.id !== friendId)
     );
   };
 

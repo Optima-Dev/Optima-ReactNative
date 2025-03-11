@@ -371,12 +371,8 @@ function Root() {
         try {
           const userData = await getUser(storedToken);
           setUser(userData.user);
-        } catch (error) {
-          alert(error);
-        }
 
-        try {
-          if (storedRole === "seeker") {
+          if(storedRole === 'seeker') {
             const friendsData = await getFriends(storedToken);
             setFriends(friendsData.friends);
           } else {
