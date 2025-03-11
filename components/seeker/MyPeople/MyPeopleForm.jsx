@@ -4,7 +4,7 @@ import PrimaryButton from "../../UI/PrimaryButton";
 import AuthInput from "../../Auth/AuthInput";
 import Colors from "../../../constants/Colors";
 
-function MyPeopleForm({ onAddPerson, onHideForm }) {
+function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
   const [peopleForm, setPeopleForm] = useState({
     firstName: "",
     lastName: "",
@@ -51,6 +51,7 @@ function MyPeopleForm({ onAddPerson, onHideForm }) {
           onPress={handleSubmit}
           backgroundColor={Colors.MainColor}
           textColor={"white"}
+          isLoading={isLoading}
         />
         <PrimaryButton
           title='Cancel'

@@ -45,11 +45,11 @@ export async function sendFriendRequest(token, requestData) {
   }
 }
 
-export async function acceptFriendRequest(token, userId) {
+export async function acceptFriendRequest(token, friendRequestId) {
   try {
     const response = await axios.post(
-      `${API_URL}/requests/accept`,
-      { userId },
+      `${API_URL}/accept`,
+      { friendRequestId },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,11 +62,11 @@ export async function acceptFriendRequest(token, userId) {
   }
 }
 
-export async function rejectFriendRequest(token, userId) {
+export async function rejectFriendRequest(token, friendRequestId) {
   try {
     const response = await axios.post(
-      `${API_URL}/requests/reject`,
-      { userId },
+      `${API_URL}/reject`,
+      { friendRequestId },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -79,27 +79,34 @@ export async function rejectFriendRequest(token, userId) {
   }
 }
 
-export async function removeFriend(token, userId) {
+export async function removeFriend(token, friendId) {
   try {
-    const response = await axios.delete(`${API_URL}/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.post(
+      `${API_URL}/remove`,
+      { friendId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data?.message || "Invalid token";
   }
 }
 
-export async function editFriend(token, userId, data) {
+export async function editFriend(token, data) {
   try {
-    const response = await axios.put(`${API_URL}/${userId}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    const response = await axios.put(
+      `${API_URL}/edit`,
+      { ...data },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
   } catch (error) {
     throw error.response?.data?.message || "Invalid token";
   }

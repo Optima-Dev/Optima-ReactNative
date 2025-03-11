@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
+
 
 const NotificationItem = ({
   profileImage,
@@ -9,8 +10,9 @@ const NotificationItem = ({
   type,
   onAccept,
   onDecline,
+  status: statusType,
 }) => {
-  const [status, setStatus] = useState(null); // null, 'accepted', 'declined'
+  const [status, setStatus] = useState(statusType); // null, 'accepted', 'declined'
   const AcceptStyle =
     status === "accepted" ? styles.acceptedButton : styles.acceptButton;
   const DeclineStyle =
@@ -18,16 +20,12 @@ const NotificationItem = ({
 
   const handleAccept = () => {
     setStatus("accepted");
-    if (onAccept) {
-      onAccept();
-    }
+    onAccept();
   };
 
   const handleDecline = () => {
     setStatus("declined");
-    if (onDecline) {
-      onDecline();
-    }
+    onDecline();
   };
 
   return (

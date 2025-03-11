@@ -1,5 +1,5 @@
 // importing react hooks
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // importing navigation
 import { Platform, SafeAreaView, StyleSheet, Text } from "react-native";
@@ -45,13 +45,13 @@ import BackButton from "./components/UI/BackButton";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 // importing contexts
-import AuthProvider, { AuthContext } from "./store/AuthContext";
+import AuthProvider, { useAuth } from "./store/AuthContext";
 import UserProvider, { useUser } from "./store/UserContext";
 import FriendsProvider, { useFriends } from "./store/FriendsContext";
 
 // importing util functions
 import { getUser } from "./util/UserHttp";
-import { getFriends } from "./util/FriendsHttp";
+import { getFriendRequests, getFriends } from "./util/FriendsHttp";
 
 // creating stack navigator
 const Stack = createNativeStackNavigator();
@@ -283,7 +283,7 @@ function HelperTap() {
 }
 
 function SettingsScreen() {
-  const { role } = useContext(AuthContext);
+  const { role } = useAuth();
   const Settings = role === "helper" ? HelperSettings : SekeerSettings;
 
   return (
@@ -316,7 +316,7 @@ function HelperCommunityScreen() {
 }
 
 function Navigation() {
-  const { isAuthenticated, role, isNewUser } = useContext(AuthContext);
+  const { isAuthenticated, role, isNewUser } = useAuth();
   let MyTab = <HelperTap />;
 
   if (role === "seeker") {
@@ -343,15 +343,18 @@ function Navigation() {
 
 function Root() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const { authenticate, handleRole } = useContext(AuthContext);
-  const { setFriends } = useFriends();
+
+  const { authenticate, handleRole, token } = useAuth();
   const { setUser } = useUser();
+  const { setFriends, setRequests } = useFriends();
 
   useEffect(() => {
     async function fetchToken() {
       setIsTryingLogin(true);
       const storedToken = await AsyncStorage.getItem("token");
       const storedRole = await AsyncStorage.getItem("role");
+
+      console.log(storedRole, "  ", storedToken);
 
       if (storedToken) {
         authenticate(storedToken);
@@ -361,14 +364,19 @@ function Root() {
           const userData = await getUser(storedToken);
           setUser(userData.user);
         } catch (error) {
-          console.error("Failed to fetch user data:", error);
+          alert(error);
         }
 
         try {
-          const friendsData = await getFriends(storedToken);
-          setFriends(friendsData.friends);
+          if(storedRole === 'seeker') {
+            const friendsData = await getFriends(storedToken);
+            setFriends(friendsData.friends);
+          } else {
+            const friendRequests = await getFriendRequests(storedToken);
+            setRequests(friendRequests.friendRequests);
+          }
         } catch (error) {
-          console.error("Failed to fetch friends data:", error);
+          alert(error);
         }
       }
 
@@ -376,7 +384,8 @@ function Root() {
     }
 
     fetchToken();
-  }, []);
+  }, [token]);
+  // we add token as a dependency here to reRender the data becasue when we signin then logout then signin again with different account it stay with the data which belong to the previous account
 
   if (isTryingLogin) {
     return <AppLoading />;

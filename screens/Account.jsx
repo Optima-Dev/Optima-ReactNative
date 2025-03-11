@@ -29,7 +29,6 @@ const Account = ({ navigation }) => {
     email: user?.email || "",
   });
 
-  console.log(updatedUser);
 
   const onChange = useCallback((name, value) => {
     setUpdatedUser((prev) => ({ ...prev, [name]: value }));

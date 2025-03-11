@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   View,
   Text,
@@ -15,21 +14,22 @@ import { useFriends } from "../../../store/FriendsContext";
 function MyPeopleList({ onShowForm }) {
   const { friends } = useFriends();
 
-  console.log(friends);
-
-  function renderFriend({ friend }) {
+  function renderFriend({ item }) {
+    const { customFirstName, customLastName } = item;
+    
     return (
       <View style={styles.personContainer}>
         {/* Avatar */}
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
-            {friend.firstName.charAt(0).toUpperCase()}
+            {customFirstName.charAt(0).toUpperCase()}
           </Text>
         </View>
 
         {/* Name */}
-        <Text
-          style={styles.name}>{`${friend.firstName} ${friend.lastName}`}</Text>
+        <Text style={styles.name}>
+          {`${customFirstName} ${customLastName}`}
+        </Text>
 
         {/* Call Button */}
         <TouchableOpacity style={styles.callButton}>
@@ -42,6 +42,7 @@ function MyPeopleList({ onShowForm }) {
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
       <PrimaryButton
@@ -53,7 +54,7 @@ function MyPeopleList({ onShowForm }) {
       {friends.length > 0 ? (
         <FlatList
           data={friends}
-          keyExtractor={(friend, index) => index.toString()}
+          keyExtractor={(item) => item.user._id}
           renderItem={renderFriend}
           style={{ marginTop: 15 }}
         />

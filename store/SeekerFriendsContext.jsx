@@ -2,18 +2,17 @@ import { createContext, useContext, useState } from "react";
 
 export const FriendsContext = createContext({
   friends: [],
-  requests: [],
-  setRequests: () => {},
   setFriends: () => {},
   removeFriend: () => {},
   editFriend: () => {},
-  acceptFriendRequest: () => {},
-  rejectFriendRequest: () => {},
 });
 
 function FriendsProvider({ children }) {
   const [friends, setFriends] = useState([]);
-  const [requests, setRequests] = useState([]);
+
+  const updateFriends = (newFriends) => {
+    setFriends(newFriends);
+  };
 
   const removeFriend = (userId) => {
     setFriends((prevFriends) =>
@@ -29,31 +28,11 @@ function FriendsProvider({ children }) {
     );
   };
 
-  const acceptFriendRequest = (requestId) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((request) => (
-        request._id === requestId ? { ...request, status: "accepted" } : request
-      )
-    ));
-  };
-
-  const rejectFriendRequest = (requestId) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request._id === requestId ? { ...request, status: "declined" } : request
-      )
-    );
-  };
-
   const value = {
     friends,
-    requests,
-    setFriends,
-    setRequests,
+    setFriends: updateFriends,
     removeFriend,
     editFriend,
-    acceptFriendRequest,
-    rejectFriendRequest,
   };
 
   return (
