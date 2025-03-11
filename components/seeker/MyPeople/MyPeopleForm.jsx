@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { View, StyleSheet, Alert, Platform } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
-import AuthInput from "../../Auth/AuthInput";
 import Colors from "../../../constants/Colors";
+import MyPeopleFormInputs from "./MyPeopleFormInputs";
 
 function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
   const [peopleForm, setPeopleForm] = useState({
@@ -11,40 +11,27 @@ function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
     email: "",
   });
 
+  function handleChangeInputs(key, value) {
+    setPeopleForm((prevState => {
+      return {
+        ...prevState,
+        [key]: value,
+      }
+    }));
+  }
+
   function handleSubmit() {
     if (peopleForm.firstName && peopleForm.lastName && peopleForm.email) {
       onAddPerson(peopleForm); // Pass the full object
     } else {
-      Alert.alert("Error", "Please fill all the fields", [{ text: "Okay" }]);
+      alert("Error", "Please fill all the fields", [{ text: "Okay" }]);
     }
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.InputsContainer}>
-        <AuthInput
-          placeholder='First Name'
-          value={peopleForm.firstName}
-          onChangeText={(text) =>
-            setPeopleForm({ ...peopleForm, firstName: text })
-          }
-          icon={"person-outline"}
-        />
-        <AuthInput
-          placeholder='Last Name'
-          value={peopleForm.lastName}
-          onChangeText={(text) =>
-            setPeopleForm({ ...peopleForm, lastName: text })
-          }
-          icon={"person-outline"}
-        />
-        <AuthInput
-          placeholder='Email'
-          value={peopleForm.email}
-          onChangeText={(text) => setPeopleForm({ ...peopleForm, email: text })}
-          icon={"mail-outline"}
-        />
-      </View>
+      <MyPeopleFormInputs form={peopleForm} onChange={handleChangeInputs} />
+
       <View style={styles.ButtonsContainer}>
         <PrimaryButton
           title='Add Member'
