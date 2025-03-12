@@ -138,18 +138,13 @@ function SeekerTap() {
         headerShown: false,
         backgroundColor: "white",
         tabBarStyle: {
-          // paddingBottom: Platform.OS === "ios" ? 0 : 10,
-          height: Platform.OS === "ios" ? 0 : 60,
+          marginBottom: Platform.OS === "ios" ? 0 : 10,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          borderTopEndRadius: 20,
-          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
-          <Text style={{ fontSize: 14, color, marginBottom: 20 }}>
-            {route.name}
-          </Text>
+          <Text style={{ fontSize: 14, color }}>{route.name}</Text>
         ),
       })}>
       <MyTabs.Screen
@@ -217,14 +212,11 @@ function HelperTap() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: Colors.MainColor,
-        backgroundColor: "white",
         tabBarStyle: {
-          height: Platform.OS === "ios" ? 0 : 60,
+          marginBottom: Platform.OS === "ios" ? 0 : 10,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          borderTopEndRadius: 20,
-          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
           <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -371,7 +363,7 @@ function Root() {
           const userData = await getUser(storedToken);
           setUser(userData.user);
 
-          if (storedRole === "seeker") {
+          if (storedRole === 'seeker') {
             const friendsData = await getFriends(storedToken);
             setFriends(friendsData.friends);
           } else {

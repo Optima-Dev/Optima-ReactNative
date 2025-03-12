@@ -7,7 +7,7 @@ import { editFriend, removeFriend } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
 import { useFriends } from "../../../store/FriendsContext";
 
-const FriendList = ({ user }) => {
+const FriendList = ({ user, customFirstName, customLastName }) => {
   const [showModal, setShowModal] = useState(false);
 
   const { token } = useAuth();
@@ -33,21 +33,17 @@ const FriendList = ({ user }) => {
     }
   }
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <View style={styles.personContainer}>
       {/* Avatar */}
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
-          {user.firstName.charAt(0).toUpperCase()}
+          {customFirstName[0].toUpperCase()}
         </Text>
       </View>
 
       {/* Name */}
-      <Text style={styles.name}>{`${user.firstName} ${user.lastName}`}</Text>
+      <Text style={styles.name}>{`${customFirstName} ${customLastName}`}</Text>
 
       {/* Call Button */}
       <TouchableOpacity
@@ -60,6 +56,8 @@ const FriendList = ({ user }) => {
         visible={showModal}
         onChangeMode={(mode) => setShowModal(mode)}
         user={user}
+        customFirstName={customFirstName}
+        customLastName={customLastName}
         onRemove={handleRemoveUser}
         onEdit={handleEditUser}
       />

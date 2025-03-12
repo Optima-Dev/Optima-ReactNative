@@ -14,6 +14,8 @@ import PrimaryButton from "../../UI/PrimaryButton";
 const EditFriendsModal = ({
   visible,
   user,
+  customFirstName,
+  customLastName,
   onChangeMode,
   onRemove,
   onEdit,
@@ -21,8 +23,8 @@ const EditFriendsModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editFriendData, setEditFriendData] = useState({
-    firstName: user.firstName,
-    lastName: user.lastName,
+    firstName: customFirstName,
+    lastName: customLastName,
     email: user.email,
   });
 
@@ -37,31 +39,18 @@ const EditFriendsModal = ({
 
   async function handleRemoveFriend() {
     setIsLoading(true);
-    try {
-      await onRemove(user._id);
-      console.log("Friend removed");
-      onChangeMode(false);
-    } catch (error) {
-      console.error("Error removing friend:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    await onRemove(user._id);
+    setIsLoading(false);
   }
 
   async function handleEditFriend() {
     setIsEditing(true);
-    try {
-      const bodyRequest = {
-        customFirstName: editFriendData.firstName,
-        customLastName: editFriendData.lastName,
-      };
-      await onEdit(user._id, bodyRequest);
-      onChangeMode(false);
-    } catch (error) {
-      console.error("Error editing friend:", error);
-    } finally {
-      setIsEditing(false);
-    }
+    const bodyRequest = {
+      customFirstName: editFriendData.firstName,
+      customLastName: editFriendData.lastName,
+    };
+    await onEdit(user._id, bodyRequest);
+    setIsEditing(false);
   }
 
   return (
@@ -78,11 +67,11 @@ const EditFriendsModal = ({
       <View style={styles.modalContainer}>
         <View style={styles.avatarConatiner}>
           <Text style={styles.avatarText}>
-            {user.firstName[0].toUpperCase() + user.lastName[0].toUpperCase()}
+            {customFirstName[0].toUpperCase() + customLastName[0].toUpperCase()}
           </Text>
         </View>
 
-        <Text style={styles.name}>{`${user.firstName} ${user.lastName}`}</Text>
+        <Text style={styles.name}>{`${customFirstName} ${customLastName}`}</Text>
 
         <MyPeopleFormInputs
           form={editFriendData}

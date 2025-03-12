@@ -17,14 +17,14 @@ function FriendsProvider({ children }) {
 
   const removeFriend = (friendId) => {
     setFriends((prevFriends) =>
-      prevFriends.filter((friend) => friend.id !== friendId)
+      prevFriends.filter((friend) => friend.user._id !== friendId)
     );
   };
 
-  const editFriend = (userId, data) => {
+  const editFriend = (friendId, data) => {
     setFriends((prevFriends) =>
       prevFriends.map((friend) =>
-        friend.id === userId ? { ...friend, ...data } : friend
+        friend.user._id === friendId ? { ...friend, ...data } : friend
       )
     );
   };

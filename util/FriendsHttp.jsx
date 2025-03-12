@@ -30,11 +30,15 @@ export async function getFriendRequests(token) {
 
 export async function sendFriendRequest(token, requestData) {
   try {
-    const response = await axios.post(`${API_URL}/send`, requestData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.post(
+      `${API_URL}/send`,
+      requestData, // Pass the full object instead of just email
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data?.message || "Invalid token";

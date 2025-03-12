@@ -4,7 +4,6 @@ import {
   FlatList,
   StyleSheet,
   Platform,
-  Image,
 } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
@@ -15,8 +14,6 @@ function MyPeopleList({ onShowForm }) {
   const { friends } = useFriends();
 
   function renderFriend({ item }) {
-    console.log("item", item);
-    
     return <FriendDetails {...item} />;
   }
 
