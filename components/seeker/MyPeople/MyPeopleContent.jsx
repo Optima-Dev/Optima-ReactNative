@@ -23,6 +23,7 @@ function MyPeopleContent() {
       };
 
       await sendFriendRequest(token, requestBody);
+      console.log("Friend request sent");
 
       setShowForm(false);
     } catch (error) {

@@ -7,20 +7,34 @@ import { editFriend, removeFriend } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
 import { useFriends } from "../../../store/FriendsContext";
 
-const FriendList = ({ customFirstName, customLastName, user }) => {
+const FriendList = ({ user }) => {
   const [showModal, setShowModal] = useState(false);
 
   const { token } = useAuth();
-  const { removeFriend: deleleFriend } = useFriends();
+  const { removeFriend: deleteFriend, editFriend: updateFriend } = useFriends();
 
   async function handleRemoveUser(friendId) {
-    deleleFriend(friendId);
-    await removeFriend(token, friendId);
+    try {
+      deleteFriend(friendId);
+      await removeFriend(token, friendId);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error removing friend:", error);
+    }
   }
 
   async function handleEditUser(friendId, data) {
-    // data is an object containing customFirstName and customLastName
-    await editFriend(friendId, data);
+    try {
+      updateFriend(friendId, data);
+      await editFriend(token, friendId, data);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error editing friend:", error);
+    }
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -47,6 +61,7 @@ const FriendList = ({ customFirstName, customLastName, user }) => {
         onChangeMode={(mode) => setShowModal(mode)}
         user={user}
         onRemove={handleRemoveUser}
+        onEdit={handleEditUser}
       />
     </View>
   );

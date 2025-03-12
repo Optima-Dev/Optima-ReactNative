@@ -30,15 +30,11 @@ export async function getFriendRequests(token) {
 
 export async function sendFriendRequest(token, requestData) {
   try {
-    const response = await axios.post(
-      `${API_URL}/send`,
-      requestData, // Pass the full object instead of just email
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.post(`${API_URL}/send`, requestData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data?.message || "Invalid token";
@@ -96,17 +92,18 @@ export async function removeFriend(token, friendId) {
   }
 }
 
-export async function editFriend(token, data) {
+export async function editFriend(token, friendId, data) {
   try {
     const response = await axios.put(
       `${API_URL}/edit`,
-      { ...data },
+      { friendId, ...data },
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       }
     );
+    return response.data;
   } catch (error) {
     throw error.response?.data?.message || "Invalid token";
   }

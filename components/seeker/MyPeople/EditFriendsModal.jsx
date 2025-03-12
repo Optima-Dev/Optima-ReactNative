@@ -8,15 +8,21 @@ import {
   Platform,
 } from "react-native";
 import Colors from "../../../constants/Colors";
-import AuthInput from "../../Auth/AuthInput";
 import MyPeopleFormInputs from "./MyPeopleFormInputs";
 import PrimaryButton from "../../UI/PrimaryButton";
 
-const EditFriendsModal = ({ visible, user, onChangeMode, onRemove }) => {
+const EditFriendsModal = ({
+  visible,
+  user,
+  onChangeMode,
+  onRemove,
+  onEdit,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [editFriendData, setEditFriendData] = useState({
-    customFirstName: user.firstName,
-    customLastName: user.lastName,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
   });
 
@@ -29,10 +35,33 @@ const EditFriendsModal = ({ visible, user, onChangeMode, onRemove }) => {
     });
   }
 
-  async function hanldeRemoveFriend() {
+  async function handleRemoveFriend() {
     setIsLoading(true);
-    await onRemove(user._id);
-    setIsLoading(false);
+    try {
+      await onRemove(user._id);
+      console.log("Friend removed");
+      onChangeMode(false);
+    } catch (error) {
+      console.error("Error removing friend:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleEditFriend() {
+    setIsEditing(true);
+    try {
+      const bodyRequest = {
+        customFirstName: editFriendData.firstName,
+        customLastName: editFriendData.lastName,
+      };
+      await onEdit(user._id, bodyRequest);
+      onChangeMode(false);
+    } catch (error) {
+      console.error("Error editing friend:", error);
+    } finally {
+      setIsEditing(false);
+    }
   }
 
   return (
@@ -58,10 +87,20 @@ const EditFriendsModal = ({ visible, user, onChangeMode, onRemove }) => {
         <MyPeopleFormInputs
           form={editFriendData}
           onChange={handleChangeInputs}
+          isEditing={isEditing}
           disabled
         />
 
         <View style={styles.ButtonsContainer}>
+          <PrimaryButton
+            backgroundColor={"white"}
+            textColor={Colors.MainColor}
+            style={{ borderWidth: 4 }}
+            title='Save'
+            onPress={handleEditFriend}
+            isLoading={isEditing}
+          />
+
           <PrimaryButton
             backgroundColor={Colors.MainColor}
             textColor={Colors.white}
@@ -75,7 +114,7 @@ const EditFriendsModal = ({ visible, user, onChangeMode, onRemove }) => {
             backgroundColor={Colors.red600}
             textColor={Colors.white}
             title='Remove'
-            onPress={hanldeRemoveFriend}
+            onPress={handleRemoveFriend}
             isLoading={isLoading}
           />
         </View>
@@ -95,7 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingHorizontal: 50,
     borderRadius: 35,
-    marginTop: -35,
+    marginTop: -75,
   },
   avatarConatiner: {
     backgroundColor: Colors.MainColor,
