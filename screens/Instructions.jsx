@@ -50,7 +50,7 @@ const INSTRUCTIONS = {
     {
       step: 4,
       text: `Now you can help the person we assigned you to help.\nDo not forget our warnings.`,
-      ImgSource: require("../assets/Images/Vector.png"),
+      ImgSource: require("../assets/Images/Video person call.png"),
     }
   ]
 };
