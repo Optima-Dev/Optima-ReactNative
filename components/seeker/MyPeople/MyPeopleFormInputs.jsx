@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import AuthInput from "../../Auth/AuthInput";
 
-const MyPeopleFormInputs = ({ form, onChange, disabled }) => {
+const MyPeopleFormInputs = ({ form, onChange, disabled, error }) => {
   return (
     <View style={styles.InputsContainer}>
       <AuthInput
@@ -9,12 +9,14 @@ const MyPeopleFormInputs = ({ form, onChange, disabled }) => {
         value={form.firstName}
         onChangeText={(text) => onChange("firstName", text)}
         icon={"person-outline"}
+        error={error.firstName}
       />
       <AuthInput
         placeholder='Last Name'
         value={form.lastName}
         onChangeText={(text) => onChange("lastName", text)}
         icon={"person-outline"}
+        error={error.lastName}
       />
       <AuthInput
         placeholder='Email'
@@ -22,6 +24,7 @@ const MyPeopleFormInputs = ({ form, onChange, disabled }) => {
         onChangeText={(text) => onChange("email", text)}
         icon={"mail-outline"}
         isDisabled={disabled || null}
+        error={error.email}
       />
     </View>
   );
@@ -32,6 +35,5 @@ export default MyPeopleFormInputs;
 const styles = StyleSheet.create({
   InputsContainer: {
     marginBottom: 20,
-    gap: 8,
   },
 });

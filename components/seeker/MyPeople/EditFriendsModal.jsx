@@ -10,6 +10,7 @@ import {
 import Colors from "../../../constants/Colors";
 import MyPeopleFormInputs from "./MyPeopleFormInputs";
 import PrimaryButton from "../../UI/PrimaryButton";
+import { validateEmail, validateName } from "../../../util/Validation";
 
 const EditFriendsModal = ({
   visible,
@@ -26,6 +27,11 @@ const EditFriendsModal = ({
     firstName: customFirstName,
     lastName: customLastName,
     email: user.email,
+  });
+  const [error, setError] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
   });
 
   function handleChangeInputs(key, value) {
@@ -44,13 +50,25 @@ const EditFriendsModal = ({
   }
 
   async function handleEditFriend() {
-    setIsEditing(true);
-    const bodyRequest = {
-      customFirstName: editFriendData.firstName,
-      customLastName: editFriendData.lastName,
-    };
-    await onEdit(user._id, bodyRequest);
-    setIsEditing(false);
+    const isFirstName = validateName(editFriendData.firstName);
+    const isLastName = validateName(editFriendData.lastName);
+    const isEmail = validateEmail(editFriendData.email);
+
+    if (!(isFirstName || isLastName || isEmail)) {
+      setIsEditing(true);
+      const bodyRequest = {
+        customFirstName: editFriendData.firstName,
+        customLastName: editFriendData.lastName,
+      };
+      await onEdit(user._id, bodyRequest);
+      setIsEditing(false);
+    } else {
+      setError({
+        firstName: isFirstName,
+        lastName: isLastName,
+        email: isEmail,
+      });
+    }
   }
 
   return (
@@ -77,6 +95,7 @@ const EditFriendsModal = ({
           form={editFriendData}
           onChange={handleChangeInputs}
           isEditing={isEditing}
+          error={error}
           disabled
         />
 
