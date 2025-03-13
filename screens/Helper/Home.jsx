@@ -22,7 +22,10 @@ const Home = ({ navigation }) => {
         subtitle='We would like to thank you for investing your precious time in helping people.'
         imageTitle
       />
-
+      <Image
+        source={require("../../assets/Images/Ellipse 1.png")}
+        style={[styles.ring2]}
+      />
       <Pressable style={styles.buttonContainer}>
         <Text style={styles.buttonText}>
           People who are waiting today for help from all over the world
@@ -31,14 +34,13 @@ const Home = ({ navigation }) => {
         <View style={styles.numberContainer}>
           <Image
             source={require("../../assets/Images/Ellipse 10.png")}
-            style={styles.boxShadow}
+            style={styles.ring}
           />
           <Text style={styles.numberText}>200</Text>
         </View>
-
         <Image
           source={require("../../assets/Images/Ellipse 11.png")}
-          style={[styles.boxShadow, { bottom: 0 }]}
+          style={[styles.ring, { top: 130, left: 0 }]}
         />
       </Pressable>
 
@@ -55,6 +57,10 @@ const Home = ({ navigation }) => {
         <Text style={styles.bottomText}>
           We will notify you when someone needs help.
         </Text>
+        <Image
+          source={require("../../assets/Images/Ellipse 2.png")}
+          style={[styles.ring2]}
+        />
       </View>
     </View>
   );
@@ -69,6 +75,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     gap: 10,
     paddingTop: Platform.OS === "android" ? 60 : 0,
+    zIndex: 1,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -80,12 +87,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 16,
     overflow: "hidden",
+    zIndex: 1,
   },
   buttonText: {
     fontWeight: "600",
     color: Colors.white,
     fontSize: 22,
     width: "54%",
+    zIndex: 1,
   },
   numberContainer: {
     justifyContent: "center",
@@ -94,19 +103,19 @@ const styles = StyleSheet.create({
     height: 96,
     backgroundColor: Colors.white,
     borderRadius: 48,
+    zIndex: 1,
   },
   numberText: {
     color: Colors.MainColor,
     fontSize: 30,
     fontWeight: "700",
+    zIndex: 1,
   },
-  boxShadow: {
-    position: "absolute",
-    zIndex: -1,
-  },
+
   textContainer: {
     flex: 1,
     justifyContent: "flex-end",
+    zIndex: 1,
   },
   bottomText: {
     color: Colors.black500,
@@ -115,10 +124,20 @@ const styles = StyleSheet.create({
     fontFamily: "SF UI Display",
     textAlign: "center",
     marginBottom: 20,
+    zIndex: 2,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 2,
+  },
+  ring: {
+    position: "absolute",
+    zIndex: -1,
+  },
+  ring2: {
+    position: "absolute",
+    zIndex: -1,
   },
 });

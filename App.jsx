@@ -138,10 +138,13 @@ function SeekerTap() {
         headerShown: false,
         backgroundColor: "white",
         tabBarStyle: {
-          marginBottom: Platform.OS === "ios" ? 0 : 10,
+          height: Platform.OS === "ios" ? 0 : 60,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
+          backgroundColor: "#FFFFFF",
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
           <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -213,13 +216,16 @@ function HelperTap() {
         headerShown: false,
         tabBarActiveTintColor: Colors.MainColor,
         tabBarStyle: {
-          marginBottom: Platform.OS === "ios" ? 0 : 10,
+          height: Platform.OS === "ios" ? 0 : 60,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
+          backgroundColor: "#FFFFFF",
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
-          <Text style={{ fontSize: 14, color }}>{route.name}</Text>
+          <Text style={{ fontSize: 12.5, color }}>{route.name}</Text>
         ),
       })}>
       <MyTabs.Screen
@@ -286,10 +292,34 @@ function SettingsScreen() {
   const Settings = role === "helper" ? HelperSettings : SekeerSettings;
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerShadowVisible: false,
+        headerStyle: {
+          shadowOpacity: 0, // Remove shadow on iOS
+          elevation: 0, // Remove shadow on Android
+        },
+        headerTitle: "",
+        headerTintColor: Colors.MainColor,
+      }}>
       <Stack.Screen name='SettingsScreen' component={Settings} />
-      <Stack.Screen name='Account' component={Account} />
-      <Stack.Screen name='ForgetPassword' component={ForgetPassword} />
+      <Stack.Screen
+        name='Account'
+        component={Account}
+        options={{
+          headerShown: true,
+          headerLeft: () => <BackButton />,
+        }}
+      />
+      <Stack.Screen
+        name='ForgetPassword'
+        component={ForgetPassword}
+        options={{
+          headerShown: true,
+          headerLeft: () => <BackButton />,
+        }}
+      />
       <Stack.Screen name='Language' component={Language} />
       <Stack.Screen name='VoiceControl' component={VoiceControl} />
     </Stack.Navigator>
@@ -363,7 +393,7 @@ function Root() {
           const userData = await getUser(storedToken);
           setUser(userData.user);
 
-          if (storedRole === 'seeker') {
+          if (storedRole === "seeker") {
             const friendsData = await getFriends(storedToken);
             setFriends(friendsData.friends);
           } else {

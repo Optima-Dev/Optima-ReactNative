@@ -5,8 +5,8 @@ import {
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  Image,
 } from "react-native";
-import BackButton from "../components/UI/BackButton";
 import Colors from "../constants/Colors";
 import AuthInput from "../components/Auth/AuthInput";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,11 +15,17 @@ import { useContext, useState, useCallback } from "react";
 import { AuthContext } from "../store/AuthContext";
 import { useUser } from "../store/UserContext";
 import { deleteUser, updateUser } from "../util/UserHttp";
+import { validateName } from "../util/Validation";
 // import { useDebounce } from "../hooks/useDebounce";
 
 const Account = ({ navigation }) => {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState({
+    firstName: "",
+    lastName: "",
+  });
 
   const { logout, token } = useContext(AuthContext);
   const { user, setUser } = useUser();
@@ -28,7 +34,6 @@ const Account = ({ navigation }) => {
     lastName: user?.lastName || "",
     email: user?.email || "",
   });
-
 
   const onChange = useCallback((name, value) => {
     setUpdatedUser((prev) => ({ ...prev, [name]: value }));
@@ -48,24 +53,41 @@ const Account = ({ navigation }) => {
   }
 
   async function saveAccount() {
-    setIsEditing(false);
-    try {
-      await updateUser(token, updatedUser);
-      setUser(updatedUser);
-      console.log("account updated");
-    } catch (error) {
-      console.log("can't update account", error);
+    const isFirstNameInvalid = validateName(updatedUser.firstName);
+    const isLastNameInvalid = validateName(updatedUser.lastName);
+    console.log(isFirstNameInvalid, isLastNameInvalid);
+    console.log(updatedUser);
+    if (!(isFirstNameInvalid || isLastNameInvalid)) {
+      setError({
+        firstName: "",
+        lastName: "",
+      });
+      setIsEditing(false);
+      try {
+        setIsUpdating(true);
+        await updateUser(token, updatedUser);
+        setUser(updatedUser);
+        console.log("account updated");
+      } catch (error) {
+        console.log("can't update account", error);
+      }
+    } else {
+      setError({
+        firstName: isFirstNameInvalid,
+        lastName: isLastNameInvalid,
+      });
     }
+    setIsUpdating(false);
   }
 
   const buttons = isEditing ? (
     <>
       <PrimaryButton
         backgroundColor={Colors.MainColor}
-        isLoading={false}
         onPress={saveAccount}
         textColor='white'
         title='Save'
+        isLoading={isUpdating}
       />
       <PrimaryButton
         backgroundColor={Colors.red600}
@@ -108,8 +130,10 @@ const Account = ({ navigation }) => {
       style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
-          <BackButton />
-
+          <Image
+            source={require("../assets/Images/Ellipse 1.png")}
+            style={[styles.ring]}
+          />
           <Text style={styles.title}>Account</Text>
 
           <View style={styles.logoContainer}>
@@ -129,6 +153,7 @@ const Account = ({ navigation }) => {
               value={updatedUser.firstName}
               textStyle={styles.mainInputText}
               isDisabled={isDisabled}
+              error={error.firstName}
             />
             <AuthInput
               icon='person-outline'
@@ -138,6 +163,7 @@ const Account = ({ navigation }) => {
               value={updatedUser.lastName}
               textStyle={styles.mainInputText}
               isDisabled={isDisabled}
+              error={error.lastName}
             />
             <AuthInput
               icon='mail-outline'
@@ -162,7 +188,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 20 : 0,
+    paddingTop: Platform.OS === "android" ? 10 : 0,
   },
   title: {
     color: Colors.MainColor,
@@ -190,5 +216,10 @@ const styles = StyleSheet.create({
   mainInputText: {
     color: Colors.MainColor,
     fontWeight: "500",
+  },
+  ring: {
+    position: "absolute",
+    top: 0,
+    zIndex: 0,
   },
 });

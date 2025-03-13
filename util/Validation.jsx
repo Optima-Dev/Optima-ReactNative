@@ -45,7 +45,7 @@ export function validateName(name) {
     return "Name must be at least 2 characters.";
   }
   
-  if(!/^[a-zA-Z]{2,}$/.test(name)) {
+  if(!/^[a-zA-Z][a-zA-Z0-9]*$/.test(name)) {
     return "Invalid Name";
   }
 
