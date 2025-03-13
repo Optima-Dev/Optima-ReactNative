@@ -7,7 +7,7 @@ import { editFriend, removeFriend } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
 import { useFriends } from "../../../store/FriendsContext";
 
-const FriendList = ({ user, customFirstName, customLastName }) => {
+const FriendDetails = ({ user, customFirstName, customLastName }) => {
   const [showModal, setShowModal] = useState(false);
 
   const { token } = useAuth();
@@ -65,7 +65,7 @@ const FriendList = ({ user, customFirstName, customLastName }) => {
   );
 };
 
-export default FriendList;
+export default FriendDetails;
 
 const styles = StyleSheet.create({
   personContainer: {

@@ -16,7 +16,7 @@ import { sendingCode, resetPassword, verifyCode } from "@/util/AuthHttp";
 import { validateEmail, validatePassword } from "../../util/Validation";
 import BackButton from "../../components/UI/BackButton";
 import { AuthContext } from "../../store/AuthContext";
-import Modal from "../../components/UI/Modal";
+import MainModal from "../../components/UI/MainModal";
 
 
 const content = [
@@ -177,11 +177,12 @@ const ForgetPassword = ({ navigation }) => {
           />
         )}
 
-        <Modal
+        <MainModal
           onPress={handleOnDone}
           isModalOpen={isModalOpen}
           logo={require("../../assets/Images/lets-icons_done-ring-round.png")}
           subTitle="Your password was reset successfully."
+          backgroundColor={Colors.MainColor}
           buttonText="Done"
         />
       </View>

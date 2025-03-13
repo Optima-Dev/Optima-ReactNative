@@ -14,6 +14,8 @@ const Colors = {
   black: "#000000",
   black500: "#616161",
   red600: "#E33629",
+  red700: "#C52E23",
+  yellow700: "#F4D203",
 };
 
 export default Colors;
