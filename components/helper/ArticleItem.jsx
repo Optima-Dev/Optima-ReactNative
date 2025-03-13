@@ -63,7 +63,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 2,
     borderColor: Colors.MainColor,
-    // paddingTop: Platform.OS === "android" ? 60 : 0,
   },
   imageContainer: {
     alignItems: "center",

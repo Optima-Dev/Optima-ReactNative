@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, TextInput, Pressable, StyleSheet, Platform } from "react-native";
+import { View, TextInput, Pressable, StyleSheet, Platform, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 
@@ -10,9 +10,9 @@ function AuthInput({
   value,
   onChangeText,
   keyboardType,
-  isInvalid,
   textStyle,
   isDisabled,
+  error,
 }) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(secureTextEntry);
 
@@ -21,32 +21,36 @@ function AuthInput({
   }
 
   return (
-    <View style={[styles.container, isInvalid && styles.containerInvalid]}>
-      <Ionicons
-        style={[styles.icon, isInvalid && styles.labelInvalid]}
-        name={icon}
-        size={25}
-      />
-      <TextInput
-        style={[styles.input, isInvalid && styles.inputInvalid, textStyle]}
-        placeholder={placeholder}
-        secureTextEntry={isPasswordVisible}
-        value={value}
-        autoCapitalize='none'
-        onChangeText={onChangeText}
-        keyboardType={keyboardType}
-        editable={!isDisabled}
-      />
-      {secureTextEntry && (
-        <Pressable onPress={togglePasswordVisibility}>
-          <Ionicons
-            name={isPasswordVisible ? "eye-off" : "eye"}
-            size={24}
-            color={Colors.grey400}
-          />
-        </Pressable>
-      )}
-    </View>
+    <>
+      <View style={[styles.container, error && styles.errorInput]}>
+        <Ionicons
+          style={[styles.icon, error && styles.errorIcon]}
+          name={icon}
+          size={25}
+        />
+        <TextInput
+          style={[styles.input, textStyle]}
+          placeholder={placeholder}
+          secureTextEntry={isPasswordVisible}
+          value={value}
+          autoCapitalize='none'
+          onChangeText={onChangeText}
+          keyboardType={keyboardType}
+          editable={!isDisabled}
+        />
+        {secureTextEntry && (
+          <Pressable onPress={togglePasswordVisibility}>
+            <Ionicons
+              name={isPasswordVisible ? "eye-off" : "eye"}
+              size={24}
+              color={Colors.grey400}
+            />
+          </Pressable>
+        )}
+      </View>
+
+      { error && <Text style={styles.errorMessage}>{ error }</Text> }
+    </>
   );
 }
 
@@ -63,15 +67,12 @@ const styles = StyleSheet.create({
     width: Platform.OS === "android" ? 360 : "100%",
     height: 55,
   },
-  containerInvalid: {
-    borderColor: Colors.error500,
-  },
   icon: {
     marginHorizontal: 10,
     color: Colors.MainColor,
   },
-  labelInvalid: {
-    color: Colors.error500,
+  errorIcon: {
+    color: Colors.red600,
   },
   input: {
     flex: 1,
@@ -79,9 +80,17 @@ const styles = StyleSheet.create({
     color: Colors.black,
     fontWeight: "300",
   },
-  inputInvalid: {
-    backgroundColor: Colors.error100,
+  errorInput: {
+    borderColor: Colors.red600,
   },
+  errorMessage: {
+    marginLeft: 10,
+    color: Colors.red600,
+    fontSize: 16,
+    fontWeight: "300",
+    lineHeight: 22,
+    marginBottom: 5,
+  }
 });
 
 export default AuthInput;

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ScrollView, StyleSheet, View, Platform } from "react-native";
+import { ScrollView, StyleSheet, View, Platform, Image } from "react-native";
 
 import MainHeader from "@/components/UI/MainHeader";
 import InstructionItem from "@/components/Instructions/InstructionItem";
@@ -7,9 +7,8 @@ import Colors from "@/constants/Colors";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import { AuthContext } from "@/store/AuthContext";
 
-
 const INSTRUCTIONS = {
-  "seeker": [
+  seeker: [
     {
       step: 1,
       text: `You can navigate the whole app by using voice commands.\nJust talk out loud with whatever you want to do.`,
@@ -29,9 +28,9 @@ const INSTRUCTIONS = {
       step: 4,
       text: `In my people section you will be able to add your family and friends accounts so you can call them easily by saying out loud “Call person’s name “.`,
       ImgSource: require("../assets/Images/family 2.png"),
-    }
+    },
   ],
-  "helper": [
+  helper: [
     {
       step: 1,
       text: `We will send you a notification whenever someone needs help specifically people who speaks your native language.`,
@@ -50,30 +49,29 @@ const INSTRUCTIONS = {
     {
       step: 4,
       text: `Now you can help the person we assigned you to help.\nDo not forget our warnings.`,
-      ImgSource: require("../assets/Images/Vector.png"),
-    }
-  ]
+      ImgSource: require("../assets/Images/Video person call.png"),
+    },
+  ],
 };
 
 const HEADER = {
-  "seeker": {
+  seeker: {
     title: `HELLO OUR\nFRIEND !`,
     subtitle: `Here is some instructions on how to use our app in the most efficient way.`,
     noimage: true,
   },
-  "helper": {
+  helper: {
     subtitle: `Here is some instructions on how to pick-up a call :`,
     imageTitle: true,
-  }
-}
-
+  },
+};
 
 const Instructions = ({ navigation }) => {
   const { role } = useContext(AuthContext);
 
   function handlePressGotit() {
-    if(role === "seeker") {
-      navigation.navigate('MyTabs');
+    if (role === "seeker") {
+      navigation.navigate("MyTabs");
     } else {
       navigation.goBack();
     }
@@ -81,11 +79,19 @@ const Instructions = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require("../assets/Images/Ellipse 1.png")}
+        style={styles.ring}
+      />
       <MainHeader {...HEADER[role]} />
 
-      <ScrollView style={styles.instructions} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.instructions}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.instructionsContainer}>
-          { INSTRUCTIONS[role].map(instruction => <InstructionItem key={instruction.step} {...instruction} /> )}
+          {INSTRUCTIONS[role].map((instruction) => (
+            <InstructionItem key={instruction.step} {...instruction} />
+          ))}
         </View>
       </ScrollView>
 
@@ -94,7 +100,7 @@ const Instructions = ({ navigation }) => {
           backgroundColor={Colors.MainColor}
           textColor={Colors.white}
           onPress={handlePressGotit}
-          title="Got it !"
+          title='Got it !'
         />
       </View>
     </View>
@@ -107,8 +113,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    backgroundColor: 'white',
-    paddingTop: Platform.OS === 'android' ? 60 : 0,
+    backgroundColor: "white",
+    paddingTop: Platform.OS === "android" ? 60 : 0,
     // marginBottom: 20,
   },
   instructions: {
@@ -131,5 +137,11 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     paddingVertical: 16,
+  },
+  ring: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    zIndex: 0,
   },
 });

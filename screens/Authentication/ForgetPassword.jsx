@@ -2,7 +2,7 @@
 import { useContext, useState } from "react";
 
 // importing react-native components
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View, Platform } from "react-native";
 
 // importing constants
 import Colors from "@/constants/Colors";
@@ -12,16 +12,17 @@ import ForgetPassHeader from "@/components/Auth/ForgetPassHeader";
 import AuthInput from "@/components/Auth/AuthInput";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import CodeInput from "@/components/Auth/CodeInput";
-import { sendingCode, resetPassword, verifyCode } from "@/util/HttpAuth";
+import { sendingCode, resetPassword, verifyCode } from "@/util/AuthHttp";
 import { validateEmail, validatePassword } from "../../util/Validation";
 import BackButton from "../../components/UI/BackButton";
 import { AuthContext } from "../../store/AuthContext";
-
+import MainModal from "../../components/UI/MainModal";
 
 const content = [
   {
     title: "Password Reset",
-    subTitle: "Enter your email to get a verification code to reset your password",
+    subTitle:
+      "Enter your email to get a verification code to reset your password",
     buttonText: "Send Code",
   },
   {
@@ -33,11 +34,10 @@ const content = [
     title: "Reset Your Password",
     subTitle: "Please enter your new password",
     buttonText: "Reset",
-  }
+  },
 ];
 
 const ForgetPassword = ({ navigation }) => {
-
   const { isAuthenticated } = useContext(AuthContext);
   const [inputText, setInputText] = useState({
     email: "",
@@ -45,8 +45,14 @@ const ForgetPassword = ({ navigation }) => {
   });
   const [phases, setPhases] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
+  const [isError, setIsError] = useState(false);
+  const [verificationCode, setVerificationCode] = useState(["", "", "", ""]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  function handleOnDone() {
+    navigation.goBack();
+    setIsModalOpen((prevState) => !prevState);
+  }
 
   function handleInputChange(value) {
     const field = phases === 1 ? "email" : "newPassword";
@@ -69,7 +75,7 @@ const ForgetPassword = ({ navigation }) => {
     try {
       const response = await sendingCode(inputText.email.toLowerCase());
       Alert.alert("Success", response);
-    } catch(error) {
+    } catch (error) {
       Alert.alert("Error", error);
     }
     setIsLoading(false);
@@ -80,106 +86,128 @@ const ForgetPassword = ({ navigation }) => {
     try {
       let response;
 
-      if(phases === 1) {
-        validateEmail(inputText.email);
+      if (phases === 1) {
+        const error = validateEmail(inputText.email);
+        if (error) throw error;
 
         response = await sendingCode(inputText.email);
-        setPhases(prev => prev + 1);
-      }
-      else if(phases === 2){
-        response = await verifyCode(inputText.email, verificationCode.join(""));
-        setPhases(prev => prev + 1);
-      } 
-      else {
-        validatePassword(inputText.newPassword);
-        
-        response = await resetPassword(inputText.email, inputText.newPassword);
-        navigation.navigate(isAuthenticated ? "Account" : "Login");
-      }
+        setPhases((prev) => prev + 1);
+        setIsError(false);
+      } else if (phases === 2) {
+        if (verificationCode.includes("")) {
+          throw "Please fill all the fields";
+        }
 
-      Alert.alert("Success", response);
-    } catch(error) {
-      Alert.alert("Error", error);
+        response = await verifyCode(inputText.email, verificationCode.join(""));
+        setPhases((prev) => prev + 1);
+        setIsError(false);
+      } else {
+        const error = validatePassword(inputText.newPassword);
+        if (error) throw error;
+
+        response = await resetPassword(inputText.email, inputText.newPassword);
+        setIsModalOpen((prevState) => !prevState);
+      }
+    } catch (error) {
+      setIsError(error);
     }
     setIsLoading(false);
   }
 
   return (
     <View style={styles.container}>
-      <BackButton />
+      <View style={styles.bodyContainer}>
+        <ForgetPassHeader
+          title={content[phases - 1].title}
+          subTitle={content[phases - 1].subTitle}
+        />
 
-      <ForgetPassHeader
-        title={content[phases - 1].title}
-        subTitle={content[phases - 1].subTitle}
-      />
-
-      {
-        phases === 2 ? (
+        {phases === 2 ? (
           <CodeInput
             verificationCode={verificationCode}
             handleCodeChange={handleCodeChange}
+            error={isError}
           />
         ) : (
           <AuthInput
-            icon={ phases === 1 ? "mail-outline" : "lock-closed-outline"}
-            placeholder={ phases === 1 ? "example@gmail.com" : "********" }
-            secureTextEntry={ phases === 3 }
-            value={ phases === 1 ? inputText.email : inputText.newPassword }
+            icon={phases === 1 ? "mail-outline" : "lock-closed-outline"}
+            placeholder={phases === 1 ? "example@gmail.com" : "********"}
+            secureTextEntry={phases === 3}
+            value={phases === 1 ? inputText.email : inputText.newPassword}
             onChangeText={handleInputChange}
+            error={isError}
           />
-        )
-      }
+        )}
 
-      {
-        phases === 3 && (
+        {phases === 3 && (
           <View style={styles.instructionsContainer}>
-            <Text style={styles.insetructionText}>Your password must include: </Text>
+            <Text style={styles.insetructionText}>
+              Your password must include:{" "}
+            </Text>
             <Text style={styles.insetructionText}>At least 8 charachters</Text>
-            <Text style={styles.insetructionText}>At least one Number and one symbol</Text>
+            <Text style={styles.insetructionText}>
+              At least one Number and one symbol
+            </Text>
           </View>
-        )
-      }
+        )}
 
-      <PrimaryButton
-        title={content[phases - 1].buttonText}
-        backgroundColor={Colors.MainColor}
-        onPress={handleSumbit}
-        textColor="white"
-        isLoading={isLoading}
-      />
+        <View style={{ marginTop: 24, gap: 14 }}>
+          <PrimaryButton
+            title={content[phases - 1].buttonText}
+            backgroundColor={Colors.MainColor}
+            onPress={handleSumbit}
+            textColor='white'
+            isLoading={isLoading}
+          />
 
-      { phases === 2 && (
-        <PrimaryButton
-          title="Send Again"
-          backgroundColor='white'
-          onPress={sendCodeAgain}
-          textColor={Colors.MainColor}
-          isLoading={isLoading}
-        />
-      )}
+          {phases === 2 && (
+            <PrimaryButton
+              title='Send Again'
+              backgroundColor='white'
+              onPress={sendCodeAgain}
+              textColor={Colors.MainColor}
+              isLoading={isLoading}
+            />
+          )}
+
+          <MainModal
+            onPress={handleOnDone}
+            isModalOpen={isModalOpen}
+            logo={require("../../assets/Images/lets-icons_done-ring-round.png")}
+            subTitle='Your password was reset successfully.'
+            backgroundColor={Colors.MainColor}
+            buttonText='Done'
+          />
+        </View>
+      </View>
     </View>
   );
-}
+};
 
 export default ForgetPassword;
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    rowGap: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingHorizontal: 30,
-    // paddingVertical: 20,
+    paddingTop: Platform.OS === "android" ? 20 : 0,
+    alignItems: "center",
+  },
+  bodyContainer: {
+    flex: 1,
+    // alignItems: "center",
   },
   instructionsContainer: {
+    marginTop: 10,
     paddingLeft: 10,
-    marginRight: 'auto',
+    marginRight: "auto",
     gap: 5,
+    alignItems: "center",
   },
   insetructionText: {
     color: Colors.grey400,
     fontSize: 18,
     fontWeight: 500,
-  }
+  },
 });

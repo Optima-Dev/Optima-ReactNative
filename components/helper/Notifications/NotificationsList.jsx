@@ -1,96 +1,66 @@
-import React from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  Text,
+} from "react-native";
 import NotificationItem from "./NotificationItem";
-
-const notifications = [
-  {
-    id: "1",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"), // Use actual image path
-    name: "Hatoom",
-    message: "wants your help via video call.",
-    type: "video_call",
-  },
-  {
-    id: "2",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Abdelsalam",
-    message: "added you as a friend.",
-    type: "friend_request",
-  },
-  {
-    id: "3",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "accepted",
-  },
-  {
-    id: "4",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "removed",
-  },
-  {
-    id: "5",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "friend_request",
-  },
-  {
-    id: "6",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "accepted",
-  },
-  {
-    id: "7",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "removed",
-  },
-  {
-    id: "8",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "friend_request",
-  },
-  {
-    id: "9",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "accepted",
-  },
-  {
-    id: "10",
-    profileImage: require("../../../assets/Images/mingcute_user-add-line.png"),
-    name: "Shaun Anderson",
-    message: "added you as a friend.",
-    type: "removed",
-  }
-];
+import { useFriends } from "../../../store/FriendsContext";
+import { acceptFriendRequest, rejectFriendRequest } from "../../../util/FriendsHttp";
+import { useAuth } from "../../../store/AuthContext";
 
 const NotificationsList = () => {
+  const { token } = useAuth();
+  const { 
+    requests,
+    acceptFriendRequest: acceptFriendReq,
+    rejectFriendRequest: rejectFriendReq,
+  } = useFriends();
+
+
+  async function handleOnAccept(friendRequestId) {
+    try {
+      acceptFriendReq(friendRequestId);
+      await acceptFriendRequest(token, friendRequestId);
+    } catch(error) {
+      alert(error);
+    }
+  }
+
+  async function handleonDecline(friendRequestId) {
+    try {
+      rejectFriendReq(friendRequestId);
+      await rejectFriendRequest(token, friendRequestId);
+    } catch(error) {
+      alert(error);
+    }
+  }
+
+  function renderRequest({ item }) {
+    const formattedItem = {
+      profileImage: require("../../../assets/Images/ion_person-outline.png"),
+      name: `${item.firstName} ${item.lastName}`,
+      message: "sent you a friend request.",
+      type: "friend_request",
+      status: item.status || null,
+    };
+
+    return (
+      <NotificationItem
+        {...formattedItem}
+        onAccept={() => handleOnAccept(item._id)}
+        onDecline={() => handleonDecline(item._id)}
+      />
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={notifications}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <NotificationItem
-            profileImage={item.profileImage}
-            name={item.name}
-            message={item.message}
-            type={item.type}
-            onAccept={() => console.log(`${item.name} accepted`)}
-            onDecline={() => console.log(`${item.name} declined`)}
-          />
-        )}
+        data={requests}
+        keyExtractor={(item) => item._id}
+        renderItem={renderRequest}
+        ListEmptyComponent={<Text>No notifications found.</Text>}
       />
     </View>
   );

@@ -1,5 +1,5 @@
 // importing react hooks
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // importing navigation
 import { Platform, SafeAreaView, StyleSheet, Text } from "react-native";
@@ -10,10 +10,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
-
-// importing contexts
-import AuthProvider, { AuthContext } from "./store/AuthContext";
-import UserProvider, { useUser } from "./store/UserContext";
 
 // importing constants
 import Colors from "./constants/Colors";
@@ -47,7 +43,15 @@ import Article from "./screens/Helper/Atricle";
 // importing components
 import BackButton from "./components/UI/BackButton";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { getUser } from "./util/HttpUser";
+
+// importing contexts
+import AuthProvider, { useAuth } from "./store/AuthContext";
+import UserProvider, { useUser } from "./store/UserContext";
+import FriendsProvider, { useFriends } from "./store/FriendsContext";
+
+// importing util functions
+import { getUser } from "./util/UserHttp";
+import { getFriendRequests, getFriends } from "./util/FriendsHttp";
 
 // creating stack navigator
 const Stack = createNativeStackNavigator();
@@ -132,12 +136,15 @@ function SeekerTap() {
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: Colors.MainColor,
         headerShown: false,
+        backgroundColor: "white",
         tabBarStyle: {
-          marginBottom: Platform.OS === "ios" ? 0 : 10,
+          height: Platform.OS === "ios" ? 0 : 60,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          borderRadius: 20,
+          backgroundColor: "#FFFFFF",
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
           <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -209,14 +216,16 @@ function HelperTap() {
         headerShown: false,
         tabBarActiveTintColor: Colors.MainColor,
         tabBarStyle: {
-          marginBottom: Platform.OS === "ios" ? 0 : 10,
+          height: Platform.OS === "ios" ? 0 : 60,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          borderRadius: 20,
+          backgroundColor: "#FFFFFF",
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
         },
         tabBarLabel: ({ color }) => (
-          <Text style={{ fontSize: 14, color }}>{route.name}</Text>
+          <Text style={{ fontSize: 12.5, color }}>{route.name}</Text>
         ),
       })}>
       <MyTabs.Screen
@@ -279,14 +288,38 @@ function HelperTap() {
 }
 
 function SettingsScreen() {
-  const { role } = useContext(AuthContext);
+  const { role } = useAuth();
   const Settings = role === "helper" ? HelperSettings : SekeerSettings;
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        headerShadowVisible: false,
+        headerStyle: {
+          shadowOpacity: 0, // Remove shadow on iOS
+          elevation: 0, // Remove shadow on Android
+        },
+        headerTitle: "",
+        headerTintColor: Colors.MainColor,
+      }}>
       <Stack.Screen name='SettingsScreen' component={Settings} />
-      <Stack.Screen name='Account' component={Account} />
-      <Stack.Screen name='ForgetPassword' component={ForgetPassword} />
+      <Stack.Screen
+        name='Account'
+        component={Account}
+        options={{
+          headerShown: true,
+          headerLeft: () => <BackButton />,
+        }}
+      />
+      <Stack.Screen
+        name='ForgetPassword'
+        component={ForgetPassword}
+        options={{
+          headerShown: true,
+          headerLeft: () => <BackButton />,
+        }}
+      />
       <Stack.Screen name='Language' component={Language} />
       <Stack.Screen name='VoiceControl' component={VoiceControl} />
     </Stack.Navigator>
@@ -312,13 +345,15 @@ function HelperCommunityScreen() {
 }
 
 function Navigation() {
-  const { isAuthenticated, role, isNewUser } = useContext(AuthContext);
+  const { isAuthenticated, role, isNewUser } = useAuth();
   let MyTab = <HelperTap />;
 
-  if(role === 'seeker') {
+  if (role === "seeker") {
     MyTab = (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        { isNewUser && <Stack.Screen name='Instructions' component={Instructions} /> }
+        {isNewUser && (
+          <Stack.Screen name='Instructions' component={Instructions} />
+        )}
         <Stack.Screen name='MyTabs' component={SeekerTap} />
       </Stack.Navigator>
     );
@@ -337,24 +372,36 @@ function Navigation() {
 
 function Root() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const { authenticate, handleRole } = useContext(AuthContext);
+
+  const { authenticate, handleRole, token } = useAuth();
   const { setUser } = useUser();
+  const { setFriends, setRequests } = useFriends();
 
   useEffect(() => {
     async function fetchToken() {
       setIsTryingLogin(true);
       const storedToken = await AsyncStorage.getItem("token");
       const storedRole = await AsyncStorage.getItem("role");
-      
+
+      console.log(storedRole, "  ", storedToken);
+
       if (storedToken) {
         authenticate(storedToken);
         handleRole(storedRole);
 
-        try { 
+        try {
           const userData = await getUser(storedToken);
           setUser(userData.user);
-        } catch(error) {
-          console.error("Failed to fetch user data:", error);
+
+          if (storedRole === "seeker") {
+            const friendsData = await getFriends(storedToken);
+            setFriends(friendsData.friends);
+          } else {
+            const friendRequests = await getFriendRequests(storedToken);
+            setRequests(friendRequests.friendRequests);
+          }
+        } catch (error) {
+          alert(error);
         }
       }
 
@@ -362,7 +409,8 @@ function Root() {
     }
 
     fetchToken();
-  }, []);
+  }, [token]);
+  // we add token as a dependency here to reRender the data becasue when we signin then logout then signin again with different account it stay with the data which belong to the previous account
 
   if (isTryingLogin) {
     return <AppLoading />;
@@ -374,9 +422,11 @@ function Root() {
 export default function App() {
   return (
     <AuthProvider>
-      <UserProvider>
-        <Root />
-      </UserProvider>
+      <FriendsProvider>
+        <UserProvider>
+          <Root />
+        </UserProvider>
+      </FriendsProvider>
     </AuthProvider>
   );
 }

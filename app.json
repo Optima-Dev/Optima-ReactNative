@@ -4,9 +4,9 @@
     "slug": "Optima",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Images/Main-Logo-blue 1.png",
+    "icon": "./assets/Main-Logo-blue.png",
     "splash": {
-      "image": "./assets/Images/Main-Logo-blue 1.png",
+      "image": "./assets/Splash-Logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#2727C4"
     },
@@ -15,12 +15,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/Images/Main-Logo-blue 1.png",
+        "foregroundImage": "./assets/Main-Logo-blue.png",
         "backgroundColor": "white"
       }
     },
     "web": {
-      "favicon": "./assets/Images/Main-Logo-blue 1.png"
+      "favicon": "./assets/Main-Logo-blue.png"
     },
     "plugins": [
       [

@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 15,
     marginBottom: 10,
+    zIndex: 2,
   },
   text: {
     color: Colors.MainColor, // Blue text color

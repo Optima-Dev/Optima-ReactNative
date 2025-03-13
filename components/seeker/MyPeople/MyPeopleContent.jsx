@@ -1,17 +1,34 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import ForgetPassHeader from "../../Auth/ForgetPassHeader";
 import MyPeopleForm from "./MyPeopleForm";
 import MyPeopleList from "./MyPeopleList";
-
+import { sendFriendRequest } from "../../../util/FriendsHttp";
+import { useAuth } from "../../../store/AuthContext";
+import { useUser } from "../../../store/UserContext";
 
 function MyPeopleContent() {
   const [showForm, setShowForm] = useState(false);
-  const [people, setPeople] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { token } = useAuth();
+  const { user } = useUser();
 
-  function handleAddPerson(person) {
-    setPeople((prevPeople) => [...prevPeople, person]);
-    setShowForm(false);
+  async function handleAddPerson(personData) {
+    setIsLoading(true);
+    try {
+      const requestBody = {
+        customFirstName: user.firstName,
+        customLastName: user.lastName,
+        helperEmail: personData.email,
+      };
+
+      await sendFriendRequest(token, requestBody);
+
+      setShowForm(false);
+    } catch (error) {
+      alert(error);
+    }
+    setIsLoading(false);
   }
 
   const Subtitle = !showForm
@@ -25,9 +42,10 @@ function MyPeopleContent() {
         <MyPeopleForm
           onAddPerson={handleAddPerson}
           onHideForm={() => setShowForm(false)}
+          isLoading={isLoading}
         />
       ) : (
-        <MyPeopleList people={people} onShowForm={() => setShowForm(true)} />
+        <MyPeopleList onShowForm={() => setShowForm(true)} />
       )}
     </View>
   );

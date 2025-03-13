@@ -16,9 +16,9 @@ import PrimaryButton from "../UI/PrimaryButton";
 import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
-import { getUser } from "../../util/HttpUser";
+import { getUser } from "../../util/UserHttp";
 import { useUser } from "../../store/UserContext";
-import { login, signup, GoogleLogin } from "../../util/HttpAuth";
+import { login, signup, GoogleLogin } from "../../util/AuthHttp";
 import {
   validateEmail,
   validateName,
@@ -37,30 +37,26 @@ function AuthContent({ type }) {
     email: "",
     password: "",
   });
+  const [isError, setIsError] = useState({
+    email: null,
+    password: null,
+    firstName: null,
+    lastName: null,
+  });
 
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handleAuth() {
+  async function sendingForm() {
     setIsLoading(true);
-    try {
-      validateEmail(form.email);
-      validatePassword(form.password);
 
+    try {
       let response;
 
       if (type === "login") {
-        response = await login(
-          form.email.toLowerCase(),
-          form.password,
-          role
-        );
-      }
-      else {
-        validateName(form.firstName);
-        validateName(form.lastName);
-
+        response = await login(form.email.toLowerCase(), form.password, role);
+      } else {
         response = await signup(
           form.firstName,
           form.lastName,
@@ -68,20 +64,39 @@ function AuthContent({ type }) {
           form.password,
           role
         );
-
       }
 
       authenticate(response.token);
       setNewUser(true);
-      
+
       const userData = await getUser(response.token);
       setUser(userData.user);
+    } catch (error) {
+      if (type === "login") {
+        setIsError({ email: error, password: error });
+      } else {
+        setIsError({ email: error });
+      }
     }
-    catch (error) {
-      console.log("error in auth content", error);
-      Alert.alert("Authentication Failed", error);
-    }
+
     setIsLoading(false);
+  }
+
+  async function handleFormSubmission() {
+    let errorsList = {};
+    errorsList.email = validateEmail(form.email);
+    errorsList.password = validatePassword(form.password);
+
+    if (type === "signup") {
+      errorsList.firstName = validateName(form.firstName);
+      errorsList.lastName = validateName(form.lastName);
+    }
+
+    if (Object.values(errorsList).some((value) => value)) {
+      setIsError(errorsList);
+    } else {
+      await sendingForm();
+    }
   }
 
   const swithModeHandler = () => {
@@ -114,14 +129,19 @@ function AuthContent({ type }) {
           />
 
           {/* Auth Form */}
-          <AuthForm type={type} form={form} onChange={handleChange} />
+          <AuthForm
+            type={type}
+            form={form}
+            onChange={handleChange}
+            errors={isError}
+          />
 
           {/* Confirm Button */}
           <View style={styles.ButtonContainer}>
             <PrimaryButton
               backgroundColor={Colors.MainColor}
               title={type === "login" ? "Login" : "Sign up"}
-              onPress={handleAuth}
+              onPress={handleFormSubmission}
               textColor='white'
               isLoading={isLoading}
             />

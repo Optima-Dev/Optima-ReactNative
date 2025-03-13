@@ -1,13 +1,7 @@
 import { View, Text, Image, StyleSheet, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 
-function MainHeader({
-  title,
-  subtitle,
-  login,
-  noImage,
-  imageTitle
-}) {
+function MainHeader({ title, subtitle, login, noImage, imageTitle }) {
   return (
     <View style={styles.container}>
       {!noImage && (
@@ -18,14 +12,18 @@ function MainHeader({
           />
         </View>
       )}
-      
+
       {imageTitle && (
         <View style={styles.logoContainer}>
           <Text style={styles.imageTitle}>Optima</Text>
         </View>
       )}
 
-      { title && <Text style={[styles.title, imageTitle && { fontSize:26 }]}>{title}</Text> }
+      {title && (
+        <Text style={[styles.title, imageTitle && { fontSize: 26 }]}>
+          {title}
+        </Text>
+      )}
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
@@ -34,6 +32,7 @@ function MainHeader({
 const styles = StyleSheet.create({
   container: {
     // alignItems: "center",
+    zIndex: 1,
   },
   position: {
     marginBottom: Platform.OS === "android" ? 15 : 40,

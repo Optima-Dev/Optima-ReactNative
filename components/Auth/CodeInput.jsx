@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import Colors from "../../constants/Colors";
 
 
-const CodeInput = ({ verificationCode, handleCodeChange }) => {
+const CodeInput = ({ verificationCode, handleCodeChange, error }) => {
 
   const refs = useRef([]);
 
@@ -27,25 +27,29 @@ const CodeInput = ({ verificationCode, handleCodeChange }) => {
     handleCodeChange('', index); 
   };
 
+  console.log(error);
   return (
-    <View style={styles.container}>
-      {
-        verificationCode.map((item, index) => (
-          <TextInput
-            key={`code-input-${index}`}
-            style={styles.input}
-            value={item}
-            maxLength={1}
-            keyboardType="number-pad"
-            autoCapitalize="none"
-            autoCorrect={false}
-            onChangeText={(value) => handleChange(value, index)}
-            onFocus={() => handleFocus(index)} // Clear the input on focus
-            ref={(e) => (refs.current[index] = e)} // Assign ref to each input
-          />
-        ))
-      }
-    </View>
+    <>
+      <View style={styles.container}>
+        {
+          verificationCode.map((item, index) => (
+            <TextInput
+              key={`code-input-${index}`}
+              style={[styles.input, error && styles.inputError]}
+              value={item}
+              maxLength={1}
+              keyboardType="number-pad"
+              autoCapitalize="none"
+              autoCorrect={false}
+              onChangeText={(value) => handleChange(value, index)}
+              onFocus={() => handleFocus(index)} // Clear the input on focus
+              ref={(e) => (refs.current[index] = e)} // Assign ref to each input
+            />
+          ))
+        }
+      </View>
+      { error && <Text style={styles.errorMessage}>{ error }</Text> }
+    </>
   );
 }
 
@@ -68,5 +72,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 32,
     fontWeight: '500',
+  },
+  inputError: {
+    borderColor: Colors.red600,
+  },
+  errorMessage: {
+    marginLeft: 10,
+    color: Colors.red600,
+    fontSize: 18,
+    fontWeight: "300",
+    lineHeight: 22,
+    marginTop: 10,
   }
 });
