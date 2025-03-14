@@ -1,28 +1,25 @@
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  Text,
-} from "react-native";
+import { View, FlatList, StyleSheet, Text } from "react-native";
 import NotificationItem from "./NotificationItem";
-import { useFriends } from "../../../store/FriendsContext";
-import { acceptFriendRequest, rejectFriendRequest } from "../../../util/FriendsHttp";
+import { useHelper } from "../../../store/HelperContext";
+import {
+  acceptFriendRequest,
+  rejectFriendRequest,
+} from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
 
 const NotificationsList = () => {
   const { token } = useAuth();
-  const { 
+  const {
     requests,
     acceptFriendRequest: acceptFriendReq,
     rejectFriendRequest: rejectFriendReq,
-  } = useFriends();
-
+  } = useHelper();
 
   async function handleOnAccept(friendRequestId) {
     try {
       acceptFriendReq(friendRequestId);
       await acceptFriendRequest(token, friendRequestId);
-    } catch(error) {
+    } catch (error) {
       alert(error);
     }
   }
@@ -31,7 +28,7 @@ const NotificationsList = () => {
     try {
       rejectFriendReq(friendRequestId);
       await rejectFriendRequest(token, friendRequestId);
-    } catch(error) {
+    } catch (error) {
       alert(error);
     }
   }

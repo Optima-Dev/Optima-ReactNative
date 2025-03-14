@@ -1,18 +1,13 @@
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet, Platform } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
-import { useFriends } from "../../../store/FriendsContext";
 import FriendDetails from "./FriendDetails";
+import { useSeeker } from "../../../store/SeekerContext";
 
 function MyPeopleList({ onShowForm }) {
-  const { friends } = useFriends();
+  const { friends } = useSeeker();
 
+  console.log(friends);
   function renderFriend({ item }) {
     return <FriendDetails {...item} />;
   }

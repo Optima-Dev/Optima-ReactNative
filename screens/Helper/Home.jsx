@@ -2,7 +2,6 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   Text,
   View,
   Platform,
@@ -11,6 +10,7 @@ import MainHeader from "../../components/UI/MainHeader";
 import DetailItem from "../../components/Terms/DetailItem";
 import Colors from "../../constants/Colors";
 import { useUser } from "../../store/UserContext";
+import FriendsList from "../../components/helper/FriendsList";
 
 const Home = ({ navigation }) => {
   const { user } = useUser();
@@ -52,7 +52,7 @@ const Home = ({ navigation }) => {
         backgroundColor={Colors.green500}
         iconSource={require("../../assets/Images/Forward-Arrow.png")}
       />
-
+      <FriendsList />
       <View style={styles.textContainer}>
         <Text style={styles.bottomText}>
           We will notify you when someone needs help.

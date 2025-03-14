@@ -18,12 +18,12 @@ function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
   });
 
   function handleChangeInputs(key, value) {
-    setPeopleForm((prevState => {
+    setPeopleForm((prevState) => {
       return {
         ...prevState,
         [key]: value,
-      }
-    }));
+      };
+    });
   }
 
   async function handleSubmit() {
@@ -34,6 +34,11 @@ function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
     if (!(isFirstName || isLastName || isEmail)) {
       await onAddPerson(peopleForm);
       onHideForm();
+      setError({
+        firstName: "",
+        lastName: "",
+        email: "",
+      });
     } else {
       setError({
         firstName: isFirstName,
@@ -45,7 +50,11 @@ function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
 
   return (
     <View style={styles.container}>
-      <MyPeopleFormInputs form={peopleForm} onChange={handleChangeInputs} error={error} />
+      <MyPeopleFormInputs
+        form={peopleForm}
+        onChange={handleChangeInputs}
+        error={error}
+      />
 
       <View style={styles.ButtonsContainer}>
         <PrimaryButton
