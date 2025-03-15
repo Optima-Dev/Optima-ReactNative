@@ -34,11 +34,6 @@ function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
     if (!(isFirstName || isLastName || isEmail)) {
       await onAddPerson(peopleForm);
       onHideForm();
-      setError({
-        firstName: "",
-        lastName: "",
-        email: "",
-      });
     } else {
       setError({
         firstName: isFirstName,

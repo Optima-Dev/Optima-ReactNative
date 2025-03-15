@@ -5,11 +5,12 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Platform, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import AppLoading from "expo-app-loading";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
+import AppLoading from "expo-app-loading";
 
 // importing constants
 import Colors from "./constants/Colors";
@@ -42,7 +43,6 @@ import Article from "./screens/Helper/Atricle";
 
 // importing components
 import BackButton from "./components/UI/BackButton";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 // importing contexts
 import AuthProvider, { useAuth } from "./store/AuthContext";
@@ -54,26 +54,27 @@ import SeekerProvider, { useSeeker } from "./store/SeekerContext";
 import { getUser } from "./util/UserHttp";
 import { getFriendRequests, getFriends } from "./util/FriendsHttp";
 
+
 // creating stack navigator
 const Stack = createNativeStackNavigator();
 
 // creating bottom tab navigator
 const MyTabs = createBottomTabNavigator();
 
+
 // creating stack navigator function
 const UnAuthStack = React.memo(() => (
   <Stack.Navigator
     screenOptions={{
-      headerShown: false,
+      headerLeft: () => <BackButton />,
       contentStyle: { backgroundColor: Colors.MainColor },
-      headerShadowVisible: false,
-      headerStyle: {
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTitle: "",
+      headerStyle: { shadowOpacity: 0, elevation: 0 },
       headerTintColor: Colors.MainColor,
-    }}>
+      headerShadowVisible: false,
+      headerTitle: "",
+    }}
+  >
+
     <Stack.Screen
       name='Splash'
       component={Splash}
@@ -82,49 +83,37 @@ const UnAuthStack = React.memo(() => (
         gestureEnabled: false,
       }}
     />
-    <Stack.Screen name='OnBoarding1' component={OnBoarding} />
+
     <Stack.Screen
-      name='Start'
-      component={Start}
-      options={{
-        headerShown: true,
-        headerLeft: () => <BackButton />,
-      }}
+      name='OnBoarding1'
+      component={OnBoarding}
+      options={{ headerShown: false }}
     />
-    <Stack.Screen
-      name='PrivacyTerms1'
-      component={PrivacyTerms1}
-      options={{
-        headerShown: true,
-        headerLeft: () => <BackButton />,
-      }}
-    />
-    <Stack.Screen
-      name='Login'
-      component={Login}
-      options={{
-        headerShown: true,
-        headerLeft: () => <BackButton />,
-      }}
-    />
-    <Stack.Screen
-      name='Signup'
-      component={Signup}
-      options={{
-        headerShown: true,
-        headerLeft: () => <BackButton />,
-      }}
-    />
-    <Stack.Screen
-      name='ForgetPassword'
-      component={ForgetPassword}
-      options={{
-        headerShown: true,
-        headerLeft: () => <BackButton />,
-      }}
-    />
+    
+    <Stack.Screen name='Start' component={Start} />
+    <Stack.Screen name='PrivacyTerms1' component={PrivacyTerms1} />
+    <Stack.Screen name='Login' component={Login} />
+    <Stack.Screen name='Signup' component={Signup} />
+    <Stack.Screen name='ForgetPassword' component={ForgetPassword} />
   </Stack.Navigator>
 ));
+
+const createTabScreen = (name, component, icon, dot) => {
+  return (
+    <MyTabs.Screen
+      name={name}
+      component={component}
+      options={{
+        tabBarIcon: ({ color, focused }) => (
+          <>
+            <Ionicons name={`${icon}${focused ? "" : "-outline"}`} size={28} color={color} />
+            { dot && <View style={styles.notificationDot} />}
+          </>
+        ),
+      }}
+    />
+  )
+}
 
 const SeekerTap = React.memo(() => (
   <MyTabs.Navigator
@@ -133,146 +122,55 @@ const SeekerTap = React.memo(() => (
       headerShown: false,
       backgroundColor: "white",
       tabBarStyle: {
-        height: Platform.OS === "ios" ? 0 : 60,
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        backgroundColor: "#FFFFFF",
-        borderTopEndRadius: 20,
-        borderTopStartRadius: 20,
+        marginBottom: Platform.OS === "ios" ? 0 : 12,
+        // height: Platform.OS === "ios" ? 0 : 60,
+        // backgroundColor: "#FFFFFF",
+        // borderTopEndRadius: 20,
+        // borderTopStartRadius: 20,
       },
       tabBarLabel: ({ color }) => (
-        <Text style={{ fontSize: 14, color }}>{route.name}</Text>
+        <Text style={{ fontSize: 14, color, paddingBottom: 10 }}>{route.name}</Text>
       ),
-    })}>
-    <MyTabs.Screen
-      name='Support'
-      component={Support}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <Ionicons
-            name={`videocam${focused ? "" : "-outline"}`}
-            size={30}
-            color={color}
-          />
-        ),
-      }}
-    />
-    <MyTabs.Screen
-      name='MyVision'
-      component={MyVision}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <Ionicons
-            name={`camera${focused ? "" : "-outline"}`}
-            size={30}
-            color={color}
-          />
-        ),
-      }}
-    />
-    <MyTabs.Screen
-      name='MyPeople'
-      component={MyPeople}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <Ionicons
-            name={`people${focused ? "" : "-outline"}`}
-            size={30}
-            color={color}
-          />
-        ),
-      }}
-    />
-    <MyTabs.Screen
-      name='Settings'
-      component={SettingsScreen}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <Ionicons
-            name={`settings${focused ? "" : "-outline"}`}
-            size={28}
-            color={color}
-          />
-        ),
-      }}
-    />
+    })}
+  >
+    
+    {createTabScreen("Support", Support, "videocam")}
+    {createTabScreen("MyVision", MyVision, "camera")}
+    {createTabScreen("MyPeople", MyPeople, "people")}
+    {createTabScreen("Settings", SettingsScreen, "settings")}
+
   </MyTabs.Navigator>
 ));
 
-const HelperTap = React.memo(({ hasFriendRequests }) => (
+const HelperTap = React.memo(({ hasRequest }) => (
   <MyTabs.Navigator
     screenOptions={({ route }) => ({
       headerShown: false,
       tabBarActiveTintColor: Colors.MainColor,
       tabBarStyle: {
-        height: Platform.OS === "ios" ? 0 : 60,
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        backgroundColor: "#FFFFFF",
-        borderTopEndRadius: 20,
-        borderTopStartRadius: 20,
+        marginBottom: Platform.OS === "ios" ? 0 : 12,
+        // height: Platform.OS === "ios" ? 0 : 60,
+        // backgroundColor: "#FFFFFF",
+        // borderTopEndRadius: 20,
+        // borderTopStartRadius: 20,
       },
       tabBarLabel: ({ color }) => (
         <Text style={{ fontSize: 12.5, color }}>{route.name}</Text>
       ),
-    })}>
-    <MyTabs.Screen
-      name='Home'
-      component={HelperHomeScreen}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <Ionicons
-            name={`home${focused ? "" : "-outline"}`}
-            size={28}
-            color={color}
-          />
-        ),
-      }}
-    />
-    <MyTabs.Screen
-      name='Notifications'
-      component={Notifications}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <View>
-            <Ionicons
-              name={`notifications${focused ? "" : "-outline"}`}
-              size={28}
-              color={color}
-            />
-            {hasFriendRequests && <View style={styles.notificationDot} />}
-          </View>
-        ),
-      }}
-    />
-    <MyTabs.Screen
-      name='Community'
-      component={HelperCommunityScreen}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <Ionicons
-            name={`people${focused ? "" : "-outline"}`}
-            size={28}
-            color={color}
-          />
-        ),
-      }}
-    />
-    <MyTabs.Screen
-      name='Settings'
-      component={SettingsScreen}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <Ionicons
-            name={`settings${focused ? "" : "-outline"}`}
-            size={28}
-            color={color}
-          />
-        ),
-      }}
-    />
+    })}
+  >
+
+    {createTabScreen("Home", HelperHomeScreen, "home")}
+    {createTabScreen("Notifications", Notifications, "notifications", hasRequest)}
+    {createTabScreen("Community", HelperCommunityScreen, "people")}
+    {createTabScreen("Settings", SettingsScreen, "settings")}
+
   </MyTabs.Navigator>
 ));
 
@@ -285,13 +183,11 @@ const SettingsScreen = React.memo(() => {
       screenOptions={{
         headerShown: false,
         headerShadowVisible: false,
-        headerStyle: {
-          shadowOpacity: 0,
-          elevation: 0,
-        },
+        headerStyle: { shadowOpacity: 0, elevation: 0 },
         headerTitle: "",
         headerTintColor: Colors.MainColor,
-      }}>
+      }}
+    >
       <Stack.Screen name='SettingsScreen' component={Settings} />
       <Stack.Screen
         name='Account'
@@ -329,8 +225,9 @@ const HelperCommunityScreen = React.memo(() => (
   </Stack.Navigator>
 ));
 
-const Navigation = React.memo(({ hasFriendRequests }) => {
+const Navigation = React.memo(({ hasRequest }) => {
   const { isAuthenticated, role, isNewUser } = useAuth();
+  
   const MyTab = useMemo(() => {
     if (role === "seeker") {
       return (
@@ -342,8 +239,8 @@ const Navigation = React.memo(({ hasFriendRequests }) => {
         </Stack.Navigator>
       );
     }
-    return <HelperTap hasFriendRequests={hasFriendRequests} />;
-  }, [role, isNewUser, hasFriendRequests]);
+    return <HelperTap hasRequest={hasRequest} />;
+  }, [role, isNewUser]);
 
   return (
     <NavigationContainer>
@@ -358,17 +255,17 @@ const Navigation = React.memo(({ hasFriendRequests }) => {
 
 const Root = React.memo(() => {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const [hasFriendRequests, setHasFriendRequests] = useState(false);
   const { authenticate, handleRole, token } = useAuth();
   const { setUser } = useUser();
   const { setFriends } = useSeeker();
-  const { setRequests } = useHelper();
+  const { setRequests, requests } = useHelper();
+
+  let hasFriendRequests = requests.length > 0;
 
   useEffect(() => {
     async function fetchToken() {
       setIsTryingLogin(true);
-      const storedToken = await AsyncStorage.getItem("token");
-      const storedRole = await AsyncStorage.getItem("role");
+      const [[, storedToken], [, storedRole]] = await AsyncStorage.multiGet(["token", "role"]);
 
       console.log(storedRole, "  ", storedToken);
 
@@ -386,7 +283,6 @@ const Root = React.memo(() => {
           } else {
             const friendRequests = await getFriendRequests(storedToken);
             setRequests(friendRequests.friendRequests);
-            setHasFriendRequests(friendRequests.friendRequests.length > 0);
           }
         } catch (error) {
           alert(error);
@@ -403,7 +299,7 @@ const Root = React.memo(() => {
     return <AppLoading />;
   }
 
-  return <Navigation hasFriendRequests={hasFriendRequests} />;
+  return <Navigation hasRequest={hasFriendRequests} />;
 });
 
 export default function App() {
