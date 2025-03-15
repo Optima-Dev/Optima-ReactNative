@@ -120,12 +120,12 @@ const SeekerTap = React.memo(() => (
     screenOptions={({ route }) => ({
       tabBarActiveTintColor: Colors.MainColor,
       headerShown: false,
-      backgroundColor: "white",
       tabBarStyle: {
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
         marginBottom: Platform.OS === "ios" ? 0 : 12,
+        marginTop: 5,
         // height: Platform.OS === "ios" ? 0 : 60,
         // backgroundColor: "#FFFFFF",
         // borderTopEndRadius: 20,
@@ -141,7 +141,6 @@ const SeekerTap = React.memo(() => (
     {createTabScreen("MyVision", MyVision, "camera")}
     {createTabScreen("MyPeople", MyPeople, "people")}
     {createTabScreen("Settings", SettingsScreen, "settings")}
-
   </MyTabs.Navigator>
 ));
 
@@ -155,13 +154,14 @@ const HelperTap = React.memo(({ hasRequest }) => (
         elevation: 0,
         shadowOpacity: 0,
         marginBottom: Platform.OS === "ios" ? 0 : 12,
+        marginTop: 5,
         // height: Platform.OS === "ios" ? 0 : 60,
         // backgroundColor: "#FFFFFF",
         // borderTopEndRadius: 20,
         // borderTopStartRadius: 20,
       },
       tabBarLabel: ({ color }) => (
-        <Text style={{ fontSize: 12.5, color }}>{route.name}</Text>
+        <Text style={{ fontSize: 14, color }}>{route.name}</Text>
       ),
     })}
   >

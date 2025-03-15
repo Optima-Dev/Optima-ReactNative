@@ -7,7 +7,7 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Colors from "../../constants/Colors";
+import Colors from "../../../constants/Colors";
 
 const ArticleItem = ({ title, date, image, description, toArticle }) => {
   const navigation = useNavigation();

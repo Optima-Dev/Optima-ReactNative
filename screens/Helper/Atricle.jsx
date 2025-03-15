@@ -1,6 +1,6 @@
 import { StyleSheet, View, Platform, ScrollView } from "react-native";
 import BackButton from "../../components/UI/BackButton";
-import ArticleItem from "../../components/helper/ArticleItem";
+import ArticleItem from "../../components/helper/Community/ArticleItem";
 
 const Atricle = ({ route }) => {
   return (
