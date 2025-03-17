@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -6,21 +6,15 @@ import {
   Image,
   PermissionsAndroid,
   Platform,
-  Modal,
-  Pressable,
-  Alert,
 } from "react-native";
+import { Camera } from "expo-camera";
 
 import Colors from "@/constants/Colors";
 import TermsList from "@/components/Terms/TermsList";
 import PrimaryButton from "@/components/UI/PrimaryButton";
-import {
-  PermissionStatus,
-  useCameraPermissions,
-  useMicrophonePermissions,
-} from "expo-camera";
+import MainModal from "../components/UI/MainModal";
 
-async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
+async function requestPermissions(setModalVisible) {
   try {
     if (Platform.OS === "android") {
       const granted = await PermissionsAndroid.requestMultiple([
@@ -35,11 +29,26 @@ async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
           PermissionsAndroid.RESULTS.GRANTED
       ) {
         console.log("Camera & Mic permissions granted ✅");
+        return true;
       } else {
         console.log("Camera or Mic permissions denied ❌");
-        setModalVisible(true); // Show warning modal if denied
+        setModalVisible(true);
+        return false;
       }
     } else if (Platform.OS === "ios") {
+      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+      const { status: microphoneStatus } = await Camera.requestMicrophonePermissionsAsync();
+
+      console.log("Camera status", cameraStatus);
+      console.log("Microphone status", microphoneStatus);
+      
+      if (cameraStatus === "granted" && microphoneStatus === "granted") {
+        console.log("Camera & Mic permissions granted ✅");
+        return true;
+      } else {
+        console.log("Camera or Mic permissions denied ❌");
+        return false;
+      }
     }
   } catch (err) {
     console.warn(err);
@@ -47,79 +56,17 @@ async function requestPermissions(setModalVisible, verifyPermissionsOnIos) {
   }
 }
 
-function PrivacyTerms1({ navigation }) {
+function PrivacyTerms({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [cameraPermission, requestCamera] = useCameraPermissions();
-  const [micPermission, requestMic] = useMicrophonePermissions();
 
-  // async function verifyPermissionsOnIos() {
-  // try {
-  //   // First check current status without requesting
-  //   if (cameraPermission.status === PermissionStatus.UNDETERMINED ||
-  //       micPermission.status === PermissionStatus.UNDETERMINED) {
-
-  //     // Request both permissions simultaneously
-  //     const [cameraResponse, micResponse] = await Promise.all([
-  //       requestCamera(),
-  //       requestMic()
-  //     ]);
-
-  //     // Check immediate responses
-  //     if (!cameraResponse.granted || !micResponse.granted) {
-  //       return false;
-  //     }
-  //   }
-
-  //  // Final check after potential updates
-  //   const finalCameraStatus = cameraPermission.status === PermissionStatus.GRANTED;
-  //   const finalMicStatus = micPermission.status === PermissionStatus.GRANTED;
-
-  //   return finalCameraStatus && finalMicStatus;
-
-  // } catch (error) {
-  //   console.error("Permission error:", error);
-  //   return false;
-  // }
-  // }
-
-  // async function handleAllow() {
-  //   if (Platform.OS === 'ios') {
-  //     // Explicitly request permissions again to trigger native dialog
-  //     const [cameraResponse, micResponse] = await Promise.all([
-  //       requestCamera(),
-  //       requestMic(),
-  //     ]);
-
-  //     if (!(cameraResponse.granted && micResponse.granted)) {
-  //       setModalVisible(true);
-  //     }
-  //   }
-  //   const granted = await requestPermissions(setModalVisible, verifyPermissionsOnIos);
-  //   if (granted) {
-  //     navigation.navigate("Login");
-  //   } else {
-  //     setModalVisible(true);
-  //   }
-  // }
-
-  function agreementHandler() {
-    // Alert.alert(
-    //   "Camera, Video and Microphone",
-    //   "Allow optima to have control over these while using app",
-    //   [
-    //     {
-    //       text: "Cancel",
-    //       onPress: () => {
-    //         setModalVisible(true); // Show warning modal
-    //         // Stay on current page
-    //       }
-    //     },
-    //     {
-    //       text: "Allow",
-    //       onPress: handleAllow
-    //     },
-    //   ]
-    // );
+  async function agreementHandler() {
+    
+    // const isAllowed = await requestPermissions(setModalVisible);
+    // if (!isAllowed) {
+      // setModalVisible(prev => !prev);
+    // }  else {
+      // navigation.navigate("Login");
+    // }
 
     requestPermissions(setModalVisible);
     if (!modalVisible) {
@@ -155,28 +102,16 @@ function PrivacyTerms1({ navigation }) {
           textColor='white'
         />
       </View>
-
-      {/* Warning Modal */}
-      <Modal visible={modalVisible} transparent animationType='fade'>
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Image
-              source={require("../assets/Images/WarningIcon.png")}
-              style={styles.warningIcon}
-            />
-            <Text style={styles.modalTitle}>Warning!</Text>
-            <Text style={styles.modalMessage}>
-              By canceling, you will have to accept it later if you want to use
-              our app properly.
-            </Text>
-            <Pressable
-              style={styles.okButton}
-              onPress={() => setModalVisible(false)}>
-              <Text style={styles.okButtonText}>OK</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+  
+      <MainModal
+        onPress={agreementHandler}
+        isModalOpen={modalVisible}
+        logo={require("@/assets/Images/WarningIcon.png")}
+        backgroundColor={Colors.yellow700}
+        subTitle="By cancelling you will have to accept it later if you want to use our app properly."
+        title="Warning!"
+        titleColor={Colors.black}
+      />
     </View>
   );
 }
@@ -262,4 +197,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PrivacyTerms1;
+export default PrivacyTerms;

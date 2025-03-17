@@ -1,8 +1,8 @@
 // importing react hooks
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 // importing navigation
-import { Platform, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -18,7 +18,7 @@ import Colors from "./constants/Colors";
 // importing screens
 import Splash from "@/screens/Splash";
 import OnBoarding from "@/screens/OnBoarding";
-import PrivacyTerms1 from "@/screens/PrivacyTerms1";
+import PrivacyTerms from "@/screens/PrivacyTerms";
 import Start from "@/screens/Start";
 import Login from "@/screens/Authentication/Login";
 import Signup from "@/screens/Authentication/Signup";
@@ -91,7 +91,7 @@ const UnAuthStack = React.memo(() => (
     />
     
     <Stack.Screen name='Start' component={Start} />
-    <Stack.Screen name='PrivacyTerms1' component={PrivacyTerms1} />
+    <Stack.Screen name='PrivacyTerms' component={PrivacyTerms} />
     <Stack.Screen name='Login' component={Login} />
     <Stack.Screen name='Signup' component={Signup} />
     <Stack.Screen name='ForgetPassword' component={ForgetPassword} />
@@ -304,15 +304,19 @@ const Root = React.memo(() => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <UserProvider>
-        <HelperProvider>
-          <SeekerProvider>
-            <Root />
-          </SeekerProvider>
-        </HelperProvider>
-      </UserProvider>
-    </AuthProvider>
+    <>
+      <StatusBar barStyle="default" />
+      
+      <AuthProvider>
+        <UserProvider>
+          <HelperProvider>
+            <SeekerProvider>
+              <Root />
+            </SeekerProvider>
+          </HelperProvider>
+        </UserProvider>
+      </AuthProvider>
+    </>
   );
 }
 

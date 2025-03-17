@@ -18,63 +18,63 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-  <ScrollView
-    contentContainerStyle={{ flexGrow: 1 }}
-    alwaysBounceVertical={false}
-  >
-    <View style={styles.contentContainer}>
-      <MainHeader
-        title={`Hello, ${user.firstName} ${user.lastName}!`}
-        subtitle="We would like to thank you for investing your precious time in helping people."
-        imageTitle
-      />
-
-      <Image
-        source={require("../../assets/Images/Ellipse 1.png")}
-        style={[styles.ring2]}
-      />
-
-      <Pressable style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>
-          People who are waiting today for help from all over the world
-        </Text>
-
-        <View style={styles.numberContainer}>
-          <Image
-            source={require("../../assets/Images/Ellipse 10.png")}
-            style={styles.ring}
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        alwaysBounceVertical={false}
+      >
+        <View style={styles.contentContainer}>
+          <MainHeader
+            title={`Hello, ${user.firstName} ${user.lastName}!`}
+            subtitle="We would like to thank you for investing your precious time in helping people."
+            imageTitle
           />
-          <Text style={styles.numberText}>200</Text>
+          
+          {/* <Image
+            source={require("../../assets/Images/Ellipse 1.png")}
+            style={[styles.ring2]}
+          /> */}
+
+          <Pressable style={styles.buttonContainer}>
+            <Text style={styles.buttonText}>
+              People who are waiting today for help from all over the world
+            </Text>
+
+            <View style={styles.numberContainer}>
+              <Image
+                source={require("../../assets/Images/Ellipse 10.png")}
+                style={styles.ring}
+              />
+              <Text style={styles.numberText}>200</Text>
+            </View>
+            <Image
+              source={require("../../assets/Images/Ellipse 11.png")}
+              style={[styles.ring, { top: 88, left: 0 }]}
+            />
+          </Pressable>
+
+          <DetailItem
+            onPress={() => {
+              navigation.navigate("Instructions");
+            }}
+            text="How to pick-up a call"
+            backgroundColor={Colors.green500}
+            iconSource={require("../../assets/Images/Forward-Arrow.png")}
+          />
+
+          <FriendsList />
         </View>
-        <Image
-          source={require("../../assets/Images/Ellipse 11.png")}
-          style={[styles.ring, { top: 88, left: 0 }]}
-        />
-      </Pressable>
+      </ScrollView>
 
-      <DetailItem
-        onPress={() => {
-          navigation.navigate("Instructions");
-        }}
-        text="How to pick-up a call"
-        backgroundColor={Colors.green500}
-        iconSource={require("../../assets/Images/Forward-Arrow.png")}
-      />
-
-      <FriendsList />
+      <View style={styles.textContainer}>
+        <Text style={styles.bottomText}>
+          We will notify you when someone needs help.
+        </Text>
+        {/* <Image
+          source={require("../../assets/Images/Ellipse 2.png")}
+          style={[styles.ring2]}
+        /> */}
+      </View>
     </View>
-  </ScrollView>
-
-  <View style={styles.textContainer}>
-    <Text style={styles.bottomText}>
-      We will notify you when someone needs help.
-    </Text>
-    {/* <Image
-      source={require("../../assets/Images/Ellipse 2.png")}
-      style={[styles.ring2]}
-    /> */}
-  </View>
-</View>
   );
 };
 
