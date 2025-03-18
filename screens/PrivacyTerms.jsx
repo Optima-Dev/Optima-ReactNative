@@ -38,9 +38,6 @@ async function requestPermissions(setModalVisible) {
     } else if (Platform.OS === "ios") {
       const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
       const { status: microphoneStatus } = await Camera.requestMicrophonePermissionsAsync();
-
-      console.log("Camera status", cameraStatus);
-      console.log("Microphone status", microphoneStatus);
       
       if (cameraStatus === "granted" && microphoneStatus === "granted") {
         console.log("Camera & Mic permissions granted ✅");
