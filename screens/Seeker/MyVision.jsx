@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CameraView } from "expo-camera";
 import * as FileSystem from "expo-file-system";
@@ -7,13 +7,15 @@ import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useFocusEffect } from "@react-navigation/native";
 import { BallIndicator } from "react-native-indicators";
+import { GOOGLE_API_KEY } from "@env";
 
-const API_KEY = "AIzaSyCUANhfp0Nj4ttt04DIGcmVti8W48ot2tU"; // Replace with your actual API key
+const API_KEY = GOOGLE_API_KEY;
+console.log(API_KEY);
 
 const MyVision = () => {
   const [isCameraActive, setIsCameraActive] = useState(true);
   const cameraRef = useRef();
-  const [uri, setUri] = useState();
+  const [uri, setUri] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [answer, setAnswer] = useState("");
 
@@ -69,7 +71,6 @@ const MyVision = () => {
       setIsLoading(false);
     }
   }
-
 
   return (
     <View style={styles.container}>

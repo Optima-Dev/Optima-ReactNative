@@ -2,7 +2,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 
 // importing navigation
-import { Platform, SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
+import {
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -54,13 +61,11 @@ import SeekerProvider, { useSeeker } from "./store/SeekerContext";
 import { getUser } from "./util/UserHttp";
 import { getFriendRequests, getFriends } from "./util/FriendsHttp";
 
-
 // creating stack navigator
 const Stack = createNativeStackNavigator();
 
 // creating bottom tab navigator
 const MyTabs = createBottomTabNavigator();
-
 
 // creating stack navigator function
 const UnAuthStack = React.memo(() => (
@@ -72,9 +77,7 @@ const UnAuthStack = React.memo(() => (
       headerTintColor: Colors.MainColor,
       headerShadowVisible: false,
       headerTitle: "",
-    }}
-  >
-
+    }}>
     <Stack.Screen
       name='Splash'
       component={Splash}
@@ -89,7 +92,7 @@ const UnAuthStack = React.memo(() => (
       component={OnBoarding}
       options={{ headerShown: false }}
     />
-    
+
     <Stack.Screen name='Start' component={Start} />
     <Stack.Screen name='PrivacyTerms' component={PrivacyTerms} />
     <Stack.Screen name='Login' component={Login} />
@@ -106,14 +109,18 @@ const createTabScreen = (name, component, icon, dot) => {
       options={{
         tabBarIcon: ({ color, focused }) => (
           <>
-            <Ionicons name={`${icon}${focused ? "" : "-outline"}`} size={28} color={color} />
-            { dot && <View style={styles.notificationDot} />}
+            <Ionicons
+              name={`${icon}${focused ? "" : "-outline"}`}
+              size={28}
+              color={color}
+            />
+            {dot && <View style={styles.notificationDot} />}
           </>
         ),
       }}
     />
-  )
-}
+  );
+};
 
 const SeekerTap = React.memo(() => (
   <MyTabs.Navigator
@@ -124,18 +131,15 @@ const SeekerTap = React.memo(() => (
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        marginBottom: Platform.OS === "ios" ? 0 : 12,
-        // height: Platform.OS === "ios" ? 0 : 60,
-        // backgroundColor: "#FFFFFF",
-        // borderTopEndRadius: 20,
-        // borderTopStartRadius: 20,
+        // marginBottom: Platform.OS === "ios" ? 0 : 12,
+        height: Platform.OS === "ios" ? 0 : 60, // it suits the android
       },
       tabBarLabel: ({ color }) => (
-        <Text style={{ fontSize: 14, color, paddingBottom: 10 }}>{route.name}</Text>
+        <Text style={{ fontSize: 14, color, paddingBottom: 10 }}>
+          {route.name}
+        </Text>
       ),
-    })}
-  >
-    
+    })}>
     {createTabScreen("Support", Support, "videocam")}
     {createTabScreen("MyVision", MyVision, "camera")}
     {createTabScreen("MyPeople", MyPeople, "people")}
@@ -152,23 +156,22 @@ const HelperTap = React.memo(({ hasRequest }) => (
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        marginBottom: Platform.OS === "ios" ? 0 : 12,
-        // height: Platform.OS === "ios" ? 0 : 60,
-        // backgroundColor: "#FFFFFF",
-        // borderTopEndRadius: 20,
-        // borderTopStartRadius: 20,
+        // marginBottom: Platform.OS === "ios" ? 0 : 12,
+        height: Platform.OS === "ios" ? 0 : 60, // it suits the android
       },
       tabBarLabel: ({ color }) => (
         <Text style={{ fontSize: 14, color }}>{route.name}</Text>
       ),
-    })}
-  >
-
+    })}>
     {createTabScreen("Home", HelperHomeScreen, "home")}
-    {createTabScreen("Notifications", Notifications, "notifications", hasRequest)}
+    {createTabScreen(
+      "Notifications",
+      Notifications,
+      "notifications",
+      hasRequest
+    )}
     {createTabScreen("Community", HelperCommunityScreen, "people")}
     {createTabScreen("Settings", SettingsScreen, "settings")}
-
   </MyTabs.Navigator>
 ));
 
@@ -184,8 +187,7 @@ const SettingsScreen = React.memo(() => {
         headerStyle: { shadowOpacity: 0, elevation: 0 },
         headerTitle: "",
         headerTintColor: Colors.MainColor,
-      }}
-    >
+      }}>
       <Stack.Screen name='SettingsScreen' component={Settings} />
       <Stack.Screen
         name='Account'
@@ -225,7 +227,7 @@ const HelperCommunityScreen = React.memo(() => (
 
 const Navigation = React.memo(({ hasRequest }) => {
   const { isAuthenticated, role, isNewUser } = useAuth();
-  
+
   const MyTab = useMemo(() => {
     if (role === "seeker") {
       return (
@@ -253,6 +255,7 @@ const Navigation = React.memo(({ hasRequest }) => {
 
 const Root = React.memo(() => {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { authenticate, handleRole, token } = useAuth();
   const { setUser } = useUser();
   const { setFriends } = useSeeker();
@@ -263,7 +266,10 @@ const Root = React.memo(() => {
   useEffect(() => {
     async function fetchToken() {
       setIsTryingLogin(true);
-      const [[, storedToken], [, storedRole]] = await AsyncStorage.multiGet(["token", "role"]);
+      const [[, storedToken], [, storedRole]] = await AsyncStorage.multiGet([
+        "token",
+        "role",
+      ]);
 
       console.log(storedRole, "  ", storedToken);
 
@@ -288,13 +294,14 @@ const Root = React.memo(() => {
       }
 
       setIsTryingLogin(false);
+      setIsLoading(false);
     }
 
     fetchToken();
   }, [token]);
 
-  if (isTryingLogin) {
-    return <AppLoading />;
+  if (isTryingLogin || isLoading) {
+    return <AppLoading autoHideSplash />;
   }
 
   return <Navigation hasRequest={hasFriendRequests} />;
@@ -303,8 +310,8 @@ const Root = React.memo(() => {
 export default function App() {
   return (
     <>
-      <StatusBar barStyle="default" />
-      
+      <StatusBar barStyle='default' />
+
       <AuthProvider>
         <UserProvider>
           <HelperProvider>
