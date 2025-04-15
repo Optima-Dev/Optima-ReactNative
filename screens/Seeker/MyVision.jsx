@@ -1,26 +1,24 @@
-import { useRef, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { CameraView } from 'expo-camera';
+import React, { useRef, useState } from "react";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { CameraView } from "expo-camera";
+import * as FileSystem from "expo-file-system";
+import genai from "@google/generative-ai";
+import PrimaryButton from "../../components/UI/PrimaryButton";
+import Colors from "../../constants/Colors";
+import { useFocusEffect } from "@react-navigation/native";
+import { BallIndicator } from "react-native-indicators";
+import { GOOGLE_API_KEY } from "@env";
 
-import PrimaryButton from '../../components/UI/PrimaryButton';
-import Colors from '../../constants/Colors';
-import { useFocusEffect } from '@react-navigation/native';
-import { BallIndicator } from 'react-native-indicators';
-
-const DUMMMY_ANSWER = `This image features an open notebook with a mix of text, illustrations, and designs. Left Page:\n
-Text: The page contains hand-written text in what appears to be Chinese characters.\n
-There is a large amount of blue text at the top and black text in the middle\n
-Graphic Element: A block labeled "CAPTURE ONE" is in the center, featuring details about "Capture One 21 Pro" software, including a version number (14.2.0.48) and copyright information (1999–2021 Capture One A/S).\n
-Drawing: A small green-colored cup or plant with handwritten words.
-`
+const API_KEY = GOOGLE_API_KEY;
+console.log(API_KEY);
 
 const MyVision = () => {
   const [isCameraActive, setIsCameraActive] = useState(true);
   const cameraRef = useRef();
-  const [uri, setUri] = useState();
+  const [uri, setUri] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [answer, setAnswer] = useState("");
 
-  // useFocusEffect because when the screen is not focused, the camera should not be active if we used useEffect the camera will be active in the background
   useFocusEffect(() => {
     setIsCameraActive(true);
 
@@ -33,76 +31,94 @@ const MyVision = () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
       setUri(photo.uri);
-
-      await getInfoFromAi();
+      setAnswer(""); // Clear previous answer
+      await getInfoFromAi(photo.uri);
     }
   }
 
   async function reTakePicture() {
     setUri(null);
+    setAnswer("");
   }
 
-  async function getInfoFromAi() {
+  async function getInfoFromAi(imageUri) {
     setIsLoading(true);
 
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+    try {
+      const base64Image = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
-    return () => clearTimeout(timer);
+      const genAI = new genai.GoogleGenerativeAI(API_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+      const imagePart = {
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: base64Image,
+        },
+      };
+
+      const result = await model.generateContent([
+        "Describe this image in detail.",
+        imagePart,
+      ]);
+      const responseText = result.response.text();
+      setAnswer(responseText);
+      console.log(answer);
+    } catch (error) {
+      console.error("Error describing image:", error);
+      setAnswer("Failed to describe image. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <View style={styles.container}>
-
-      {
-        uri ? (
-          <>
-            <Image source={{ uri }} style={{ flex: 1 }} />
-            <ScrollView style={styles.answerContainer}>
-              {/* <Image source={require('../../assets/Images/mingcute_voice-fill.png')} style={styles.voiceLogo} /> */}
-              
-              { !isLoading && <Text style={styles.answer}>{ DUMMMY_ANSWER }</Text> }
-              { isLoading && (
-                <BallIndicator
-                  color='white'
-                  size={80}
-                  count={9}
-                  style={{ top: '360%' }}
-                />
-              )}
-            </ScrollView>
-          </>
-        ) : (
-          isCameraActive && <CameraView style={{ flex: 1 }} ref={cameraRef} />
-        )
-      }
+      {uri ? (
+        <>
+          <Image source={{ uri }} style={{ flex: 1 }} />
+          <ScrollView style={styles.answerContainer}>
+            {isLoading && (
+              <BallIndicator
+                color='white'
+                size={80}
+                count={9}
+                style={{ top: "360%" }}
+              />
+            )}
+            {!isLoading && <Text style={styles.answer}>{answer}</Text>}
+          </ScrollView>
+        </>
+      ) : (
+        isCameraActive && <CameraView style={{ flex: 1 }} ref={cameraRef} />
+      )}
 
       <View style={styles.buttonsContainer}>
         <PrimaryButton
-          title="Take A Picture"
+          title='Take A Picture'
           backgroundColor={Colors.MainColor}
-          textColor="white"
+          textColor='white'
           isLoading={false}
           onPress={uri ? reTakePicture : takePicture}
-          style={{ width: uri ? '49%' : '100%' }}
+          style={{ width: uri ? "49%" : "100%" }}
         />
 
-        { uri && (
+        {uri && (
           <PrimaryButton
-            title="Repeat"
+            title='Repeat'
             backgroundColor={Colors.green500}
             textColor={Colors.MainColor}
             isLoading={false}
-            onPress={getInfoFromAi}
-            style={{ width: '49%' }}
+            onPress={() => getInfoFromAi(uri)}
+            style={{ width: "49%" }}
           />
         )}
       </View>
-
     </View>
   );
-}
+};
 
 export default MyVision;
 
@@ -111,34 +127,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   answerContainer: {
-    backgroundColor: '#41403DD6',
-    position: 'absolute',
+    backgroundColor: "#41403DD6",
+    position: "absolute",
     margin: 20,
-    width: '90%',
-    height: '88%', // 'auto' to fit content
+    width: "90%",
+    height: "88%",
     borderRadius: 22,
   },
   answer: {
     padding: 10,
     fontSize: 20,
-    fontWeight: '300',
+    fontWeight: "300",
     color: Colors.white,
     lineHeight: 28,
   },
-  voiceLogo: {
-    position: 'absolute',
-    right: -20,
-    top: -20,
-  },
   buttonsContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     marginVertical: 10,
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  indicatorStyles: {
-    top: '360%',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });

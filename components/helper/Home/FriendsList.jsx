@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
-import FriendList from "./FriendList";
+import FriendItem from "./FriendItem";
 import Colors from "../../../constants/Colors";
 
 
@@ -19,7 +19,7 @@ export default function FriendsList() {
     return (
       <>
         {isNewLetter && <Text style={styles.firstLetter}>{firstLetter}</Text>}
-        <FriendList {...item} isLastName={index === friends.length - 1} />
+        <FriendItem {...item} isLastName={index === friends.length - 1} />
       </>
     );
   }
