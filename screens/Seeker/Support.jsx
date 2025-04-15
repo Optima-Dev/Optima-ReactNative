@@ -10,7 +10,7 @@ const Support = ({ navigation }) => {
       <View style={styles.TitleContainer}>
         <Text style={styles.title}>Optima</Text>
       </View>
-      <CallButton onPress={() => console.log("Calling support")} />
+      <CallButton onPress={() => navigation.navigate('CallVolunteer')} />
       <ArrowButton
         text={"MY VISION"}
         type={"MyVision"}

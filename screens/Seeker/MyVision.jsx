@@ -7,7 +7,6 @@ import Colors from '../../constants/Colors';
 import { useFocusEffect } from '@react-navigation/native';
 import { BallIndicator } from 'react-native-indicators';
 
-
 const DUMMMY_ANSWER = `This image features an open notebook with a mix of text, illustrations, and designs. Left Page:\n
 Text: The page contains hand-written text in what appears to be Chinese characters.\n
 There is a large amount of blue text at the top and black text in the middle\n
@@ -19,13 +18,15 @@ const MyVision = () => {
   const [isCameraActive, setIsCameraActive] = useState(true);
   const cameraRef = useRef();
   const [uri, setUri] = useState();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-
+  // useFocusEffect because when the screen is not focused, the camera should not be active if we used useEffect the camera will be active in the background
   useFocusEffect(() => {
     setIsCameraActive(true);
 
-    return () => setIsCameraActive(false);
+    return () => {
+      setIsCameraActive(false);
+    }
   });
 
   async function takePicture() {
@@ -69,7 +70,7 @@ const MyVision = () => {
                   count={9}
                   style={{ top: '360%' }}
                 />
-              ) }
+              )}
             </ScrollView>
           </>
         ) : (
@@ -136,5 +137,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  indicatorStyles: {
+    top: '360%',
   },
 });
