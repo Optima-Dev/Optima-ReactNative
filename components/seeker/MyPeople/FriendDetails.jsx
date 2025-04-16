@@ -5,13 +5,13 @@ import Colors from "../../../constants/Colors";
 import EditFriendsModal from "./EditFriendsModal";
 import { editFriend, removeFriend } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
-import { useFriends } from "../../../store/FriendsContext";
+import { useSeeker } from "../../../store/SeekerContext";
 
 const FriendDetails = ({ user, customFirstName, customLastName }) => {
   const [showModal, setShowModal] = useState(false);
 
   const { token } = useAuth();
-  const { removeFriend: deleteFriend, editFriend: updateFriend } = useFriends();
+  const { removeFriend: deleteFriend, editFriend: updateFriend } = useSeeker();
 
   async function handleRemoveUser(friendId) {
     try {

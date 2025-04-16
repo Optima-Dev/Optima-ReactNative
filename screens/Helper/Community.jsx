@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, View, Platform } from "react-native";
 import ForgetPassHeader from "../../components/Auth/ForgetPassHeader";
 import SearchInput from "../../components/UI/SearchInput";
-import ArticleItem from "../../components/helper/ArticleItem";
+import ArticleItem from "../../components/helper/Community/ArticleItem";
 
 const subTitle =
   "Welcome to optima’s community where you can find everything related to us and the people we help.";

@@ -17,10 +17,9 @@ function Card({ text, subText, imageSource, role }) {
   const { handleRole } = useContext(AuthContext);
 
   function handleNavigation() {
-    navigation.navigate("PrivacyTerms1");
+    navigation.navigate("PrivacyTerms");
     handleRole(role);
   }
-
 
   return (
     <Pressable
