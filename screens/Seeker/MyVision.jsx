@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CameraView } from "expo-camera";
-import * as FileSystem from "expo-file-system";
+import { readAsStringAsync, EncodingType } from "expo-file-system";
 import genai from "@google/generative-ai";
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
@@ -45,8 +45,8 @@ const MyVision = () => {
     setIsLoading(true);
 
     try {
-      const base64Image = await FileSystem.readAsStringAsync(imageUri, {
-        encoding: FileSystem.EncodingType.Base64,
+      const base64Image = await readAsStringAsync(imageUri, {
+        encoding: EncodingType.Base64,
       });
 
       const genAI = new genai.GoogleGenerativeAI(API_KEY);
