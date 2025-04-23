@@ -1,23 +1,40 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CameraView } from "expo-camera";
 import { readAsStringAsync, EncodingType } from "expo-file-system";
 import genai from "@google/generative-ai";
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { BallIndicator } from "react-native-indicators";
 import { GOOGLE_API_KEY } from "@env";
+import * as Speech from 'expo-speech';
 
 const API_KEY = GOOGLE_API_KEY;
 console.log(API_KEY);
 
 const MyVision = () => {
   const [isCameraActive, setIsCameraActive] = useState(true);
-  const cameraRef = useRef();
   const [uri, setUri] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [answer, setAnswer] = useState("");
+  const cameraRef = useRef();
+  
+  const isCancelledSpeechRef = useRef(false);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      Speech.stop();
+      isCancelledSpeechRef.current = true;
+    });
+
+    return () => {
+      unsubscribe();
+      isCancelledSpeechRef.current = true;
+    };
+  }, [navigation]);
+
 
   useFocusEffect(() => {
     setIsCameraActive(true);
@@ -29,6 +46,8 @@ const MyVision = () => {
 
   async function takePicture() {
     if (cameraRef.current) {
+      Speech.stop();
+      isCancelledSpeechRef.current = true;
       const photo = await cameraRef.current.takePictureAsync();
       setUri(photo.uri);
       setAnswer(""); // Clear previous answer
@@ -37,12 +56,16 @@ const MyVision = () => {
   }
 
   async function reTakePicture() {
+    Speech.stop();
+    isCancelledSpeechRef.current = true;
     setUri(null);
     setAnswer("");
   }
 
   async function getInfoFromAi(imageUri) {
     setIsLoading(true);
+    Speech.stop();
+    isCancelledSpeechRef.current = false;
 
     try {
       const base64Image = await readAsStringAsync(imageUri, {
@@ -63,9 +86,15 @@ const MyVision = () => {
         "Describe this image in detail.",
         imagePart,
       ]);
+
+      if (isCancelledSpeechRef.current) return;
+
       const responseText = result.response.text();
       setAnswer(responseText);
-      console.log(answer);
+
+      if (!isCancelledSpeechRef.current) {
+        Speech.speak(responseText);
+      }
     } catch (error) {
       console.error("Error describing image:", error);
       setAnswer("Failed to describe image. Please try again.");
