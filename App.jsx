@@ -38,6 +38,7 @@ import MyVision from "./screens/Seeker/MyVision";
 import MyPeople from "./screens/Seeker/MyPeople";
 import SekeerSettings from "./screens/Seeker/Settings";
 import VoiceControl from "./screens/Seeker/VoiceControl";
+import CallVolunteer from "./screens/Seeker/CallVolunteer";
 
 // importing helper screens
 import Home from "./screens/Helper/Home";
@@ -131,16 +132,16 @@ const SeekerTap = React.memo(() => (
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        // marginBottom: Platform.OS === "ios" ? 0 : 12,
-        height: Platform.OS === "ios" ? 0 : 60, // it suits the android
+        marginBottom: Platform.OS === "ios" ? 0 : 12,
+        // height: Platform.OS === "ios" ? 'auto' : 60,
       },
       tabBarLabel: ({ color }) => (
-        <Text style={{ fontSize: 14, color, paddingBottom: 10 }}>
-          {route.name}
-        </Text>
+        <Text style={{ fontSize: 14, color }}>{route.name}</Text>
       ),
-    })}>
-    {createTabScreen("Support", Support, "videocam")}
+    })}
+  >
+    
+    {createTabScreen("Support", SeekerSupport, "videocam")}
     {createTabScreen("MyVision", MyVision, "camera")}
     {createTabScreen("MyPeople", MyPeople, "people")}
     {createTabScreen("Settings", SettingsScreen, "settings")}
@@ -156,8 +157,8 @@ const HelperTap = React.memo(({ hasRequest }) => (
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        // marginBottom: Platform.OS === "ios" ? 0 : 12,
-        height: Platform.OS === "ios" ? 0 : 60, // it suits the android
+        marginBottom: Platform.OS === "ios" ? 0 : 12,
+        // height: Platform.OS === "ios" ? 0 : 60,
       },
       tabBarLabel: ({ color }) => (
         <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -173,6 +174,13 @@ const HelperTap = React.memo(({ hasRequest }) => (
     {createTabScreen("Community", HelperCommunityScreen, "people")}
     {createTabScreen("Settings", SettingsScreen, "settings")}
   </MyTabs.Navigator>
+));
+
+const SeekerSupport = React.memo(() => (
+  <Stack.Navigator screenOptions={{ headerShown: false }} lazy={false}>
+    <Stack.Screen name='SupportScreen' component={Support} />
+    <Stack.Screen name='CallVolunteer' component={CallVolunteer} />
+  </Stack.Navigator>
 ));
 
 const SettingsScreen = React.memo(() => {
@@ -310,7 +318,7 @@ const Root = React.memo(() => {
 export default function App() {
   return (
     <>
-      <StatusBar barStyle='default' />
+      <StatusBar barStyle="default" />
 
       <AuthProvider>
         <UserProvider>
