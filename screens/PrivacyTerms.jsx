@@ -1,13 +1,8 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  PermissionsAndroid,
-  Platform,
-} from "react-native";
+import { View, Text, StyleSheet, Image, Platform, Alert } from "react-native";
 import { Camera } from "expo-camera";
+import { Audio } from "expo-av"; // For microphone permissions
+import { Linking } from "react-native"; // For opening settings
 
 import Colors from "@/constants/Colors";
 import TermsList from "@/components/Terms/TermsList";
@@ -16,39 +11,33 @@ import MainModal from "../components/UI/MainModal";
 
 async function requestPermissions(setModalVisible) {
   try {
-    if (Platform.OS === "android") {
-      const granted = await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      ]);
-
-      if (
-        granted["android.permission.CAMERA"] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
-        granted["android.permission.RECORD_AUDIO"] ===
-          PermissionsAndroid.RESULTS.GRANTED
-      ) {
-        console.log("Camera & Mic permissions granted ✅");
-        return true;
-      } else {
-        console.log("Camera or Mic permissions denied ❌");
-        setModalVisible(true);
-        return false;
-      }
-    } else if (Platform.OS === "ios") {
-      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
-      const { status: microphoneStatus } = await Camera.requestMicrophonePermissionsAsync();
-      
-      if (cameraStatus === "granted" && microphoneStatus === "granted") {
-        console.log("Camera & Mic permissions granted ✅");
-        return true;
-      } else {
-        console.log("Camera or Mic permissions denied ❌");
-        return false;
-      }
+    // Request Camera Permission
+    const { status: cameraStatus } =
+      await Camera.requestCameraPermissionsAsync();
+    if (cameraStatus !== "granted") {
+      console.log("Camera permission denied ❌");
+      setModalVisible(true);
+      return false;
     }
+    console.log("Camera permission granted ✅");
+
+    // Request Microphone Permission (for voice recognition)
+    const { status: micStatus } = await Audio.requestPermissionsAsync();
+    if (micStatus !== "granted") {
+      console.log("Microphone permission denied ❌");
+      setModalVisible(true);
+      return false;
+    }
+    console.log("Microphone permission granted ✅");
+
+    // Note: Speech recognition permission (iOS) will be requested by @react-native-voice/voice
+    // when Voice.start() is called in the Support component. If you want to request it here,
+    // see the optional step below.
+
+    return true;
   } catch (err) {
-    console.warn(err);
+    console.warn("Error requesting permissions:", err);
+    setModalVisible(true);
     return false;
   }
 }
@@ -57,17 +46,11 @@ function PrivacyTerms({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   async function agreementHandler() {
-    
-    // const isAllowed = await requestPermissions(setModalVisible);
-    // if (!isAllowed) {
-      // setModalVisible(prev => !prev);
-    // }  else {
-      // navigation.navigate("Login");
-    // }
-
-    requestPermissions(setModalVisible);
-    if (!modalVisible) {
+    const isAllowed = await requestPermissions(setModalVisible);
+    if (isAllowed) {
       navigation.navigate("Login");
+    } else {
+      setModalVisible(true);
     }
   }
 
@@ -99,15 +82,20 @@ function PrivacyTerms({ navigation }) {
           textColor='white'
         />
       </View>
-  
+
       <MainModal
-        onPress={agreementHandler}
+        onPress={() => setModalVisible(false)} // Close modal without navigating
         isModalOpen={modalVisible}
         logo={require("@/assets/Images/WarningIcon.png")}
         backgroundColor={Colors.yellow700}
-        subTitle="By cancelling you will have to accept it later if you want to use our app properly."
-        title="Warning!"
+        subTitle='Camera and microphone permissions are required to use this app. Please enable them in your device settings.'
+        title='Permission Required'
         titleColor={Colors.black}
+        buttonText='Open Settings'
+        onButtonPress={() => {
+          Linking.openSettings();
+          setModalVisible(false);
+        }}
       />
     </View>
   );
@@ -131,7 +119,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     color: Colors.MainColor,
-    marginTop: Platform.OS === "android" ? 5 : 12,
+    marginTop: Platform.OS === "ios" ? 12 : 5,
   },
   SubText: {
     fontSize: 22,
@@ -150,47 +138,6 @@ const styles = StyleSheet.create({
   TermsContainer: {
     flex: 1,
     marginTop: 20,
-  },
-  // Modal styles
-  modalBackground: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    width: 320,
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  warningIcon: {
-    width: 50,
-    height: 50,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "black",
-    marginVertical: 10,
-  },
-  modalMessage: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "gray",
-    marginBottom: 20,
-  },
-  okButton: {
-    backgroundColor: Colors.MainColor,
-    paddingVertical: 10,
-    paddingHorizontal: 40,
-    borderRadius: 20,
-  },
-  okButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
 

@@ -11,13 +11,24 @@
       "backgroundColor": "#2727C4"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "We need access to your microphone for voice control.",
+        "NSSpeechRecognitionUsageDescription": "We need access to speech recognition for voice control."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/Main-Logo-blue.png",
         "backgroundColor": "white"
-      }
+      },
+      "permissions": [
+        "RECORD_AUDIO",
+        "INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.ahmed_hatem25.Optima"
     },
     "web": {
       "favicon": "./assets/Main-Logo-blue.png"
@@ -32,6 +43,14 @@
         }
       ]
     ],
-    "newArchEnabled": true
+    "permissions": [
+      "audioRecording"
+    ],
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
+      }
+    }
   }
 }
