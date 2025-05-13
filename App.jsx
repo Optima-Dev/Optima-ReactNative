@@ -57,6 +57,7 @@ import AuthProvider, { useAuth } from "./store/AuthContext";
 import UserProvider, { useUser } from "./store/UserContext";
 import HelperProvider, { useHelper } from "./store/HelperContext";
 import SeekerProvider, { useSeeker } from "./store/SeekerContext";
+import { MeetingProvider } from "./store/MeetingContext";
 
 // importing util functions
 import { getUser } from "./util/UserHttp";
@@ -138,9 +139,7 @@ const SeekerTap = React.memo(() => (
       tabBarLabel: ({ color }) => (
         <Text style={{ fontSize: 14, color }}>{route.name}</Text>
       ),
-    })}
-  >
-    
+    })}>
     {createTabScreen("Support", SeekerSupport, "videocam")}
     {createTabScreen("MyVision", MyVision, "camera")}
     {createTabScreen("MyPeople", MyPeople, "people")}
@@ -318,13 +317,15 @@ const Root = React.memo(() => {
 export default function App() {
   return (
     <>
-      <StatusBar barStyle="default" />
+      <StatusBar barStyle='default' />
 
       <AuthProvider>
         <UserProvider>
           <HelperProvider>
             <SeekerProvider>
-              <Root />
+              <MeetingProvider>
+                <Root />
+              </MeetingProvider>
             </SeekerProvider>
           </HelperProvider>
         </UserProvider>

@@ -41,7 +41,8 @@
           "microphonePermission": "This app needs access to your microphone so you can record audio.",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "permissions": [
       "audioRecording"
