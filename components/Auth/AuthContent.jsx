@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,17 +7,19 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
-  Alert, // Keep Alert for now, consider replacing with custom modals later
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google"; // Import Google provider
+
+// Google Sign-in imports commented out
+// import * as WebBrowser from "expo-web-browser";
+// import * as Google from "expo-auth-session/providers/google";
 
 // Import your components and utils
 import MainHeader from "../UI/MainHeader";
 import AuthForm from "./AuthForm";
 import PrimaryButton from "../UI/PrimaryButton";
-import GoogleButton from "../UI/GoogleButton"; // Assuming GoogleButton takes an onPress prop
+// import GoogleButton from "../UI/GoogleButton"; // Google button temporarily disabled
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
 import { getUser } from "../../util/UserHttp";
@@ -30,14 +32,14 @@ import {
 } from "../../util/Validation";
 
 // Necessary for expo-auth-session
-WebBrowser.maybeCompleteAuthSession();
+// WebBrowser.maybeCompleteAuthSession();
 
 function AuthContent({ type }) {
   const navigation = useNavigation();
   const { authenticate, role, setNewUser } = useContext(AuthContext); // Get role from context
   const { setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false); // Loading state for Google Sign-In
+  // const [isGoogleLoading, setIsGoogleLoading] = useState(false); // Loading state for Google Sign-In
 
   // State for standard form
   const [form, setForm] = useState({
@@ -54,12 +56,12 @@ function AuthContent({ type }) {
   });
 
   // --- Google Sign-In Hook ---
-  // Replace 'YOUR_ANDROID_CLIENT_ID' if not using app.json plugin config (though plugin is recommended)
+  // Initialize Google Sign-In Hook with actual client ID
+  /*
   const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com", // Make sure this matches app.json/app.config.js or is correct
-    // expoClientId: "YOUR_EXPO_GO_CLIENT_ID", // Needed if testing with Expo Go (limited functionality)
-    // iosClientId: "YOUR_IOS_CLIENT_ID", // Add if supporting iOS
-    // selectAccount: true, // Optional: Always prompt user to select account
+    androidClientId: "YOUR_ANDROID_CLIENT_ID", // Replace with your actual client ID
+    expoClientId: "YOUR_EXPO_CLIENT_ID", // Replace with your actual client ID
+    webClientId: "YOUR_WEB_CLIENT_ID", // Replace with your actual client ID
   });
 
   // --- Effect to handle Google Sign-In response ---
@@ -135,25 +137,35 @@ function AuthContent({ type }) {
       setIsGoogleLoading(false); // Stop loading indicator
     }
   }
+  */
 
   // --- Standard Form Handling ---
   function handleChange(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
     // Clear specific error when user types
     if (isError[key]) {
-        setIsError(prev => ({...prev, [key]: null}));
+      setIsError((prev) => ({ ...prev, [key]: null }));
     }
   }
 
   async function sendingForm() {
     setIsLoading(true);
-    setIsError({ email: null, password: null, firstName: null, lastName: null }); // Clear previous errors
+    setIsError({
+      email: null,
+      password: null,
+      firstName: null,
+      lastName: null,
+    }); // Clear previous errors
 
     try {
       let response;
 
       if (type === "login") {
-        response = await login(form.email.toLowerCase().trim(), form.password, role);
+        response = await login(
+          form.email.toLowerCase().trim(),
+          form.password,
+          role
+        );
       } else {
         response = await signup(
           form.firstName.trim(),
@@ -170,28 +182,41 @@ function AuthContent({ type }) {
       const userData = await getUser(response.token);
       setUser(userData.user);
       // Navigation should happen via context state change listener elsewhere
-
     } catch (error) {
-       console.error(`Error during ${type}:`, error.response?.data || error.message); // Log detailed error
-       // Attempt to parse backend error message if available
-       const errorMessage = error.response?.data?.message || error.message || `Could not ${type}. Please check your credentials or network connection.`;
-       Alert.alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Failed`, errorMessage);
+      console.error(
+        `Error during ${type}:`,
+        error.response?.data || error.message
+      ); // Log detailed error
+      // Attempt to parse backend error message if available
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        `Could not ${type}. Please check your credentials or network connection.`;
+      Alert.alert(
+        `${type.charAt(0).toUpperCase() + type.slice(1)} Failed`,
+        errorMessage
+      );
 
-       // Set specific errors if possible, otherwise show general alert
-       if (type === "login") {
-         // Assuming backend might return specific field errors, otherwise set general
-         setIsError({ email: errorMessage, password: errorMessage });
-       } else {
-         // Assuming backend might return specific field errors, otherwise set general
-         setIsError({ email: errorMessage }); // Or distribute error based on backend response
-       }
+      // Set specific errors if possible, otherwise show general alert
+      if (type === "login") {
+        // Assuming backend might return specific field errors, otherwise set general
+        setIsError({ email: errorMessage, password: errorMessage });
+      } else {
+        // Assuming backend might return specific field errors, otherwise set general
+        setIsError({ email: errorMessage }); // Or distribute error based on backend response
+      }
     } finally {
-       setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
   async function handleFormSubmission() {
-    let errorsList = { email: null, password: null, firstName: null, lastName: null };
+    let errorsList = {
+      email: null,
+      password: null,
+      firstName: null,
+      lastName: null,
+    };
     errorsList.email = validateEmail(form.email);
     errorsList.password = validatePassword(form.password);
 
@@ -220,13 +245,7 @@ function AuthContent({ type }) {
 
   // --- Google Button Press Handler ---
   const handleGoogleSignIn = () => {
-    // Ensure request object is ready before prompting
-    if (request) {
-      promptAsync(); // This opens the Google Sign-In prompt
-    } else {
-      console.error("Google Auth Request not ready.");
-      Alert.alert("Error", "Google Sign-In is not available at the moment.");
-    }
+    Alert.alert("Feature Unavailable", "Google Sign-in is currently disabled.");
   };
 
   return (
@@ -236,8 +255,8 @@ function AuthContent({ type }) {
       <ScrollView
         style={styles.screen}
         contentContainerStyle={styles.scrollViewContent} // Use contentContainerStyle for ScrollView content
-        keyboardShouldPersistTaps="handled" // Dismiss keyboard on tap outside inputs
-        >
+        keyboardShouldPersistTaps='handled' // Dismiss keyboard on tap outside inputs
+      >
         <View style={styles.container}>
           {/* Auth Header */}
           <MainHeader
@@ -268,32 +287,29 @@ function AuthContent({ type }) {
               backgroundColor={Colors.MainColor}
               title={type === "login" ? "Login" : "Sign up"}
               onPress={handleFormSubmission}
-              textColor="white"
+              textColor='white'
               isLoading={isLoading} // Use standard loading state
-              disabled={isLoading || isGoogleLoading} // Disable if any loading is active
+              disabled={isLoading} // Disable if any loading is active
             />
           </View>
 
-          <View style={styles.optionContainer}>
+          {/* Google Sign-in temporarily disabled */}
+          {/* <View style={styles.optionContainer}>
             <Text style={styles.optionText}>or continue with</Text>
           </View>
-
-          {/* Google Button */}
-          {/* Pass the handler and loading state to your GoogleButton component */}
           <GoogleButton
-             onPress={handleGoogleSignIn}
-             isLoading={isGoogleLoading} // Show loading state on Google button
-             disabled={isLoading || isGoogleLoading} // Disable if any loading is active
-          />
+            onPress={handleGoogleSignIn}
+            disabled={true}
+          /> */}
 
           {/* Switch Button */}
           <Pressable
             onPress={swithModeHandler}
-            disabled={isLoading || isGoogleLoading} // Disable if any loading is active
+            disabled={isLoading} // Disable if any loading is active
             style={({ pressed }) => [
               styles.switchButton,
-              (isLoading || isGoogleLoading) && styles.disabledButton, // Optional: style when disabled
-              { opacity: pressed && !(isLoading || isGoogleLoading) ? 0.6 : 1 }, // Only change opacity if not disabled
+              isLoading && styles.disabledButton, // Optional: style when disabled
+              { opacity: pressed && !isLoading ? 0.6 : 1 }, // Only change opacity if not disabled
             ]}>
             <View style={styles.textContainer}>
               <Text style={styles.normalText}>
@@ -317,9 +333,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-   scrollViewContent: {
+  scrollViewContent: {
     flexGrow: 1, // Ensures content can grow to fill space, important for centering
-    justifyContent: 'center', // Center content vertically
+    justifyContent: "center", // Center content vertically
   },
   container: {
     // flex: 1, // Removed flex: 1 here, let ScrollView handle growth
@@ -333,7 +349,7 @@ const styles = StyleSheet.create({
     width: "100%", // Make button width relative
     maxWidth: 364, // Optional: set a max width for larger screens
     marginBottom: 10,
-    alignItems: 'center', // Center button if maxWidth is used
+    alignItems: "center", // Center button if maxWidth is used
   },
   optionContainer: {
     marginVertical: 15, // Adjusted margin
@@ -361,10 +377,11 @@ const styles = StyleSheet.create({
     fontWeight: "600", // Bolder link
   },
   switchButton: {
-      padding: 10, // Add padding to make it easier to press
+    padding: 10, // Add padding to make it easier to press
   },
-  disabledButton: { // Optional style for disabled state
-      opacity: 0.5,
+  disabledButton: {
+    // Optional style for disabled state
+    opacity: 0.5,
   },
 });
 

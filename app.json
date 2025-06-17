@@ -4,27 +4,25 @@
     "slug": "Optima",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Main-Logo-blue.png",
+    "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/Splash-Logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#2727C4"
     },
+    "androidStatusBar": {
+      "backgroundColor": "#2727C4",
+      "translucent": false
+    },
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSMicrophoneUsageDescription": "We need access to your microphone for voice control.",
-        "NSSpeechRecognitionUsageDescription": "We need access to speech recognition for voice control."
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/Main-Logo-blue.png",
-        "backgroundColor": "white"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
       },
       "permissions": [
-        "RECORD_AUDIO",
-        "INTERNET",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
@@ -41,17 +39,14 @@
           "microphonePermission": "This app needs access to your microphone so you can record audio.",
           "recordAudioAndroid": true
         }
-      ],
-      "expo-web-browser"
-    ],
-    "permissions": [
-      "audioRecording"
+      ]
     ],
     "newArchEnabled": true,
     "extra": {
       "eas": {
         "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
       }
-    }
+    },
+    "owner": "ahmed_hatem25"
   }
 }

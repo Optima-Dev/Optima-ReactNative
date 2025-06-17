@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { View, Text, StyleSheet, Image, Platform, Alert } from "react-native";
 import { Camera } from "expo-camera";
-import { Audio } from "expo-av"; // For microphone permissions
-import { Linking } from "react-native"; // For opening settings
+// import * as Device from 'expo-device';
+// import * as Application from 'expo-application';
+import { Audio } from "expo-av";
+import { Linking } from "react-native";
 
 import Colors from "@/constants/Colors";
 import TermsList from "@/components/Terms/TermsList";
@@ -19,16 +21,25 @@ async function requestPermissions(setModalVisible) {
       setModalVisible(true);
       return false;
     }
-    console.log("Camera permission granted ✅");
-
-    // Request Microphone Permission (for voice recognition)
-    const { status: micStatus } = await Audio.requestPermissionsAsync();
-    if (micStatus !== "granted") {
-      console.log("Microphone permission denied ❌");
+    console.log("Camera permission granted ✅");    // Request Microphone Permission (for voice recognition)
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      
+      const { status: micStatus } = await Audio.requestPermissionsAsync();
+      if (micStatus !== "granted") {
+        console.log("Microphone permission denied ❌");
+        setModalVisible(true);
+        return false;
+      }
+      console.log("Microphone permission granted ✅");
+    } catch (error) {
+      console.error("Error setting up audio:", error);
       setModalVisible(true);
       return false;
     }
-    console.log("Microphone permission granted ✅");
 
     // Note: Speech recognition permission (iOS) will be requested by @react-native-voice/voice
     // when Voice.start() is called in the Support component. If you want to request it here,

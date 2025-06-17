@@ -3,7 +3,7 @@ import {
   createMeeting,
   generateMeetingToken,
   endMeeting as endMeetingApi,
-} from "../services/MeetingHttp"; // Adjust the path if needed
+} from "../util/MeetingHttp"; // Adjust the path if needed
 
 const MeetingContext = createContext();
 
