@@ -40,18 +40,17 @@ const NotificationItem = ({
               {name} <Text style={styles.message}>{message}</Text>
             </Text>
           </View>
-        </View>
-        {type === "video_call" && status === null ? (
+        </View>        {type === "video_call" && status === null ? (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.acceptButton}
               onPress={handleAccept}>
-              <Text style={[styles.buttonText, { AcceptStyle }]}>Accept</Text>
+              <Text style={styles.buttonText}>Accept</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.declineButton}
               onPress={handleDecline}>
-              <Text style={[styles.declineText, { DeclineStyle }]}>
+              <Text style={styles.declineText}>
                 Decline
               </Text>
             </TouchableOpacity>

@@ -19,7 +19,20 @@ export const MeetingProvider = ({ children }) => {
   const startMeeting = async ({ token, role, seekerId, topic }) => {
     try {
       setLoading(true);
-      const meeting = await createMeeting(token, { seekerId, topic });
+
+      // Ensure we have all required parameters
+      if (!token || !role || !seekerId) {
+        throw new Error("Missing required parameters for meeting");
+      }
+
+      // Add type parameter to match backend expectations
+      const meetingData = {
+        seekerId,
+        topic,
+        type: "volunteer", // Explicitly set the meeting type
+      };
+
+      const meeting = await createMeeting(token, meetingData);
 
       const tokenData = await generateMeetingToken(token, meeting.id);
 
@@ -30,6 +43,7 @@ export const MeetingProvider = ({ children }) => {
       setIsMeetingActive(true);
     } catch (err) {
       console.error("Failed to start meeting:", err);
+      throw err; // Re-throw to handle in component
     } finally {
       setLoading(false);
     }

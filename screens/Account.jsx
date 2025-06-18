@@ -131,7 +131,7 @@ const Account = ({ navigation }) => {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           <Image
-            source={require("../assets/Images/Ellipse 1.png")}
+            source={require("../assets/LargeImages-Backup/Ellipse 1.png")}
             style={[styles.ring]}
           />
           <Text style={styles.title}>Account</Text>

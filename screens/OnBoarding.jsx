@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 import OnBoardingContent from "../components/OnBoarding/OnBoardingContent";
 import onBoardingImage1 from "@/assets/Images/OnBoarding1.png";
@@ -10,6 +11,13 @@ import Colors from "../constants/Colors";
 function OnBoarding1({ navigation }) {
 
   const [step, setStep] = useState(1);
+  
+  // Reset to step 1 whenever this screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      setStep(1);
+    }, [])
+  );
 
   function handleNext() {
     setStep(prevStep => prevStep + 1);

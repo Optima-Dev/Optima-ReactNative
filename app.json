@@ -4,7 +4,7 @@
     "slug": "Optima",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Main-Logo-blue.png",
     "splash": {
       "image": "./assets/Splash-Logo.png",
       "resizeMode": "contain",
@@ -39,7 +39,9 @@
           "microphonePermission": "This app needs access to your microphone so you can record audio.",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "./plugins/withTwilioVideoAndroid.js",
+      "./plugins/withTwilioVideoIOS.js"
     ],
     "newArchEnabled": true,
     "extra": {

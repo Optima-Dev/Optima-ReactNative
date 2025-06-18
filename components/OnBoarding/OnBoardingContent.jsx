@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   ProgressBar: {
-    marginTop: 60,
+    marginTop: 30,
   },
   textContainer: {
     flex: 1,

@@ -1,16 +1,22 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { CameraView } from "expo-camera";
 import { BallIndicator } from "react-native-indicators";
 import { readAsStringAsync, EncodingType } from "expo-file-system";
-import genai from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { GOOGLE_API_KEY } from "@env";
 import * as Speech from "expo-speech";
 
-const genAI = new genai.GoogleGenerativeAI(GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const MyVision = () => {
@@ -27,7 +33,8 @@ const MyVision = () => {
   const navigation = useNavigation();
 
   // Helper function to update vision state
-  const updateVisionState = (updates) => setVisionState((prev) => ({ ...prev, ...updates }));
+  const updateVisionState = (updates) =>
+    setVisionState((prev) => ({ ...prev, ...updates }));
 
   // Cancel speech synthesis
   const cancelSpeech = useCallback(() => {
@@ -105,7 +112,10 @@ const MyVision = () => {
           imagePart,
         ]);
 
-        if (isCancelledSpeechRef.current || isCancelledLoadingSpeechRef.current) {
+        if (
+          isCancelledSpeechRef.current ||
+          isCancelledLoadingSpeechRef.current
+        ) {
           return;
         }
 
@@ -139,7 +149,7 @@ const MyVision = () => {
         <ScrollView style={styles.answerContainer}>
           {visionState.isLoading ? (
             <BallIndicator
-              color="white"
+              color='white'
               size={80}
               count={9}
               style={styles.loader}
@@ -165,7 +175,7 @@ const MyVision = () => {
         <PrimaryButton
           title={visionState.uri ? "Retake A Picture" : "Take A Picture"}
           backgroundColor={Colors.MainColor}
-          textColor="white"
+          textColor='white'
           isLoading={false}
           onPress={visionState.uri ? handleRetake : handleTakePicture}
           style={{ width: visionState.uri ? "49%" : "100%" }}
@@ -173,7 +183,7 @@ const MyVision = () => {
 
         {visionState.uri && (
           <PrimaryButton
-            title="Repeat"
+            title='Repeat'
             backgroundColor={Colors.green500}
             textColor={Colors.MainColor}
             isLoading={false}
