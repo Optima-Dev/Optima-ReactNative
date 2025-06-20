@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { CameraView } from "expo-camera";
@@ -33,8 +27,7 @@ const MyVision = () => {
   const navigation = useNavigation();
 
   // Helper function to update vision state
-  const updateVisionState = (updates) =>
-    setVisionState((prev) => ({ ...prev, ...updates }));
+  const updateVisionState = (updates) => setVisionState((prev) => ({ ...prev, ...updates }));
 
   // Cancel speech synthesis
   const cancelSpeech = useCallback(() => {
@@ -112,10 +105,7 @@ const MyVision = () => {
           imagePart,
         ]);
 
-        if (
-          isCancelledSpeechRef.current ||
-          isCancelledLoadingSpeechRef.current
-        ) {
+        if (isCancelledSpeechRef.current || isCancelledLoadingSpeechRef.current) {
           return;
         }
 
@@ -149,7 +139,7 @@ const MyVision = () => {
         <ScrollView style={styles.answerContainer}>
           {visionState.isLoading ? (
             <BallIndicator
-              color='white'
+              color="white"
               size={80}
               count={9}
               style={styles.loader}
@@ -175,7 +165,7 @@ const MyVision = () => {
         <PrimaryButton
           title={visionState.uri ? "Retake A Picture" : "Take A Picture"}
           backgroundColor={Colors.MainColor}
-          textColor='white'
+          textColor="white"
           isLoading={false}
           onPress={visionState.uri ? handleRetake : handleTakePicture}
           style={{ width: visionState.uri ? "49%" : "100%" }}
@@ -183,7 +173,7 @@ const MyVision = () => {
 
         {visionState.uri && (
           <PrimaryButton
-            title='Repeat'
+            title="Repeat"
             backgroundColor={Colors.green500}
             textColor={Colors.MainColor}
             isLoading={false}

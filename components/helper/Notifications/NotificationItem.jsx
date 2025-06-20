@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from "react-native";
 import Colors from "@/constants/Colors";
-
 
 const NotificationItem = ({
   profileImage,
@@ -40,7 +46,8 @@ const NotificationItem = ({
               {name} <Text style={styles.message}>{message}</Text>
             </Text>
           </View>
-        </View>        {type === "video_call" && status === null ? (
+        </View>{" "}
+        {type === "video_call" && status === null ? (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.acceptButton}
@@ -50,9 +57,7 @@ const NotificationItem = ({
             <TouchableOpacity
               style={styles.declineButton}
               onPress={handleDecline}>
-              <Text style={styles.declineText}>
-                Decline
-              </Text>
+              <Text style={styles.declineText}>Decline</Text>
             </TouchableOpacity>
           </View>
         ) : type === "friend_request" && status === null ? (
@@ -94,7 +99,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 1 },
     elevation: 2,
-    width: Platform.OS === "ios" ? '100%' : 360,
+    width: Platform.OS === "ios" ? "100%" : 360,
     marginBottom: 15,
   },
   profileContainer: {

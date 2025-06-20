@@ -1,22 +1,20 @@
-// withTwilioVideoIOS.js
-const { withInfoPlist } = require('expo/config-plugins');
+const { withInfoPlist } = require('@expo/config-plugins');
 
 /**
- * Expo Config Plugin to add necessary permission descriptions for Twilio Video
- * on iOS to Info.plist
+ * Add required permissions for Twilio Video to Info.plist
  */
 const withTwilioVideoIOS = (config) => {
   return withInfoPlist(config, (config) => {
     const infoPlist = config.modResults;
     
-    // Add camera usage description
+    // Add camera usage description if not present
     if (!infoPlist.NSCameraUsageDescription) {
-      infoPlist.NSCameraUsageDescription = "Allow Optima to access your camera for video calls with volunteers.";
+      infoPlist.NSCameraUsageDescription = 'Optima needs access to your camera for video calls with volunteers';
     }
     
-    // Add microphone usage description
+    // Add microphone usage description if not present
     if (!infoPlist.NSMicrophoneUsageDescription) {
-      infoPlist.NSMicrophoneUsageDescription = "Allow Optima to access your microphone for video calls with volunteers.";
+      infoPlist.NSMicrophoneUsageDescription = 'Optima needs access to your microphone for audio during video calls';
     }
     
     return config;
