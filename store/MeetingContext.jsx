@@ -18,6 +18,7 @@ export const MeetingProvider = ({ children }) => {
   const [meetingId, setMeetingId] = useState(null);
   const [twilioToken, setTwilioToken] = useState(null);
   const [roomName, setRoomName] = useState(null);
+  const [identity, setIdentity] = useState(null); // Added identity state for Twilio
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [userRole, setUserRole] = useState(null); // 'seeker' or 'helper'
   const [loading, setLoading] = useState(false);
@@ -78,16 +79,96 @@ export const MeetingProvider = ({ children }) => {
       }
       setCurrentMeeting(meeting);
       console.log("Meeting created successfully:", meeting._id);
-
       try {
         console.log("Generating token for meeting:", meeting._id);
-        const tokenData = await generateMeetingToken(token, meeting._id);
 
-        if (!tokenData || !tokenData.token || !tokenData.roomName) {
-          console.error("Invalid token data:", tokenData);
-          throw new Error("Failed to get valid token data for meeting");
+        // Add a small delay to ensure the meeting is properly saved in the database
+        // This can help avoid race conditions between creation and token generation
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        // Implement retry mechanism with increasing delays
+        let tokenData;
+        let tokenError;
+        let attempts = 0;
+        const maxAttempts = 3;
+        const baseDelay = 1500; // Start with 1.5 second delay
+
+        while (attempts < maxAttempts) {
+          try {
+            console.log(
+              `Token generation attempt ${attempts + 1}/${maxAttempts}`
+            );
+            tokenData = await generateMeetingToken(token, meeting._id);
+
+            if (tokenData && tokenData.token && tokenData.roomName) {
+              console.log(
+                "Token generated successfully on attempt:",
+                attempts + 1
+              );
+              tokenError = null;
+              break; // Success!
+            } else {
+              console.error("Invalid token data format:", tokenData);
+              tokenError = new Error(
+                "Failed to get valid token data for meeting"
+              );
+            }
+          } catch (error) {
+            console.error(
+              `Token generation attempt ${attempts + 1} failed:`,
+              error
+            );
+            tokenError = error;
+
+            // Check if we should retry based on error type
+            if (error.response?.status === 500) {
+              // Server error, likely temporary, so retry
+              const delay = baseDelay * Math.pow(2, attempts); // Exponential backoff
+              console.log(`Retrying in ${delay}ms...`);
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              attempts++;
+            } else if (error.response?.status === 400) {
+              // Bad request - check if meeting needs to be accepted first
+              console.log("Checking if meeting needs to be accepted first");
+              try {
+                // Attempt to get meeting details to check status
+                const meetingDetails = await getMeetingById(token, meeting._id);
+                console.log(
+                  "Meeting status:",
+                  meetingDetails?.data?.meeting?.status
+                );
+
+                // If meeting is pending, try to accept it
+                if (meetingDetails?.data?.meeting?.status === "pending") {
+                  console.log("Meeting is pending, attempting to accept it");
+                  throw new Error("Meeting needs to be accepted first");
+                }
+              } catch (detailsError) {
+                console.error("Failed to check meeting details:", detailsError);
+              }
+
+              // Retry regardless
+              const delay = baseDelay * Math.pow(2, attempts); // Exponential backoff
+              console.log(`Retrying in ${delay}ms...`);
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              attempts++;
+            } else {
+              // Other errors (401, 404, etc.) are likely not fixable with retries
+              break;
+            }
+          }
         }
 
+        // If we've exhausted retries or got an error we can't handle
+        if (tokenError) {
+          console.error("All token generation attempts failed:", tokenError);
+          throw tokenError;
+        }
+
+        if (!tokenData || !tokenData.token || !tokenData.roomName) {
+          console.error("Invalid token data after retries:", tokenData);
+          throw new Error("Failed to get valid token data for meeting");
+        }
         console.log(
           "Token generated successfully, room name:",
           tokenData.roomName
@@ -95,14 +176,47 @@ export const MeetingProvider = ({ children }) => {
         setMeetingId(meeting._id);
         setTwilioToken(tokenData.token);
         setRoomName(tokenData.roomName);
+
+        // Set identity if available
+        if (tokenData.identity) {
+          console.log("Identity received:", tokenData.identity);
+          setIdentity(tokenData.identity);
+        }
+
         setUserRole(role);
         setIsMeetingActive(true);
         return { success: true, meeting };
       } catch (tokenError) {
         console.error("Token generation failed:", tokenError);
-        throw new Error(
-          `Meeting created but failed to generate token: ${tokenError.message}`
-        );
+
+        // End the created meeting since we couldn't get a token for it
+        try {
+          console.log(
+            "Ending meeting due to token generation failure:",
+            meeting._id
+          );
+          await endMeetingApi(token, meeting._id);
+          console.log("Successfully ended meeting after token failure");
+        } catch (endError) {
+          console.error("Failed to end meeting after token failure:", endError);
+        }
+
+        // Provide a more helpful error message based on the error
+        if (tokenError.message.includes("Server error")) {
+          throw new Error(
+            "The server encountered an error while setting up your call. This might be a temporary issue. Please try again in a few minutes."
+          );
+        } else if (tokenError.message.includes("Authorization failed")) {
+          throw new Error(
+            "Your session has expired. Please log out and log back in to continue."
+          );
+        } else {
+          throw new Error(
+            `Unable to start the video call: ${
+              tokenError.message || "Unknown error"
+            }`
+          );
+        }
       }
     } catch (err) {
       console.error("Failed to start meeting:", err);
@@ -163,6 +277,7 @@ export const MeetingProvider = ({ children }) => {
       setMeetingId(null);
       setTwilioToken(null);
       setRoomName(null);
+      setIdentity(null); // Also reset identity
       setUserRole(null);
       setIsMeetingActive(false);
       setCurrentMeeting(null);
@@ -178,12 +293,11 @@ export const MeetingProvider = ({ children }) => {
 
       console.log("Attempting to end all active meetings");
       await endAllActiveMeetings(token);
-      console.log("Successfully ended all active meetings");
-
-      // Reset the state
+      console.log("Successfully ended all active meetings"); // Reset the state
       setMeetingId(null);
       setTwilioToken(null);
       setRoomName(null);
+      setIdentity(null); // Also reset identity
       setUserRole(null);
       setIsMeetingActive(false);
       setCurrentMeeting(null);
@@ -326,6 +440,7 @@ export const MeetingProvider = ({ children }) => {
         meetingId,
         twilioToken,
         roomName,
+        identity, // Expose identity to consumers
         isMeetingActive,
         userRole,
         loading,
