@@ -30,6 +30,20 @@ allprojects {
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
+    
+    // Add the Maven repositories for WebRTC
+    maven {
+      url "https://maven.google.com"
+    }
+    maven {
+      url "https://jitsi.github.io/jitsi-maven-repository/releases"
+    }
+    maven { 
+      url "https://jcenter.bintray.com" 
+    }
+    maven {
+      url "https://dl.cloudsmith.io/public/twilio/releases/maven/"
+    }
   }
 }
 

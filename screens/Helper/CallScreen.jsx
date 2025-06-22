@@ -1,46 +1,43 @@
 import { useLayoutEffect, useState, useEffect, useRef } from "react";
 import React from "react";
 import { StyleSheet, Text, View, Alert, Platform } from "react-native";
-import { TwilioVideo } from "react-native-twilio-video-webrtc";
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useMeeting } from "../../store/MeetingContext";
 import { useAuth } from "../../store/AuthContext";
 import { requestTwilioPermissions } from "../../util/TwilioUtils";
 import { useNavigation } from "@react-navigation/native";
+import TwilioVideoComponent from "../../components/TwilioVideoComponent";
 
 const CallScreen = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState("Connecting to the call...");
-  const twilioRef = useRef(null);
+  // This ref will now point to our new TwilioVideoComponent.
+  const twilioComponentRef = useRef(null);
   const navigation = useNavigation();
 
   const { twilioToken, roomName, identity, endMeeting, loading } = useMeeting();
   const { token } = useAuth();
 
   useLayoutEffect(() => {
-    // Hide tab bar for immersive experience
     const parentNav = navigation.getParent();
     parentNav?.setOptions({ tabBarStyle: { display: "none" } });
 
     return () => {
-      // Restore tab bar when leaving
       parentNav?.setOptions({
         tabBarStyle: {
           display: "flex",
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          // marginBottom: Platform.OS === "ios" ? 0 : 12,
         },
       });
     };
   }, [navigation]);
+
   useEffect(() => {
-    // Request permissions
     const checkPermissions = async () => {
       try {
-        // Import requestTwilioPermissions dynamically if needed
         let permissions;
         try {
           permissions = await requestTwilioPermissions();
@@ -68,33 +65,22 @@ const CallScreen = () => {
       }
     };
 
-    checkPermissions(); // Clean up on unmount
+    checkPermissions();
+
     return () => {
-      if (isConnected && twilioRef.current) {
-        twilioRef.current.disconnect();
-      }
-      // Only end the meeting if we have a meetingId
       if (roomName) {
-        endMeeting(token, roomName);
+        endMeeting({ token, meetingId: roomName });
       }
     };
   }, []);
+
   useEffect(() => {
-    // Connect to the Twilio room when token is available
     if (twilioToken && roomName) {
       console.log("Connecting to Twilio room:", roomName);
-      console.log("Using Twilio token:", twilioToken.substring(0, 20) + "...");
-      console.log(
-        "Identity for connection:",
-        identity || "No identity provided"
-      );
-
-      // Set a connection timeout in case the connection doesn't establish
       const connectionTimeout = setTimeout(() => {
         if (!isConnected) {
           console.log("Connection timeout after 20 seconds");
           setStatus("Connection timeout. Please try again.");
-
           Alert.alert(
             "Connection Timeout",
             "Unable to connect to the video call after 20 seconds. Please try again.",
@@ -103,7 +89,6 @@ const CallScreen = () => {
         }
       }, 20000);
 
-      // Clean up the timeout when unmounting or when successfully connected
       return () => {
         clearTimeout(connectionTimeout);
         console.log("Cleaning up connection timeout");
@@ -112,116 +97,73 @@ const CallScreen = () => {
       if (!twilioToken) console.log("Missing Twilio token");
       if (!roomName) console.log("Missing room name");
     }
-  }, [twilioToken, roomName, identity, isConnected, navigation]);
+  }, [twilioToken, roomName, isConnected, navigation]);
+
   function handleEndCall() {
-    if (isConnected && twilioRef.current) {
-      twilioRef.current.disconnect();
-    }
-    // Ensure we pass the meetingId to the endMeeting function
-    endMeeting(token, roomName);
+    endMeeting({ token, meetingId: roomName });
     navigation.goBack();
   }
 
   function handleFlipCamera() {
-    if (twilioRef.current) {
-      twilioRef.current.flipCamera();
+    if (twilioComponentRef.current) {
+      twilioComponentRef.current.flipCamera();
+    } else {
+      console.log("No ref to Twilio component");
     }
   }
-  // Debug Twilio component rendering
-  useEffect(() => {
-    console.log("Helper component rendering state:", {
-      twilioToken: !!twilioToken,
-      roomName: !!roomName,
-      twilioRefExists: !!twilioRef.current,
-      identity: !!identity,
-    });
-  }, [twilioToken, roomName, identity]); // Special wrapper around TwilioVideo to avoid ref issues
+
+  // 2. This function now uses the new, simplified TwilioVideoComponent.
   const renderTwilioVideo = () => {
     if (!twilioToken || !roomName) {
       console.log("Cannot render Helper TwilioVideo - missing required props");
       return null;
     }
 
-    console.log(
-      "Rendering Helper TwilioVideo component with token and roomName"
-    );
-
-    // This is a known workaround for TwilioVideo ref issues
-    const setRef = (ref) => {
-      if (ref) {
-        twilioRef.current = ref;
-        console.log("Helper TwilioVideo ref successfully set:", !!ref);
-
-        // Try to connect once the ref is available
-        if (twilioToken && roomName) {
-          try {
-            const connectionOptions = {
-              accessToken: twilioToken,
-              roomName: roomName,
-            };
-            if (identity) {
-              connectionOptions.identity = identity;
-            }
-
-            setTimeout(() => {
-              if (twilioRef.current) {
-                console.log(
-                  "Helper connecting with options:",
-                  connectionOptions
-                );
-                twilioRef.current.connect(connectionOptions);
-              }
-            }, 500);
-          } catch (error) {
-            console.error("Failed to connect:", error);
-          }
-        }
-      }
-    };
-
     return (
-      <TwilioVideo
-        ref={setRef}
+      <TwilioVideoComponent
+        ref={twilioComponentRef}
+        token={twilioToken}
+        roomName={roomName}
+        identity={identity}
+        style={styles.twilioVideo}
         onRoomDidConnect={() => {
           console.log("Helper room connected successfully!");
           setIsConnected(true);
           setStatus("Connected!");
         }}
-        onRoomDidDisconnect={({ error }) => {
-          console.log("Helper room disconnected", error);
+        onRoomDidDisconnect={({ error: disconnectError }) => {
+          console.log("Helper room disconnected", disconnectError);
           setIsConnected(false);
           setStatus("Disconnected");
-          if (error) {
-            Alert.alert("Call Ended", error.message || "The call has ended");
+          if (disconnectError) {
+            Alert.alert("Call Ended", disconnectError.message || "The call has ended");
           }
           navigation.goBack();
         }}
-        onRoomDidFailToConnect={(error) => {
-          console.error("Helper room failed to connect:", error);
+        onRoomDidFailToConnect={(failError) => {
+          console.error("Helper room failed to connect:", failError);
           setStatus("Failed to connect");
           Alert.alert(
             "Connection Failed",
-            error.message || "Failed to connect to the call"
+            failError.message || "Failed to connect to the call"
           );
           navigation.goBack();
         }}
-        onParticipantAddedVideoTrack={(event) => {
-          console.log("Participant added video track:", event);
+        onParticipantAddedVideoTrack={() => {
+          console.log("Participant added video track");
           setStatus("Seeker joined the call");
         }}
         onParticipantRemovedVideoTrack={() => {
           console.log("Participant removed video track");
           setStatus("Seeker left the call");
         }}
-        style={styles.twilioVideo}
       />
     );
   };
-  // Connection will be handled in the ref callback instead of a separate useEffect
 
   return (
     <View style={styles.container}>
-      {" "}
+      {/* 3. The stray " " text that was here has been removed. */}
       <View style={styles.videoContainer}>
         {renderTwilioVideo()}
         {!isConnected && (
@@ -235,17 +177,16 @@ const CallScreen = () => {
       <View style={styles.buttonContainer}>
         <PrimaryButton
           backgroundColor={Colors.MainColor}
-          textColor='white'
-          title='Flip Camera'
+          textColor="white"
+          title="Flip Camera"
           style={styles.button}
           onPress={handleFlipCamera}
           disabled={!isConnected}
         />
-
         <PrimaryButton
           backgroundColor={Colors.red600}
-          textColor='white'
-          title='End Call'
+          textColor="white"
+          title="End Call"
           style={styles.button}
           onPress={handleEndCall}
         />
@@ -296,7 +237,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
 });
-
-// Using useRef instead of defaultProps with createRef
 
 export default CallScreen;

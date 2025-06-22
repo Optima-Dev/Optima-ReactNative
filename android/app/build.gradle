@@ -173,6 +173,9 @@ dependencies {
     implementation("androidx.core:core:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     
+    // Use local libs directory
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    
     // Exclude all support libraries to avoid duplicates
     configurations.all {
         exclude group: 'com.android.support'

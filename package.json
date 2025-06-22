@@ -40,7 +40,7 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
-    "react-native-twilio-video-webrtc": "^3.2.1"
+    "react-native-twilio-video-webrtc": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
