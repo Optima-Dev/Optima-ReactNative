@@ -20,6 +20,19 @@ def reactNativeAndroidDir = new File(
   "../android"
 )
 
+// allprojects {
+//   repositories {
+//     maven {
+//       // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+//       url(reactNativeAndroidDir)
+//     }
+
+//     google()
+//     mavenCentral()
+//     maven { url 'https://www.jitpack.io' }
+//   }
+// }
+
 allprojects {
   repositories {
     maven {
@@ -30,6 +43,14 @@ allprojects {
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
+  }
+
+  configurations.all {
+    resolutionStrategy {
+      // Force AndroidX versions to avoid duplicate class conflicts with support libraries
+      force 'androidx.core:core:1.13.1'
+      force 'androidx.appcompat:appcompat:1.6.1'
+    }
   }
 }
 
