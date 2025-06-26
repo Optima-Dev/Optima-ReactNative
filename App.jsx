@@ -45,6 +45,7 @@ import Home from "./screens/Helper/Home";
 import Notifications from "./screens/Helper/Notifications";
 import Community from "./screens/Helper/Community";
 import HelperSettings from "./screens/Helper/Settings";
+import CallScreen from "./screens/Helper/CallScreen";
 import Account from "./screens/Account";
 import Language from "./screens/Language";
 import Article from "./screens/Helper/Atricle";
@@ -57,7 +58,6 @@ import AuthProvider, { useAuth } from "./store/AuthContext";
 import UserProvider, { useUser } from "./store/UserContext";
 import HelperProvider, { useHelper } from "./store/HelperContext";
 import SeekerProvider, { useSeeker } from "./store/SeekerContext";
-import { MeetingProvider } from "./store/MeetingContext";
 
 // importing util functions
 import { getUser } from "./util/UserHttp";
@@ -88,13 +88,11 @@ const UnAuthStack = React.memo(() => (
         gestureEnabled: false,
       }}
     />
-
     <Stack.Screen
       name='OnBoarding1'
       component={OnBoarding}
       options={{ headerShown: false }}
     />
-
     <Stack.Screen name='Start' component={Start} />
     <Stack.Screen name='PrivacyTerms' component={PrivacyTerms} />
     <Stack.Screen name='Login' component={Login} />
@@ -103,26 +101,24 @@ const UnAuthStack = React.memo(() => (
   </Stack.Navigator>
 ));
 
-const createTabScreen = (name, component, icon, dot) => {
-  return (
-    <MyTabs.Screen
-      name={name}
-      component={component}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <>
-            <Ionicons
-              name={`${icon}${focused ? "" : "-outline"}`}
-              size={28}
-              color={color}
-            />
-            {dot && <View style={styles.notificationDot} />}
-          </>
-        ),
-      }}
-    />
-  );
-};
+const createTabScreen = (name, component, icon, dot) => (
+  <MyTabs.Screen
+    name={name}
+    component={component}
+    options={{
+      tabBarIcon: ({ color, focused }) => (
+        <>
+          <Ionicons
+            name={`${icon}${focused ? "" : "-outline"}`}
+            size={28}
+            color={color}
+          />
+          {dot && <View style={styles.notificationDot} />}
+        </>
+      ),
+    }}
+  />
+);
 
 const SeekerTap = React.memo(() => (
   <MyTabs.Navigator
@@ -134,7 +130,7 @@ const SeekerTap = React.memo(() => (
         elevation: 0,
         shadowOpacity: 0,
         // marginBottom: Platform.OS === "ios" ? 0 : 12,
-        height: Platform.OS === "ios" ? 'auto' : 60,
+        height: Platform.OS === "ios" ? "auto" : 60,
       },
       tabBarLabel: ({ color }) => (
         <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -166,7 +162,7 @@ const HelperTap = React.memo(({ hasRequest }) => (
     {createTabScreen("Home", HelperHomeScreen, "home")}
     {createTabScreen(
       "Notifications",
-      Notifications,
+      NotificationsStack,
       "notifications",
       hasRequest
     )}
@@ -221,7 +217,15 @@ const SettingsScreen = React.memo(() => {
 const HelperHomeScreen = React.memo(() => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name='HomeScreen' component={Home} />
+    <Stack.Screen name='CallScreen' component={CallScreen} />
     <Stack.Screen name='Instructions' component={Instructions} />
+  </Stack.Navigator>
+));
+
+const NotificationsStack = React.memo(() => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name='NotificationsScreen' component={Notifications} />
+    <Stack.Screen name='CallScreen' component={CallScreen} />
   </Stack.Navigator>
 ));
 
@@ -336,9 +340,7 @@ export default function App() {
         <UserProvider>
           <HelperProvider>
             <SeekerProvider>
-              <MeetingProvider>
-                <Root />
-              </MeetingProvider>
+              <Root />
             </SeekerProvider>
           </HelperProvider>
         </UserProvider>

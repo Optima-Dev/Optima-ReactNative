@@ -40,17 +40,19 @@ allprojects {
       url(reactNativeAndroidDir)
     }
 
+    maven { url "https://webrtc.github.io/webrtc-org/native-code/android/" }
+
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
   }
 
   configurations.all {
-    resolutionStrategy {
-      // Force AndroidX versions to avoid duplicate class conflicts with support libraries
-      force 'androidx.core:core:1.13.1'
-      force 'androidx.appcompat:appcompat:1.6.1'
-    }
+      resolutionStrategy {
+        force 'androidx.core:core:1.13.1'
+        force 'androidx.appcompat:appcompat:1.6.1'
+        force 'org.webrtc:google-webrtc:1.0.32001'
+      }
   }
 }
 

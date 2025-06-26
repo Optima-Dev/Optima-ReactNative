@@ -34,7 +34,7 @@ const Home = ({ navigation }) => {
             style={[styles.ring2]}
           /> */}
 
-          <Pressable style={styles.buttonContainer}>
+          <Pressable style={styles.buttonContainer} onPress={() => navigation.navigate('CallScreen')}>
             <Text style={styles.buttonText}>
               People who are waiting today for help from all over the world
             </Text>

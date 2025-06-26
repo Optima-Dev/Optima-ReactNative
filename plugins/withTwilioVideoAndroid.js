@@ -1,65 +1,71 @@
-// withTwilioVideoAndroid.js
-const { withAndroidManifest } = require('expo/config-plugins');
+const { withAndroidManifest } = require('@expo/config-plugins');
 
 /**
- * Expo Config Plugin to add necessary permissions for Twilio Video on Android
- * to AndroidManifest.xml
+ * Add required permissions for Twilio Video to AndroidManifest.xml
  */
 const withTwilioVideoAndroid = (config) => {
   return withAndroidManifest(config, async (config) => {
     const androidManifest = config.modResults;
+
+    // Add permissions to AndroidManifest
     const mainApplication = androidManifest.manifest.application[0];
 
-    // Ensure we have the uses-permission nodes
+    // Ensure permissions exist
     if (!androidManifest.manifest['uses-permission']) {
       androidManifest.manifest['uses-permission'] = [];
     }
-    
-    const usesPermissions = androidManifest.manifest['uses-permission'];
-    
-    // List of permissions needed for Twilio Video
+
     const permissions = [
       'android.permission.CAMERA',
       'android.permission.RECORD_AUDIO',
-      'android.permission.MODIFY_AUDIO_SETTINGS',
+      'android.permission.INTERNET',
       'android.permission.ACCESS_NETWORK_STATE',
-      'android.permission.ACCESS_WIFI_STATE'
+      'android.permission.ACCESS_WIFI_STATE',
+      'android.permission.FOREGROUND_SERVICE',
+      'android.permission.BLUETOOTH',
+      'android.permission.MODIFY_AUDIO_SETTINGS'
     ];
-    
-    // Add each permission if it doesn't exist already
+
+    // Add each permission if it doesn't already exist
     permissions.forEach(permission => {
-      const existingPermission = usesPermissions.find(
-        item => item.$?.['android:name'] === permission
+      const exists = androidManifest.manifest['uses-permission'].some(
+        (item) => item.$?.['android:name'] === permission
       );
       
-      if (!existingPermission) {
-        usesPermissions.push({
+      if (!exists) {
+        androidManifest.manifest['uses-permission'].push({
           $: {
-            'android:name': permission,
-          },
+            'android:name': permission
+          }
         });
       }
     });
-    
-    // Add uses-feature for camera
+
+    // Add feature requirements
     if (!androidManifest.manifest['uses-feature']) {
       androidManifest.manifest['uses-feature'] = [];
     }
-    
-    const usesFeatures = androidManifest.manifest['uses-feature'];
-    
-    const cameraFeature = usesFeatures.find(
-      item => item.$?.['android:name'] === 'android.hardware.camera'
-    );
-    
-    if (!cameraFeature) {
-      usesFeatures.push({
-        $: {
-          'android:name': 'android.hardware.camera',
-        },
-      });
-    }
-    
+
+    const features = [
+      { name: 'android.hardware.camera', required: false },
+      { name: 'android.hardware.camera.autofocus', required: false }
+    ];
+
+    features.forEach(feature => {
+      const exists = androidManifest.manifest['uses-feature'].some(
+        (item) => item.$?.['android:name'] === feature.name
+      );
+      
+      if (!exists) {
+        androidManifest.manifest['uses-feature'].push({
+          $: {
+            'android:name': feature.name,
+            'android:required': feature.required.toString()
+          }
+        });
+      }
+    });
+
     return config;
   });
 };

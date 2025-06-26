@@ -10,7 +10,7 @@ import {
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
-import { endMeeting, createMeeting } from "../../util/MeetingHttp";
+import { endMeeting, acceptFirstMeeting } from "../../util/MeetingHttp";
 import TwilioVideoComponent from "../../components/TwilioVideoComponent";
 
 const CallVolunteer = ({ navigation }) => {
@@ -45,13 +45,13 @@ const CallVolunteer = ({ navigation }) => {
     async function setupCall() {
       try {
         setIsLoading(true);
-        const response = await createMeeting(token, { type: "global" });
+        const response = await acceptFirstMeeting(token);
         
-        console.log("Meeting creation response:", response.data);
+        console.log("Joining Meeting response:", response.data);
         setVideoInfo(response.data);
         setIsConnected(true);
       } catch (error) {
-        setIsError(error || "Failed to create meeting");
+        setIsError(error || "Failed to join meeting");
         setTimeout(() => navigation.goBack(), 2000);
       } finally {
         setIsLoading(false);
@@ -77,16 +77,6 @@ const CallVolunteer = ({ navigation }) => {
     }
   }
 
-  function handleFlipCamera() {
-    // This will work perfectly with the new component.
-
-    // if (twilioComponentRef.current) {
-    //   twilioComponentRef.current.flipCamera();
-    // } else {
-    //   console.log("No ref to Twilio component");
-    // }
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
@@ -110,21 +100,13 @@ const CallVolunteer = ({ navigation }) => {
               blurRadius={12}
             />
             <Text style={styles.waiting}>
-              { isLoading && videoInfo?.token ? "Ending Call..." : isLoading ? "Creating Call..." : isError }
+              { isLoading && videoInfo?.token ? "Ending Call..." : isLoading ? "Joining Call..." : isError }
             </Text>
           </>
         )}
       </View>
 
       <View style={styles.buttonContainer}>
-        <PrimaryButton
-          backgroundColor={Colors.MainColor}
-          textColor='white'
-          title='Flip Camera'
-          style={styles.button}
-          onPress={handleFlipCamera}
-          disabled={!isConnected}
-        />
         <PrimaryButton
           backgroundColor={Colors.red600}
           textColor='white'

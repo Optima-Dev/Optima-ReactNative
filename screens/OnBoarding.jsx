@@ -9,9 +9,8 @@ import { SafeAreaView } from "react-native";
 import Colors from "../constants/Colors";
 
 function OnBoarding1({ navigation }) {
-
   const [step, setStep] = useState(1);
-  
+
   // Reset to step 1 whenever this screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -20,8 +19,8 @@ function OnBoarding1({ navigation }) {
   );
 
   function handleNext() {
-    setStep(prevStep => prevStep + 1);
-    if(step === 3) {
+    setStep((prevStep) => prevStep + 1);
+    if (step === 3) {
       navigation.navigate("Start");
       setStep(3);
     }
@@ -35,9 +34,9 @@ function OnBoarding1({ navigation }) {
       imageUri={onBoardingImage1}
       handleNext={handleNext}
     />
-  )
+  );
 
-  if(step === 2) {
+  if (step === 2) {
     content = (
       <OnBoardingContent
         step={step}
@@ -46,9 +45,8 @@ function OnBoarding1({ navigation }) {
         imageUri={onBoardingImage2}
         handleNext={handleNext}
       />
-    )
-  }
-  else if (step === 3) {
+    );
+  } else if (step === 3) {
     content = (
       <OnBoardingContent
         step={step}
@@ -57,14 +55,10 @@ function OnBoarding1({ navigation }) {
         imageUri={onBoardingImage3}
         handleNext={handleNext}
       />
-    )
+    );
   }
 
-  return (
-    <>
-      { content }
-    </>
-  );
+  return <>{content}</>;
 }
 
 export default OnBoarding1;

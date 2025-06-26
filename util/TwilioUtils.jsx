@@ -1,8 +1,9 @@
-import { Platform, PermissionsAndroid } from "react-native";
+import { Platform } from "react-native";
+import { PermissionsAndroid } from "react-native";
 
 /**
- * Requests camera and microphone permissions for Twilio Video on Android
- * iOS permissions are handled through Info.plist
+ * Request camera and microphone permissions required for Twilio video calls
+ * @returns {Promise<Object>} Object containing permission status
  */
 export const requestTwilioPermissions = async () => {
   if (Platform.OS === "android") {
@@ -11,7 +12,7 @@ export const requestTwilioPermissions = async () => {
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
           title: "Camera Permission",
-          message: "Optima needs access to your camera to make video calls.",
+          message: "Optima needs access to your camera for video calls",
           buttonNeutral: "Ask Me Later",
           buttonNegative: "Cancel",
           buttonPositive: "OK",
@@ -22,8 +23,7 @@ export const requestTwilioPermissions = async () => {
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
         {
           title: "Microphone Permission",
-          message:
-            "Optima needs access to your microphone to make video calls.",
+          message: "Optima needs access to your microphone for video calls",
           buttonNeutral: "Ask Me Later",
           buttonNegative: "Cancel",
           buttonPositive: "OK",
@@ -35,14 +35,16 @@ export const requestTwilioPermissions = async () => {
         audioGranted: audioGranted === PermissionsAndroid.RESULTS.GRANTED,
       };
     } catch (err) {
-      console.error("Error requesting permissions:", err);
+      console.warn("Error requesting permissions:", err);
       return {
         cameraGranted: false,
         audioGranted: false,
       };
     }
   } else {
-    // iOS permissions are handled through Info.plist
+    // iOS handles permissions through Info.plist, which we assume is already configured
+    // We return true for both permissions, as the system will automatically prompt if needed
+    console.log("iOS platform detected - permissions handled by system");
     return {
       cameraGranted: true,
       audioGranted: true,
@@ -51,42 +53,13 @@ export const requestTwilioPermissions = async () => {
 };
 
 /**
- * Handle Twilio video track subscription events
+ * Helper function to format participants for the UI
+ * @param {Array} participants - List of participants from Twilio Room
+ * @returns {Array} Formatted participants data
  */
-export const handleTrackSubscription = (participant, track, twilioRef) => {
-  // You can implement custom behavior for different track types
-  // This can be useful for accessibility features or UI changes
-  if (track.kind === "video") {
-    console.log("Participant video track subscribed:", participant.identity);
-    // Example: You might want to play a sound or speech notification for blind users
-  }
-  if (track.kind === "audio") {
-    console.log("Participant audio track subscribed:", participant.identity);
-  }
-};
-
-/**
- * Format error messages from Twilio for better user feedback
- */
-export const formatTwilioError = (error) => {
-  if (!error) return "Unknown error occurred";
-
-  const errorCode = error.code || "";
-  const errorMessage = error.message || "";
-
-  // Handle common Twilio error codes
-  switch (errorCode) {
-    case 20101: // Invalid Access Token
-      return "Connection error: Invalid access token";
-    case 53000: // Room name is invalid
-      return "Connection error: Invalid room name";
-    case 53001: // Room name too long
-      return "Connection error: Room name is too long";
-    case 53103: // Maximum number of concurrent Participants
-      return "The room is full";
-    case 53105: // Room is disconnected
-      return "The call has ended";
-    default:
-      return `Error: ${errorMessage || "Unknown error"}`;
-  }
+export const formatParticipantsData = (participants) => {
+  return Object.keys(participants).map((participantSid) => ({
+    sid: participantSid,
+    ...participants[participantSid],
+  }));
 };
