@@ -4,7 +4,7 @@
     "slug": "Optima",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Main-Logo-blue.png",
+    "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/Splash-Logo.png",
       "resizeMode": "contain",
@@ -19,14 +19,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/Main-Logo-blue.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.INTERNET",
-        "android.permission.ACCESS_NETWORK_STATE", 
+        "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.ACCESS_WIFI_STATE",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.BLUETOOTH",
@@ -47,13 +47,11 @@
         }
       ],
       "./plugins/withTwilioVideoAndroid.js",
-      "./plugins/withTwilioVideoIOS.js"
+      "./plugins/withTwilioVideoIOS.js",
+      "expo-web-browser"
     ],
-    "newArchEnabled": true,
-    "extra": {
-      "eas": {
-        "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
-      }
+    "eas": {
+      "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
     },
     "owner": "ahmed_hatem25"
   }
