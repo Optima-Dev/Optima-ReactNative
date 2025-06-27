@@ -1,44 +1,41 @@
-import { useLayoutEffect, useState, useEffect, useRef } from "react";
-import React from "react";
+import React, { useLayoutEffect, useState, useEffect, useRef } from "react";
 import {
   ImageBackground,
   Platform,
   StyleSheet,
   Text,
   View,
-  Alert,
 } from "react-native";
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
-import { useMeeting } from "../../store/MeetingContext";
 import { useAuth } from "../../store/AuthContext";
-import { useUser } from "../../store/UserContext";
-import { requestTwilioPermissions } from "../../util/TwilioUtils"
+import { endMeeting, createMeeting } from "../../util/MeetingHttp";
 import TwilioVideoComponent from "../../components/TwilioVideoComponent";
 
 const CallVolunteer = ({ navigation }) => {
-  const [isCalling, setIsCalling] = useState(false);
+  const [videoInfo, setVideoInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [status, setStatus] = useState("Waiting for someone to join...");
-  // This ref will now point to our new TwilioVideoComponent.
-  const twilioComponentRef = useRef(null);
-  const {
-    twilioToken,
-    roomName,
-    identity,
-    startMeeting,
-    endMeeting,
-    endAllMeetings,
-    loading,
-    error,
-  } = useMeeting();
   const { token } = useAuth();
-  const { user } = useUser();
+  const twilioComponentRef = useRef(null);
+
+  useEffect(() => {
+    if (isConnected) {
+      const timeout = setTimeout(() => {
+        if (twilioComponentRef.current) {
+          console.log("✅ Twilio ref is ready!");
+        } else {
+          console.log("❌ Twilio ref is still NOT ready!");
+        }
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [isConnected]);
 
   useLayoutEffect(() => {
     const parentNav = navigation.getParent();
     parentNav?.setOptions({ tabBarStyle: { display: "none" } });
-
     return () => {
       parentNav?.setOptions({
         tabBarStyle: {
@@ -53,162 +50,41 @@ const CallVolunteer = ({ navigation }) => {
   }, [navigation]);
 
   useEffect(() => {
-    if (!token) {
-      console.error("Missing authentication token in CallVolunteer");
-    } else {
-      console.log("Auth token is available for meeting");
-    }
-
-    const setupCall = async () => {
+    async function setupCall() {
       try {
-        console.log("Setting up call - user:", user ? user._id : "undefined");
-        let permissions;
-        try {
-          permissions = await requestTwilioPermissions();
-        } catch (permissionsError) {
-          console.error("Failed to request permissions:", permissionsError);
-          Alert.alert(
-            "Permission Error",
-            "Failed to request camera and microphone permissions. Please grant permissions manually in your device settings.",
-            [{ text: "OK", onPress: () => navigation.goBack() }]
-          );
-          return;
-        }
-
-        if (!permissions.cameraGranted || !permissions.audioGranted) {
-          Alert.alert(
-            "Permission Required",
-            "Camera and microphone permissions are required for video calls.",
-            [{ text: "OK", onPress: () => navigation.goBack() }]
-          );
-          return;
-        }
-
-        console.log("Starting a volunteer meeting with user ID:", user?._id);
-        setIsCalling(true);
-
-        const result = await startMeeting({
-          token,
-          role: "seeker",
-          seekerId: user._id,
-          topic: "Volunteer Assistance",
-          meetingType: "global",
-          helperId: null,
-        });
-
-        if (!result.success) {
-          setIsCalling(false);
-          const errorMessage = result.error || "Please try again";
-          console.error("Meeting start failed with error:", errorMessage);
-
-          if (errorMessage.includes("already have an active meeting")) {
-            Alert.alert(
-              "Active Meeting Exists",
-              "You already have an active meeting. Would you like to end it and start a new one?",
-              [
-                {
-                  text: "Cancel",
-                  style: "cancel",
-                  onPress: () => navigation.goBack(),
-                },
-                {
-                  text: "End Current & Start New",
-                  style: "destructive",
-                  onPress: async () => {
-                    try {
-                      console.log("Attempting to end all active meetings");
-                      const endResult = await endAllMeetings(token);
-
-                      if (endResult.success) {
-                        console.log("All active meetings ended successfully");
-                        setTimeout(() => {
-                          setupCall();
-                        }, 1000);
-                      } else {
-                        throw new Error(
-                          endResult.error || "Failed to end meetings"
-                        );
-                      }
-                    } catch (endError) {
-                      console.error(
-                        "Failed to end existing meetings:",
-                        endError
-                      );
-                      Alert.alert(
-                        "Error",
-                        "Failed to end existing meetings. Please try again later."
-                      );
-                      navigation.goBack();
-                    }
-                  },
-                },
-              ]
-            );
-          } else {
-            Alert.alert("Error", `Failed to start the call: ${errorMessage}`);
-            navigation.goBack();
-          }
-          return;
-        }
-      } catch (callError) {
-        Alert.alert(
-          "Error",
-          `Failed to start the call: ${
-            callError.message || "Please try again."
-          }`
-        );
-        console.error("Call initialization error:", callError);
-        navigation.goBack();
+        setIsLoading(true);
+        const response = await createMeeting(token, { type: "global" });
+        setVideoInfo(response.data);
+        setIsConnected(true);
+      } catch (error) {
+        setIsError(error?.message || "Failed to create meeting");
+        setTimeout(() => navigation.goBack(), 2000);
+      } finally {
+        setIsLoading(false);
       }
-    };
-
+    }
     setupCall();
-
-    return () => {
-      // The new component also handles its own disconnection, but ending the meeting here is still correct.
-      if (roomName) {
-        endMeeting({ token, meetingId: roomName });
-      }
-    };
   }, []);
 
-  useEffect(() => {
-    if (twilioToken && roomName && isCalling) {
-      console.log("Monitoring connection state for:", roomName);
-      const connectionTimeout = setTimeout(() => {
-        if (!isConnected) {
-          console.log("Connection timeout after 20 seconds");
-          setStatus("Connection timeout. Please try again.");
-          Alert.alert(
-            "Connection Timeout",
-            "Unable to connect to the video call after 20 seconds. Please try again.",
-            [{ text: "OK", onPress: () => navigation.goBack() }]
-          );
-        }
-      }, 20000);
-
-      return () => {
-        clearTimeout(connectionTimeout);
-        console.log("Cleaning up connection timeout");
-      };
+  async function handleEndingCall() {
+    try {
+      setIsLoading(true);
+      if (twilioComponentRef.current) {
+        twilioComponentRef.current.disconnect();
+      }
+      await endMeeting(token, videoInfo?.roomName);
+      setIsConnected(false);
+      setTimeout(() => navigation.goBack(), 1500);
+    } catch (error) {
+      setIsConnected(false);
+      setIsError(error?.message || "Failed to end meeting. Please try again.");
+      setTimeout(() => navigation.goBack(), 2000);
+    } finally {
+      setIsLoading(false);
     }
-  }, [twilioToken, roomName, isCalling, isConnected, navigation]);
-
-  useEffect(() => {
-    if (error) {
-      Alert.alert("Error", error);
-    }
-  }, [error]);
-
-  function handleEndingCall() {
-    // The new component handles its own disconnect, so this is fine.
-    endMeeting({ token, meetingId: roomName });
-    setIsCalling(false);
-    navigation.goBack();
   }
 
   function handleFlipCamera() {
-    // This will work perfectly with the new component.
     if (twilioComponentRef.current) {
       twilioComponentRef.current.flipCamera();
     } else {
@@ -216,69 +92,19 @@ const CallVolunteer = ({ navigation }) => {
     }
   }
 
-  // 2. This function now uses the new, simplified TwilioVideoComponent.
-  const renderTwilioVideo = () => {
-    if (!isCalling || !twilioToken || !roomName) {
-      return null;
-    }
-
-    return (
-      <TwilioVideoComponent
-        ref={twilioComponentRef}
-        token={twilioToken}
-        roomName={roomName}
-        identity={identity}
-        style={styles.twilioVideo}
-        onRoomDidConnect={() => {
-          console.log("Room connected successfully!");
-          setIsConnected(true);
-          setStatus("Connected!");
-        }}
-        onRoomDidDisconnect={({ error: disconnectError }) => {
-          console.log("Room disconnected", disconnectError);
-          setIsConnected(false);
-          setStatus("Disconnected");
-          if (disconnectError) {
-            Alert.alert(
-              "Call Ended",
-              disconnectError.message || "The call has ended"
-            );
-          }
-        }}
-        onRoomDidFailToConnect={(failError) => {
-          console.error("Room failed to connect:", failError);
-          setStatus("Failed to connect");
-          Alert.alert(
-            "Connection Failed",
-            failError.message || "Failed to connect to the call"
-          );
-        }}
-        onParticipantAddedVideoTrack={() => {
-          console.log("Participant added video track");
-          setStatus("Volunteer joined the call");
-        }}
-        onParticipantRemovedVideoTrack={() => {
-          console.log("Participant removed video track");
-          setStatus("Volunteer left the call");
-        }}
-      />
-    );
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
-        {isCalling ? (
-          <>
-            {renderTwilioVideo()}
-            {!isConnected && (
-              <View style={styles.statusOverlay}>
-                <Text style={styles.statusText}>
-                  {loading ? "Starting call..." : status}
-                </Text>
-              </View>
-            )}
-          </>
+        {isConnected ? (
+          <View style={{ flex: 1 }}>
+            <Text>Calling...</Text>
+            <TwilioVideoComponent
+              ref={twilioComponentRef}
+              token={videoInfo?.token}
+              roomName={videoInfo?.roomName}
+              onEndCall={() => setIsConnected(false)}
+            />
+          </View>
         ) : (
           <>
             <ImageBackground
@@ -287,12 +113,15 @@ const CallVolunteer = ({ navigation }) => {
               blurRadius={12}
             />
             <Text style={styles.waiting}>
-              {loading ? "Starting call..." : "Wait for someone to join you .."}
+              {isLoading && videoInfo?.token
+                ? "Ending Call..."
+                : isLoading
+                ? "Creating Call..."
+                : isError}
             </Text>
           </>
         )}
       </View>
-
       <View style={styles.buttonContainer}>
         <PrimaryButton
           backgroundColor={Colors.MainColor}

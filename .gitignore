@@ -38,6 +38,11 @@ yarn-error.*
 
 # Android
 /android
+/.idea
+/build
+*.iml
+.gradle
+/local.properties
 
 # iOS
 /ios

@@ -58,7 +58,6 @@ import AuthProvider, { useAuth } from "./store/AuthContext";
 import UserProvider, { useUser } from "./store/UserContext";
 import HelperProvider, { useHelper } from "./store/HelperContext";
 import SeekerProvider, { useSeeker } from "./store/SeekerContext";
-import { MeetingProvider } from "./store/MeetingContext";
 
 // importing util functions
 import { getUser } from "./util/UserHttp";
@@ -218,6 +217,7 @@ const SettingsScreen = React.memo(() => {
 const HelperHomeScreen = React.memo(() => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name='HomeScreen' component={Home} />
+    <Stack.Screen name='CallScreen' component={CallScreen} />
     <Stack.Screen name='Instructions' component={Instructions} />
   </Stack.Navigator>
 ));
@@ -340,9 +340,7 @@ export default function App() {
         <UserProvider>
           <HelperProvider>
             <SeekerProvider>
-              <MeetingProvider>
-                <Root />
-              </MeetingProvider>
+              <Root />
             </SeekerProvider>
           </HelperProvider>
         </UserProvider>
