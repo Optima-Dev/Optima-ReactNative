@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Clean and Build Android",
+			"type": "shell",
+			"command": "cd android && ./gradlew clean && ./gradlew assembleDebug -PnewArchEnabled=false",
+			"group": "build",
+			"problemMatcher": []
+		}
+	]
+}

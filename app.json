@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "Optima",
+    "slug": "Optima",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/Splash-Logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2727C4"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#2727C4",
+      "translucent": false
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.BLUETOOTH",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "package": "com.ahmed_hatem25.Optima"
+    },
+    "web": {
+      "favicon": "./assets/Main-Logo-blue.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "This app needs access to your camera so you can take pictures and do things like that.",
+          "microphonePermission": "This app needs access to your microphone so you can record audio.",
+          "recordAudioAndroid": true
+        }
+      ],
+      "./plugins/withTwilioVideoAndroid.js",
+      "./plugins/withTwilioVideoIOS.js",
+      "expo-web-browser"
+    ],
+    "eas": {
+      "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
+    },
+    "owner": "ahmed_hatem25"
+  }
+}
