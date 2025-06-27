@@ -4,8 +4,8 @@ import Colors from "../../../constants/Colors";
 
 function HelpIcon({ isAskingForHelp }) {
   const backEffectSource = isAskingForHelp
-    ? require("../../../assets/Images/Ellipse 15.png")
-    : require("../../../assets/Images/DarkEllipse 15 (1).png");
+    ? require("../../../assets/LargeImages-Backup/Ellipse 15.png")
+    : require("../../../assets/LargeImages-Backup/DarkEllipse 15 (1).png");
 
   const iconSource = isAskingForHelp
     ? require("../../../assets/Images/ask-for-help 1.png")

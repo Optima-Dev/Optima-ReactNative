@@ -16,17 +16,17 @@ const INSTRUCTIONS = {
     },
     {
       step: 2,
-      text: `You can call one of our volunteers on a video call by clicking on the button or by reading out loud ”Call a volunteer”.`,
+      text: `You can call one of our volunteers on a video call by clicking on the button or by reading out loud "Call a volunteer".`,
       ImgSource: require("../assets/Images/video-call 1.png"),
     },
     {
       step: 3,
       ImgSource: require("../assets/Images/camera 1.png"),
-      text: `You can use our AI feature that would describe the whole view in front of you. Just say out loud “Open my vision“ then “Take a picture“.`,
+      text: `You can use our AI feature that would describe the whole view in front of you. Just say out loud "Open my vision" then "Take a picture".`,
     },
     {
       step: 4,
-      text: `In my people section you will be able to add your family and friends accounts so you can call them easily by saying out loud “Call person’s name “.`,
+      text: `In my people section you will be able to add your family and friends accounts so you can call them easily by saying out loud "Call person's name ".`,
       ImgSource: require("../assets/Images/family 2.png"),
     },
   ],
@@ -80,7 +80,7 @@ const Instructions = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("../assets/Images/Ellipse 1.png")}
+        source={require("../assets/LargeImages-Backup/Ellipse 1.png")}
         style={styles.ring}
       />
       <MainHeader {...HEADER[role]} />

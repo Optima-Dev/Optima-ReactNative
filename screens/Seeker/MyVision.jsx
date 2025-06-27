@@ -4,13 +4,13 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { CameraView } from "expo-camera";
 import { BallIndicator } from "react-native-indicators";
 import { readAsStringAsync, EncodingType } from "expo-file-system";
-import genai from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { GOOGLE_API_KEY } from "@env";
 import * as Speech from "expo-speech";
 
-const genAI = new genai.GoogleGenerativeAI(GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const MyVision = () => {

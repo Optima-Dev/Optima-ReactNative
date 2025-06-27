@@ -1,5 +1,5 @@
 // importing react hooks
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 
 // importing navigation
 import {
@@ -17,7 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
-import AppLoading from "expo-app-loading";
+import * as SplashScreen from "expo-splash-screen";
 
 // importing constants
 import Colors from "./constants/Colors";
@@ -45,6 +45,7 @@ import Home from "./screens/Helper/Home";
 import Notifications from "./screens/Helper/Notifications";
 import Community from "./screens/Helper/Community";
 import HelperSettings from "./screens/Helper/Settings";
+import CallScreen from "./screens/Helper/CallScreen";
 import Account from "./screens/Account";
 import Language from "./screens/Language";
 import Article from "./screens/Helper/Atricle";
@@ -87,13 +88,11 @@ const UnAuthStack = React.memo(() => (
         gestureEnabled: false,
       }}
     />
-
     <Stack.Screen
       name='OnBoarding1'
       component={OnBoarding}
       options={{ headerShown: false }}
     />
-
     <Stack.Screen name='Start' component={Start} />
     <Stack.Screen name='PrivacyTerms' component={PrivacyTerms} />
     <Stack.Screen name='Login' component={Login} />
@@ -102,26 +101,24 @@ const UnAuthStack = React.memo(() => (
   </Stack.Navigator>
 ));
 
-const createTabScreen = (name, component, icon, dot) => {
-  return (
-    <MyTabs.Screen
-      name={name}
-      component={component}
-      options={{
-        tabBarIcon: ({ color, focused }) => (
-          <>
-            <Ionicons
-              name={`${icon}${focused ? "" : "-outline"}`}
-              size={28}
-              color={color}
-            />
-            {dot && <View style={styles.notificationDot} />}
-          </>
-        ),
-      }}
-    />
-  );
-};
+const createTabScreen = (name, component, icon, dot) => (
+  <MyTabs.Screen
+    name={name}
+    component={component}
+    options={{
+      tabBarIcon: ({ color, focused }) => (
+        <>
+          <Ionicons
+            name={`${icon}${focused ? "" : "-outline"}`}
+            size={28}
+            color={color}
+          />
+          {dot && <View style={styles.notificationDot} />}
+        </>
+      ),
+    }}
+  />
+);
 
 const SeekerTap = React.memo(() => (
   <MyTabs.Navigator
@@ -132,15 +129,13 @@ const SeekerTap = React.memo(() => (
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        marginBottom: Platform.OS === "ios" ? 0 : 12,
-        // height: Platform.OS === "ios" ? 'auto' : 60,
+        // marginBottom: Platform.OS === "ios" ? 0 : 12,
+        height: Platform.OS === "ios" ? "auto" : 60,
       },
       tabBarLabel: ({ color }) => (
         <Text style={{ fontSize: 14, color }}>{route.name}</Text>
       ),
-    })}
-  >
-    
+    })}>
     {createTabScreen("Support", SeekerSupport, "videocam")}
     {createTabScreen("MyVision", MyVision, "camera")}
     {createTabScreen("MyPeople", MyPeople, "people")}
@@ -157,8 +152,8 @@ const HelperTap = React.memo(({ hasRequest }) => (
         borderTopWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-        marginBottom: Platform.OS === "ios" ? 0 : 12,
-        // height: Platform.OS === "ios" ? 0 : 60,
+        // marginBottom: Platform.OS === "ios" ? 0 : 12,
+        height: Platform.OS === "ios" ? 0 : 60,
       },
       tabBarLabel: ({ color }) => (
         <Text style={{ fontSize: 14, color }}>{route.name}</Text>
@@ -167,7 +162,7 @@ const HelperTap = React.memo(({ hasRequest }) => (
     {createTabScreen("Home", HelperHomeScreen, "home")}
     {createTabScreen(
       "Notifications",
-      Notifications,
+      NotificationsStack,
       "notifications",
       hasRequest
     )}
@@ -222,7 +217,15 @@ const SettingsScreen = React.memo(() => {
 const HelperHomeScreen = React.memo(() => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name='HomeScreen' component={Home} />
+    <Stack.Screen name='CallScreen' component={CallScreen} />
     <Stack.Screen name='Instructions' component={Instructions} />
+  </Stack.Navigator>
+));
+
+const NotificationsStack = React.memo(() => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name='NotificationsScreen' component={Notifications} />
+    <Stack.Screen name='CallScreen' component={CallScreen} />
   </Stack.Navigator>
 ));
 
@@ -262,8 +265,7 @@ const Navigation = React.memo(({ hasRequest }) => {
 });
 
 const Root = React.memo(() => {
-  const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [appIsReady, setAppIsReady] = useState(false);
   const { authenticate, handleRole, token } = useAuth();
   const { setUser } = useUser();
   const { setFriends } = useSeeker();
@@ -272,53 +274,67 @@ const Root = React.memo(() => {
   let hasFriendRequests = requests.length > 0;
 
   useEffect(() => {
-    async function fetchToken() {
-      setIsTryingLogin(true);
-      const [[, storedToken], [, storedRole]] = await AsyncStorage.multiGet([
-        "token",
-        "role",
-      ]);
+    async function prepare() {
+      try {
+        // Keep the splash screen visible while we fetch resources
+        await SplashScreen.preventAutoHideAsync();
 
-      console.log(storedRole, "  ", storedToken);
+        const [[, storedToken], [, storedRole]] = await AsyncStorage.multiGet([
+          "token",
+          "role",
+        ]);
 
-      if (storedToken) {
-        authenticate(storedToken);
-        handleRole(storedRole);
+        if (storedToken) {
+          authenticate(storedToken);
+          handleRole(storedRole);
 
-        try {
-          const userData = await getUser(storedToken);
-          setUser(userData.user);
+          try {
+            const userData = await getUser(storedToken);
+            setUser(userData.user);
 
-          if (storedRole === "seeker") {
-            const friendsData = await getFriends(storedToken);
-            setFriends(friendsData.friends);
-          } else {
-            const friendRequests = await getFriendRequests(storedToken);
-            setRequests(friendRequests.friendRequests);
+            if (storedRole === "seeker") {
+              const friendsData = await getFriends(storedToken);
+              setFriends(friendsData.friends);
+            } else {
+              const friendRequests = await getFriendRequests(storedToken);
+              setRequests(friendRequests.friendRequests);
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
           }
-        } catch (error) {
-          alert(error);
         }
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Tell the application to render
+        setAppIsReady(true);
       }
-
-      setIsTryingLogin(false);
-      setIsLoading(false);
     }
 
-    fetchToken();
+    prepare();
   }, [token]);
 
-  if (isTryingLogin || isLoading) {
-    return <AppLoading autoHideSplash />;
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
   }
 
-  return <Navigation hasRequest={hasFriendRequests} />;
+  return (
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+      <Navigation hasRequest={hasFriendRequests} />
+    </View>
+  );
 });
 
 export default function App() {
   return (
     <>
-      <StatusBar barStyle="default" />
+      <StatusBar barStyle='default' />
 
       <AuthProvider>
         <UserProvider>

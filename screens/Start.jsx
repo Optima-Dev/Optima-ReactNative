@@ -11,7 +11,7 @@ function Start() {
         {/* Ellips1 */}
         <Image
           style={styles.backgroundImage}
-          source={require("@/assets/Images/Ellipse 1.png")} // Replace with your actual image
+          source={require("../assets/LargeImages-Backup/Ellipse 1.png")} // Replace with your actual image
         />
         <Image
           style={styles.image}
@@ -28,7 +28,7 @@ function Start() {
       <View style={styles.cardsContainer}>
         <Image
           style={styles.backgroundImage}
-          source={require("@/assets/Images/Ellipse 2.png")} // Replace with your actual image
+          source={require("../assets/LargeImages-Backup/Ellipse 2.png")} // Replace with your actual image
         />
         <Card
           text={"I WANT SOMEONE TO HELP ME."}

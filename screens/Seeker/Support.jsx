@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Platform } from "react-native";
 import CallButton from "../../components/seeker/CallButton";
 import Colors from "../../constants/Colors";
 import ArrowButton from "../../components/UI/ArrowButton";
-
+import { useEffect } from "react";
 
 const Support = ({ navigation }) => {
   return (

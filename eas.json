@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 15.0.12",
+    "appVersionSource": "remote"
+  },  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "ANDROID_NDK_HOME": "/opt/android/ndk/25.2.9519653",
+        "EXPO_DEBUG": "true"
+      },      "android": {
+        "gradleCommand": ":app:assembleDebug --stacktrace --info --debug --scan --no-daemon",
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

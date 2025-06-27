@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useState, useEffect, useRef } from "react";
+import { useLayoutEffect, useState, useEffect, useRef } from "react";
+import React from "react";
 import {
   ImageBackground,
   Platform,
@@ -9,33 +10,24 @@ import {
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
-import { endMeeting, createMeeting } from "../../util/MeetingHttp";
+import { endMeeting, acceptFirstMeeting } from "../../util/MeetingHttp";
 import TwilioVideoComponent from "../../components/TwilioVideoComponent";
 
 const CallVolunteer = ({ navigation }) => {
+
   const [videoInfo, setVideoInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const { token } = useAuth();
-  const twilioComponentRef = useRef(null);
 
-  useEffect(() => {
-    if (isConnected) {
-      const timeout = setTimeout(() => {
-        if (twilioComponentRef.current) {
-          console.log("✅ Twilio ref is ready!");
-        } else {
-          console.log("❌ Twilio ref is still NOT ready!");
-        }
-      }, 100);
-      return () => clearTimeout(timeout);
-    }
-  }, [isConnected]);
+  const { token } = useAuth();
+
+  const twilioComponentRef = useRef(null);
 
   useLayoutEffect(() => {
     const parentNav = navigation.getParent();
     parentNav?.setOptions({ tabBarStyle: { display: "none" } });
+
     return () => {
       parentNav?.setOptions({
         tabBarStyle: {
@@ -53,42 +45,35 @@ const CallVolunteer = ({ navigation }) => {
     async function setupCall() {
       try {
         setIsLoading(true);
-        const response = await createMeeting(token, { type: "global" });
+        const response = await acceptFirstMeeting(token);
+        
+        console.log("Joining Meeting response:", response.data);
         setVideoInfo(response.data);
         setIsConnected(true);
       } catch (error) {
-        setIsError(error?.message || "Failed to create meeting");
+        setIsError(error || "Failed to join meeting");
         setTimeout(() => navigation.goBack(), 2000);
       } finally {
         setIsLoading(false);
       }
     }
+
     setupCall();
   }, []);
 
   async function handleEndingCall() {
     try {
       setIsLoading(true);
-      if (twilioComponentRef.current) {
-        twilioComponentRef.current.disconnect();
-      }
-      await endMeeting(token, videoInfo?.roomName);
+      const data = await endMeeting(token, videoInfo.roomName);
+      
+      console.log("Ending call response:", data);
       setIsConnected(false);
-      setTimeout(() => navigation.goBack(), 1500);
+      
+      setTimeout(() => navigation.goBack(), 2000);
     } catch (error) {
       setIsConnected(false);
-      setIsError(error?.message || "Failed to end meeting. Please try again.");
+      setIsError(error || "Failed to end meeting");
       setTimeout(() => navigation.goBack(), 2000);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  function handleFlipCamera() {
-    if (twilioComponentRef.current) {
-      twilioComponentRef.current.flipCamera();
-    } else {
-      console.log("No ref to Twilio component");
     }
   }
 
@@ -96,15 +81,17 @@ const CallVolunteer = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.videoContainer}>
         {isConnected ? (
-          <View style={{ flex: 1 }}>
-            <Text>Calling...</Text>
-            <TwilioVideoComponent
-              ref={twilioComponentRef}
-              token={videoInfo?.token}
-              roomName={videoInfo?.roomName}
-              onEndCall={() => setIsConnected(false)}
-            />
-          </View>
+          <>
+            <View style={styles.statusOverlay}>
+              <Text style={styles.statusText}> Video call should appear now </Text>
+              {/* <TwilioVideoComponent
+                ref={twilioComponentRef}
+                token={videoInfo.token}
+                roomName={videoInfo.roomName}
+                identity={videoInfo.identity}
+              /> */}
+            </View>
+          </>
         ) : (
           <>
             <ImageBackground
@@ -113,24 +100,13 @@ const CallVolunteer = ({ navigation }) => {
               blurRadius={12}
             />
             <Text style={styles.waiting}>
-              {isLoading && videoInfo?.token
-                ? "Ending Call..."
-                : isLoading
-                ? "Creating Call..."
-                : isError}
+              { isLoading && videoInfo?.token ? "Ending Call..." : isLoading ? "Joining Call..." : isError }
             </Text>
           </>
         )}
       </View>
+
       <View style={styles.buttonContainer}>
-        <PrimaryButton
-          backgroundColor={Colors.MainColor}
-          textColor='white'
-          title='Flip Camera'
-          style={styles.button}
-          onPress={handleFlipCamera}
-          disabled={!isConnected}
-        />
         <PrimaryButton
           backgroundColor={Colors.red600}
           textColor='white'
