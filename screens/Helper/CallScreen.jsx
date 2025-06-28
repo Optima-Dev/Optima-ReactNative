@@ -11,7 +11,7 @@ import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
 import { endMeeting, acceptFirstMeeting } from "../../util/MeetingHttp";
-import TwilioVideoComponent from "../../components/TwilioVideoComponent";
+// import TwilioVideoComponent from "../../components/TwilioVideoComponent";
 
 const CallVolunteer = ({ navigation }) => {
 

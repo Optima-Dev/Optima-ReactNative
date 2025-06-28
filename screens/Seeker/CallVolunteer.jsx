@@ -10,32 +10,20 @@ import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
 import { endMeeting, createMeeting } from "../../util/MeetingHttp";
-import TwilioVideoComponent from "../../components/TwilioVideoComponent";
+import AgoraVideoComponent from "../../components/AgoraVideoComponent";
 
 const CallVolunteer = ({ navigation }) => {
   const [videoInfo, setVideoInfo] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const { token } = useAuth();
-  const twilioComponentRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (isConnected) {
-      const timeout = setTimeout(() => {
-        if (twilioComponentRef.current) {
-          console.log("✅ Twilio ref is ready!");
-        } else {
-          console.log("❌ Twilio ref is still NOT ready!");
-        }
-      }, 100);
-      return () => clearTimeout(timeout);
-    }
-  }, [isConnected]);
+  const { token } = useAuth();
+  const agoraRef = useRef(null);
 
   useLayoutEffect(() => {
     const parentNav = navigation.getParent();
     parentNav?.setOptions({ tabBarStyle: { display: "none" } });
+
     return () => {
       parentNav?.setOptions({
         tabBarStyle: {
@@ -50,61 +38,57 @@ const CallVolunteer = ({ navigation }) => {
   }, [navigation]);
 
   useEffect(() => {
-    async function setupCall() {
+    const startCall = async () => {
       try {
-        setIsLoading(true);
         const response = await createMeeting(token, { type: "global" });
         setVideoInfo(response.data);
-        setIsConnected(true);
-      } catch (error) {
-        setIsError(error?.message || "Failed to create meeting");
+        console.log("📞 Meeting response:", response.data);
+      } catch (err) {
+        console.error("❌ Create meeting error:", err);
+        setError("Failed to create call");
         setTimeout(() => navigation.goBack(), 2000);
       } finally {
         setIsLoading(false);
       }
-    }
-    setupCall();
-  }, []);
+    };
+    startCall();
+  }, [token, navigation]);
 
-  async function handleEndingCall() {
+  const handleEndCall = async () => {
     try {
       setIsLoading(true);
-      if (twilioComponentRef.current) {
-        twilioComponentRef.current.disconnect();
+      if (agoraRef.current) {
+        await agoraRef.current.disconnect();
       }
-      await endMeeting(token, videoInfo?.roomName);
-      setIsConnected(false);
-      setTimeout(() => navigation.goBack(), 1500);
-    } catch (error) {
-      setIsConnected(false);
-      setIsError(error?.message || "Failed to end meeting. Please try again.");
-      setTimeout(() => navigation.goBack(), 2000);
+      if (videoInfo?.roomName) {
+        await endMeeting(token, videoInfo.roomName);
+      }
+    } catch (err) {
+      setError("Failed to end call.");
     } finally {
-      setIsLoading(false);
+      setTimeout(() => navigation.goBack(), 1500);
     }
-  }
+  };
 
-  function handleFlipCamera() {
-    if (twilioComponentRef.current) {
-      twilioComponentRef.current.flipCamera();
-    } else {
-      console.log("No ref to Twilio component");
-    }
-  }
+  const handleFlipCamera = () => {
+    agoraRef.current?.flipCamera();
+  };
+
+  console.log("videoInfo", videoInfo);
+
+  console.log("token", videoInfo?.token);
 
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
-        {isConnected ? (
-          <View style={{ flex: 1 }}>
-            <Text>Calling...</Text>
-            <TwilioVideoComponent
-              ref={twilioComponentRef}
-              token={videoInfo?.token}
-              roomName={videoInfo?.roomName}
-              onEndCall={() => setIsConnected(false)}
-            />
-          </View>
+        {videoInfo?.token && videoInfo?.roomName ? (
+          <AgoraVideoComponent
+            ref={agoraRef}
+            token={videoInfo.token}
+            roomName={videoInfo.roomName}
+            onEndCall={handleEndCall}
+            shouldConnect={true}
+          />
         ) : (
           <>
             <ImageBackground
@@ -113,15 +97,12 @@ const CallVolunteer = ({ navigation }) => {
               blurRadius={12}
             />
             <Text style={styles.waiting}>
-              {isLoading && videoInfo?.token
-                ? "Ending Call..."
-                : isLoading
-                ? "Creating Call..."
-                : isError}
+              {isLoading ? "Creating Call..." : error ?? "Disconnected"}
             </Text>
           </>
         )}
       </View>
+
       <View style={styles.buttonContainer}>
         <PrimaryButton
           backgroundColor={Colors.MainColor}
@@ -129,14 +110,14 @@ const CallVolunteer = ({ navigation }) => {
           title='Flip Camera'
           style={styles.button}
           onPress={handleFlipCamera}
-          disabled={!isConnected}
+          disabled={!videoInfo}
         />
         <PrimaryButton
           backgroundColor={Colors.red600}
           textColor='white'
           title='End Call'
           style={styles.button}
-          onPress={handleEndingCall}
+          onPress={handleEndCall}
         />
       </View>
     </View>
@@ -151,9 +132,9 @@ const styles = StyleSheet.create({
   },
   videoContainer: {
     flex: 1,
+    backgroundColor: "#000",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
   },
   personImage: {
     flex: 1,
@@ -164,28 +145,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.white,
     position: "absolute",
-    textAlign: "center",
-    padding: 20,
-  },
-  twilioVideo: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  statusOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  statusText: {
-    color: Colors.white,
-    fontSize: 18,
-    fontWeight: "bold",
     textAlign: "center",
     padding: 20,
   },

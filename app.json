@@ -46,8 +46,6 @@
           "recordAudioAndroid": true
         }
       ],
-      "./plugins/withTwilioVideoAndroid.js",
-      "./plugins/withTwilioVideoIOS.js",
       "expo-web-browser"
     ],
     "eas": {
