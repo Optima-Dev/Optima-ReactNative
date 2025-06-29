@@ -50,6 +50,7 @@ const AgoraVideoComponent = forwardRef(
     const [remoteUid, setRemoteUid] = useState(null);
     const [isReady, setIsReady] = useState(false); 
 
+    // Effect for initializing and destroying the Agora engine (runs only once)
     useEffect(() => {
       const initEngine = async () => {
         if (!appId) {
@@ -110,6 +111,7 @@ const AgoraVideoComponent = forwardRef(
 
       initEngine();
 
+      // Return a cleanup function to release the engine on unmount
       return () => {
         if (engineRef.current) {
           console.log("Releasing Agora engine...");
@@ -148,6 +150,7 @@ const AgoraVideoComponent = forwardRef(
         {joined && remoteUid ? (
           <RtcSurfaceView canvas={{ uid: remoteUid }} style={styles.remoteVideo} renderMode={1} />
         ) : (
+          // Show "Connecting..." text only before the remote user joins
           <View style={styles.overlay}>
             <Text style={styles.statusText}>{joined ? 'Waiting for others...' : 'Connecting...'}</Text>
           </View>
@@ -171,6 +174,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  // When remote user joins, local view becomes a picture-in-picture
   localVideo: {
     position: 'absolute',
     width: 120,
