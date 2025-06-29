@@ -19,7 +19,7 @@ import {
   ClientRoleType,
 } from "react-native-agora";
 
-// Note: APP_ID is now passed as a prop, no longer hardcoded.
+// APP_ID is now passed as a prop, no longer hardcoded.
 
 const requestAndroidPermissions = async () => {
   if (Platform.OS === "android") {
@@ -48,14 +48,13 @@ const AgoraVideoComponent = forwardRef(
     const engineRef = useRef(null);
     const [joined, setJoined] = useState(false);
     const [remoteUid, setRemoteUid] = useState(null);
-    const [isReady, setIsReady] = useState(false);
+    const [isReady, setIsReady] = useState(false); 
 
     useEffect(() => {
       const initEngine = async () => {
-        // Guard against missing props
         if (!appId) {
-          console.error("appId is missing. Cannot initialize Agora engine.");
-          return;
+            console.error("appId is missing. Cannot initialize Agora engine.");
+            return;
         }
 
         const hasPermission = await requestAndroidPermissions();
@@ -70,7 +69,6 @@ const AgoraVideoComponent = forwardRef(
           engineRef.current = engine;
 
           engine.initialize({
-            // FIX: Use appId from props
             appId: appId,
             channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
           });
@@ -78,10 +76,7 @@ const AgoraVideoComponent = forwardRef(
 
           engine.registerEventHandler({
             onJoinChannelSuccess: (connection, _elapsed) => {
-              console.log(
-                "✅ Joined channel successfully:",
-                connection.channelId
-              );
+              console.log("✅ Joined channel successfully:", connection.channelId);
               setJoined(true);
             },
             onUserJoined: (_connection, rUid) => {
@@ -97,13 +92,17 @@ const AgoraVideoComponent = forwardRef(
               setJoined(false);
               setRemoteUid(null);
             },
+            onError: (err, msg) => {
+                console.error("❌ Agora Error:", "Code:", err, "Msg:", msg);
+            }
           });
           console.log("Agora event handlers registered.");
-
+          
           engine.enableVideo();
           engine.startPreview();
           console.log("Agora video preview started.");
           setIsReady(true);
+
         } catch (e) {
           console.error("Engine init error:", e);
         }
@@ -120,20 +119,13 @@ const AgoraVideoComponent = forwardRef(
     }, [appId]); // Re-initialize only if appId changes.
 
     useEffect(() => {
-      if (
-        isReady &&
-        engineRef.current &&
-        shouldConnect &&
-        token &&
-        channelName &&
-        uid
-      ) {
-        console.log("🔌 Props are ready, attempting to join channel...");
+      // FIX: Use channelName and ensure uid is a number
+      if (isReady && engineRef.current && shouldConnect && token && channelName && typeof uid === 'number') {
+        console.log(`🔌 Props ready. Joining channel: ${channelName} with UID: ${uid}`);
         engineRef.current.setClientRole(ClientRoleType.ClientRoleBroadcaster);
-        // FIX: Use uid and channelName from props
         engineRef.current.joinChannel(token, channelName, uid, {});
       }
-    }, [isReady, shouldConnect, token, channelName, uid]);
+    }, [isReady, shouldConnect, token, channelName, uid]); 
 
     useImperativeHandle(ref, () => ({
       disconnect: async () => {
@@ -148,30 +140,16 @@ const AgoraVideoComponent = forwardRef(
       },
     }));
 
-    console.log("joined ?", joined);
-
     return (
       <View style={styles.container}>
-        {/* FIX: Use a number for the UID, as it's expected by the canvas. 0 is for the local user before the backend UID is assigned. */}
-        {isReady && (
-          <RtcSurfaceView
-            canvas={{ uid: 0 }}
-            style={styles.localVideo}
-            renderMode={1}
-          />
-        )}
+        {/* Local user view uses UID 0 until channel is joined */}
+        {isReady && <RtcSurfaceView canvas={{ uid: 0 }} style={styles.localVideo} renderMode={1} />}
 
         {joined && remoteUid ? (
-          <RtcSurfaceView
-            canvas={{ uid: remoteUid }}
-            style={styles.remoteVideo}
-            renderMode={1}
-          />
+          <RtcSurfaceView canvas={{ uid: remoteUid }} style={styles.remoteVideo} renderMode={1} />
         ) : (
           <View style={styles.overlay}>
-            <Text style={styles.statusText}>
-              {joined ? "Waiting for others..." : "Connecting..."}
-            </Text>
+            <Text style={styles.statusText}>{joined ? 'Waiting for others...' : 'Connecting...'}</Text>
           </View>
         )}
       </View>
@@ -179,7 +157,7 @@ const AgoraVideoComponent = forwardRef(
   }
 );
 
-AgoraVideoComponent.displayName = "AgoraVideoComponent";
+AgoraVideoComponent.displayName = 'AgoraVideoComponent';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
@@ -194,7 +172,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   localVideo: {
-    position: "absolute",
+    position: 'absolute',
     width: 120,
     height: 160,
     right: 20,
@@ -202,7 +180,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: '#fff',
   },
   remoteVideo: {
     ...StyleSheet.absoluteFillObject,

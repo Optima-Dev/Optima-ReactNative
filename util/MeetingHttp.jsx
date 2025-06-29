@@ -81,7 +81,7 @@ export async function acceptSpecificMeeting(token, meetingId) {
 export async function acceptFirstMeeting(token) {
   try {
     const response = await axios.post(
-      `${API_URL}/accept-first`,
+      `${API_URL}/accept-agora`,
       {},
       {
         headers: {
@@ -125,5 +125,19 @@ export async function endMeeting(token, meetingId) {
     return response.data;
   } catch (error) {
     throw error?.response?.data?.message || "Unable to end meeting";
+  }
+}
+
+// 8. NEW: Get all pending global meetings
+export async function getPendingGlobalMeetings(token) {
+  try {
+    const response = await axios.get(`${API_URL}/global`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || "Unable to fetch global meetings";
   }
 }
