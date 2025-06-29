@@ -15,6 +15,7 @@ import AgoraVideoComponent from "../../components/AgoraVideoComponent";
 const CallVolunteer = ({ navigation }) => {
   const [videoInfo, setVideoInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEnding, setIsEnding] = useState(false);
   const [error, setError] = useState(null);
 
   const { token } = useAuth();
@@ -56,17 +57,22 @@ const CallVolunteer = ({ navigation }) => {
 
   const handleEndCall = async () => {
     try {
-      setIsLoading(true);
-      if (agoraRef.current) {
-        await agoraRef.current.disconnect();
-      }
+      setIsEnding(true);
+      await agoraRef.current?.disconnect();
       if (videoInfo?.roomName) {
         await endMeeting(token, videoInfo.roomName);
       }
     } catch (err) {
+      console.error("End call error:", err);
       setError("Failed to end call.");
     } finally {
-      setTimeout(() => navigation.goBack(), 1500);
+      setTimeout(() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.navigate("Support");
+        }
+      }, 1500);
     }
   };
 
@@ -74,14 +80,10 @@ const CallVolunteer = ({ navigation }) => {
     agoraRef.current?.flipCamera();
   };
 
-  console.log("videoInfo", videoInfo);
-
-  console.log("token", videoInfo?.token);
-
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
-        {videoInfo?.token && videoInfo?.roomName ? (
+        {videoInfo?.token && videoInfo?.roomName && !isEnding ? (
           <AgoraVideoComponent
             ref={agoraRef}
             token={videoInfo.token}
@@ -97,7 +99,13 @@ const CallVolunteer = ({ navigation }) => {
               blurRadius={12}
             />
             <Text style={styles.waiting}>
-              {isLoading ? "Creating Call..." : error ?? "Disconnected"}
+              {isLoading
+                ? "Creating Call..."
+                : error
+                ? error
+                : isEnding
+                ? "Ending call..."
+                : "Disconnected"}
             </Text>
           </>
         )}
@@ -110,7 +118,7 @@ const CallVolunteer = ({ navigation }) => {
           title='Flip Camera'
           style={styles.button}
           onPress={handleFlipCamera}
-          disabled={!videoInfo}
+          disabled={!videoInfo || isEnding}
         />
         <PrimaryButton
           backgroundColor={Colors.red600}
@@ -118,6 +126,7 @@ const CallVolunteer = ({ navigation }) => {
           title='End Call'
           style={styles.button}
           onPress={handleEndCall}
+          disabled={isEnding}
         />
       </View>
     </View>

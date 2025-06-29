@@ -5,95 +5,171 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { View, Text, StyleSheet } from "react-native";
 import {
-  RtcEngine,
-  RtcLocalView,
-  RtcRemoteView,
-  VideoRenderMode,
+  View,
+  Text,
+  StyleSheet,
+  PermissionsAndroid,
+  Platform,
+} from "react-native";
+import {
+  createAgoraRtcEngine,
+  RtcSurfaceView,
+  ChannelProfileType,
+  ClientRoleType,
 } from "react-native-agora";
 
-const APP_ID = "78d38f0beb8d47738eba2baaf3ccbd62"; // Replace with your Agora App ID
+const APP_ID = "78d38f0beb8d47738eba2baaf3ccbd62";
+
+const requestAndroidPermissions = async () => {
+  if (Platform.OS === "android") {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      ]);
+      return (
+        granted["android.permission.CAMERA"] ===
+          PermissionsAndroid.RESULTS.GRANTED &&
+        granted["android.permission.RECORD_AUDIO"] ===
+          PermissionsAndroid.RESULTS.GRANTED
+      );
+    } catch (err) {
+      console.warn("Permission error:", err);
+      return false;
+    }
+  }
+  return true;
+};
 
 const AgoraVideoComponent = forwardRef(
   ({ token, roomName, onEndCall, shouldConnect }, ref) => {
     const engineRef = useRef(null);
     const [joined, setJoined] = useState(false);
-    const [peerIds, setPeerIds] = useState([]);
+    const [remoteUid, setRemoteUid] = useState(null);
+    const [isReady, setIsReady] = useState(false); // State to control when preview renders
 
+    // Effect for initializing and destroying the Agora engine (runs only once)
     useEffect(() => {
-      const init = async () => {
+      const initEngine = async () => {
+        const hasPermission = await requestAndroidPermissions();
+        if (!hasPermission) {
+          console.warn("Permissions not granted. Cannot start camera.");
+          return;
+        }
+
         try {
-          engineRef.current = await RtcEngine.create(APP_ID);
-          await engineRef.current.enableVideo();
+          console.log("Initializing Agora engine...");
+          const engine = createAgoraRtcEngine();
+          engineRef.current = engine;
 
-          engineRef.current.addListener("UserJoined", (uid) => {
-            setPeerIds((prev) => [...prev, uid]);
+          // FIX: The order of operations is corrected here.
+          // 1. Initialize First
+          engine.initialize({
+            appId: APP_ID,
+            channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
           });
+          console.log("Agora engine initialized.");
 
-          engineRef.current.addListener("UserOffline", (uid) => {
-            setPeerIds((prev) => prev.filter((id) => id !== uid));
+          // 2. Register Event Handlers Second
+          engine.registerEventHandler({
+            onJoinChannelSuccess: (connection, _elapsed) => {
+              console.log(
+                "✅ Joined channel successfully:",
+                connection.channelId
+              );
+              setJoined(true);
+            },
+            onUserJoined: (_connection, uid) => {
+              console.log("📡 Remote user joined:", uid);
+              setRemoteUid(uid);
+            },
+            onUserOffline: (_connection, uid) => {
+              console.log("📴 Remote user left:", uid);
+              setRemoteUid(null);
+            },
+            onLeaveChannel: () => {
+              console.log("🚪 Left channel");
+              setJoined(false);
+              setRemoteUid(null);
+            },
           });
+          console.log("Agora event handlers registered.");
 
-          engineRef.current.addListener("JoinChannelSuccess", () => {
-            setJoined(true);
-          });
-
-          if (shouldConnect && token && roomName) {
-            console.log("🔌 Attempting to join Agora from init...");
-            await engineRef.current?.joinChannel(token, roomName, null, 0);
-            console.log("✅ Joined Agora Channel from init!");
-          }
-        } catch (err) {
-          console.error("Agora init or join error:", err);
+          // 3. Enable Video and Start Preview
+          engine.enableVideo();
+          engine.startPreview();
+          console.log("Agora video preview started.");
+          setIsReady(true); // Signal that the engine is ready and preview can be shown
+        } catch (e) {
+          console.error("Engine init error:", e);
         }
       };
 
-      init();
+      console.log("joined ?", joined);
 
+      initEngine();
+
+      // Return a cleanup function to release the engine on unmount
       return () => {
         if (engineRef.current) {
-          engineRef.current.leaveChannel();
-          engineRef.current.destroy();
+          console.log("Releasing Agora engine...");
+          engineRef.current.release();
         }
       };
-    }, [token, roomName, shouldConnect]);
+    }, []); // Empty dependency array ensures this runs only once.
+
+    // Effect for joining the channel when props are ready
+    useEffect(() => {
+      // Guard against running before engine is ready or props are available
+      if (isReady && engineRef.current && shouldConnect && token && roomName) {
+        console.log("🔌 Props are ready, attempting to join channel...");
+        engineRef.current.setClientRole(ClientRoleType.ClientRoleBroadcaster);
+        engineRef.current.joinChannel(token, roomName, 0, {});
+      }
+    }, [isReady, shouldConnect, token, roomName]); // This effect re-runs when these props change
+
+    console.log("joined ?", joined);
 
     useImperativeHandle(ref, () => ({
       disconnect: async () => {
-        await engineRef.current?.leaveChannel();
-        if (onEndCall) onEndCall();
+        if (engineRef.current) {
+          await engineRef.current.leaveChannel();
+        }
+        onEndCall?.();
       },
-      flipCamera: async () => {
-        await engineRef.current?.switchCamera();
+      flipCamera: () => {
+        engineRef.current?.switchCamera();
+        console.log("🔄 Camera flipped");
       },
-      getStatus: () => (joined ? "connected" : "disconnected"),
-      getParticipantCount: () => peerIds.length + (joined ? 1 : 0),
     }));
+
+    console.log("joined ?", joined);
 
     return (
       <View style={styles.container}>
-        {joined ? (
-          <>
-            <RtcLocalView.SurfaceView
-              style={styles.localVideo}
-              channelId={roomName}
-              renderMode={VideoRenderMode.Hidden}
-              zOrderMediaOverlay
-            />
-            {peerIds.map((uid) => (
-              <RtcRemoteView.SurfaceView
-                key={uid}
-                style={styles.remoteVideo}
-                uid={uid}
-                channelId={roomName}
-                renderMode={VideoRenderMode.Hidden}
-              />
-            ))}
-          </>
+        {/* Local View: Show if the engine is ready */}
+        {isReady && (
+          <RtcSurfaceView
+            canvas={{ uid: 0 }}
+            style={styles.localVideo}
+            renderMode={1}
+          />
+        )}
+
+        {/* Remote View: Show if a remote user has joined */}
+        {joined && remoteUid ? (
+          <RtcSurfaceView
+            canvas={{ uid: remoteUid }}
+            style={styles.remoteVideo}
+            renderMode={1}
+          />
         ) : (
+          // Show "Connecting..." text only before the remote user joins
           <View style={styles.overlay}>
-            <Text style={styles.statusText}>Connecting...</Text>
+            <Text style={styles.statusText}>
+              {joined ? "Waiting for others..." : "Connecting..."}
+            </Text>
           </View>
         )}
       </View>
@@ -101,29 +177,35 @@ const AgoraVideoComponent = forwardRef(
   }
 );
 
+AgoraVideoComponent.displayName = "AgoraVideoComponent";
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.6)",
   },
   statusText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },
+  // When remote user joins, local view becomes a picture-in-picture
   localVideo: {
+    position: "absolute",
     width: 120,
     height: 160,
-    position: "absolute",
-    top: 20,
     right: 20,
+    top: 40,
     zIndex: 2,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   remoteVideo: {
     ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
   },
 });
 
