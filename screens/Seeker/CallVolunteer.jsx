@@ -59,8 +59,9 @@ const CallVolunteer = ({ navigation }) => {
     try {
       setIsEnding(true);
       await agoraRef.current?.disconnect();
-      if (videoInfo?.roomName) {
-        await endMeeting(token, videoInfo.roomName);
+      // FIX: Use channelName to match the API response
+      if (videoInfo?.channelName) {
+        await endMeeting(token, videoInfo.channelName);
       }
     } catch (err) {
       console.error("End call error:", err);
@@ -70,6 +71,7 @@ const CallVolunteer = ({ navigation }) => {
         if (navigation.canGoBack()) {
           navigation.goBack();
         } else {
+          // Fallback navigation if goBack is not possible
           navigation.navigate("Support");
         }
       }, 1500);
@@ -83,11 +85,15 @@ const CallVolunteer = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
-        {videoInfo?.token && videoInfo?.roomName && !isEnding ? (
+        {/* FIX: Check for channelName to match API response */}
+        {videoInfo?.token && videoInfo?.channelName && !isEnding ? (
           <AgoraVideoComponent
             ref={agoraRef}
             token={videoInfo.token}
-            roomName={videoInfo.roomName}
+            // FIX: Pass channelName, appId, and uid from the API response
+            channelName={videoInfo.channelName}
+            appId={videoInfo.appId}
+            uid={videoInfo.uid}
             onEndCall={handleEndCall}
             shouldConnect={true}
           />

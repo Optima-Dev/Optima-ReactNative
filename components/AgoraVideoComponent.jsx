@@ -19,7 +19,7 @@ import {
   ClientRoleType,
 } from "react-native-agora";
 
-const APP_ID = "78d38f0beb8d47738eba2baaf3ccbd62";
+// Note: APP_ID is now passed as a prop, no longer hardcoded.
 
 const requestAndroidPermissions = async () => {
   if (Platform.OS === "android") {
@@ -43,15 +43,21 @@ const requestAndroidPermissions = async () => {
 };
 
 const AgoraVideoComponent = forwardRef(
-  ({ token, roomName, onEndCall, shouldConnect }, ref) => {
+  // FIX: Accept appId, uid, and channelName from props
+  ({ token, channelName, appId, uid, onEndCall, shouldConnect }, ref) => {
     const engineRef = useRef(null);
     const [joined, setJoined] = useState(false);
     const [remoteUid, setRemoteUid] = useState(null);
-    const [isReady, setIsReady] = useState(false); // State to control when preview renders
+    const [isReady, setIsReady] = useState(false);
 
-    // Effect for initializing and destroying the Agora engine (runs only once)
     useEffect(() => {
       const initEngine = async () => {
+        // Guard against missing props
+        if (!appId) {
+          console.error("appId is missing. Cannot initialize Agora engine.");
+          return;
+        }
+
         const hasPermission = await requestAndroidPermissions();
         if (!hasPermission) {
           console.warn("Permissions not granted. Cannot start camera.");
@@ -63,15 +69,13 @@ const AgoraVideoComponent = forwardRef(
           const engine = createAgoraRtcEngine();
           engineRef.current = engine;
 
-          // FIX: The order of operations is corrected here.
-          // 1. Initialize First
           engine.initialize({
-            appId: APP_ID,
+            // FIX: Use appId from props
+            appId: appId,
             channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
           });
           console.log("Agora engine initialized.");
 
-          // 2. Register Event Handlers Second
           engine.registerEventHandler({
             onJoinChannelSuccess: (connection, _elapsed) => {
               console.log(
@@ -80,12 +84,12 @@ const AgoraVideoComponent = forwardRef(
               );
               setJoined(true);
             },
-            onUserJoined: (_connection, uid) => {
-              console.log("📡 Remote user joined:", uid);
-              setRemoteUid(uid);
+            onUserJoined: (_connection, rUid) => {
+              console.log("📡 Remote user joined:", rUid);
+              setRemoteUid(rUid);
             },
-            onUserOffline: (_connection, uid) => {
-              console.log("📴 Remote user left:", uid);
+            onUserOffline: (_connection, rUid) => {
+              console.log("📴 Remote user left:", rUid);
               setRemoteUid(null);
             },
             onLeaveChannel: () => {
@@ -96,40 +100,40 @@ const AgoraVideoComponent = forwardRef(
           });
           console.log("Agora event handlers registered.");
 
-          // 3. Enable Video and Start Preview
           engine.enableVideo();
           engine.startPreview();
           console.log("Agora video preview started.");
-          setIsReady(true); // Signal that the engine is ready and preview can be shown
+          setIsReady(true);
         } catch (e) {
           console.error("Engine init error:", e);
         }
       };
 
-      console.log("joined ?", joined);
-
       initEngine();
 
-      // Return a cleanup function to release the engine on unmount
       return () => {
         if (engineRef.current) {
           console.log("Releasing Agora engine...");
           engineRef.current.release();
         }
       };
-    }, []); // Empty dependency array ensures this runs only once.
+    }, [appId]); // Re-initialize only if appId changes.
 
-    // Effect for joining the channel when props are ready
     useEffect(() => {
-      // Guard against running before engine is ready or props are available
-      if (isReady && engineRef.current && shouldConnect && token && roomName) {
+      if (
+        isReady &&
+        engineRef.current &&
+        shouldConnect &&
+        token &&
+        channelName &&
+        uid
+      ) {
         console.log("🔌 Props are ready, attempting to join channel...");
         engineRef.current.setClientRole(ClientRoleType.ClientRoleBroadcaster);
-        engineRef.current.joinChannel(token, roomName, 0, {});
+        // FIX: Use uid and channelName from props
+        engineRef.current.joinChannel(token, channelName, uid, {});
       }
-    }, [isReady, shouldConnect, token, roomName]); // This effect re-runs when these props change
-
-    console.log("joined ?", joined);
+    }, [isReady, shouldConnect, token, channelName, uid]);
 
     useImperativeHandle(ref, () => ({
       disconnect: async () => {
@@ -148,7 +152,7 @@ const AgoraVideoComponent = forwardRef(
 
     return (
       <View style={styles.container}>
-        {/* Local View: Show if the engine is ready */}
+        {/* FIX: Use a number for the UID, as it's expected by the canvas. 0 is for the local user before the backend UID is assigned. */}
         {isReady && (
           <RtcSurfaceView
             canvas={{ uid: 0 }}
@@ -157,7 +161,6 @@ const AgoraVideoComponent = forwardRef(
           />
         )}
 
-        {/* Remote View: Show if a remote user has joined */}
         {joined && remoteUid ? (
           <RtcSurfaceView
             canvas={{ uid: remoteUid }}
@@ -165,7 +168,6 @@ const AgoraVideoComponent = forwardRef(
             renderMode={1}
           />
         ) : (
-          // Show "Connecting..." text only before the remote user joins
           <View style={styles.overlay}>
             <Text style={styles.statusText}>
               {joined ? "Waiting for others..." : "Connecting..."}
@@ -191,7 +193,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  // When remote user joins, local view becomes a picture-in-picture
   localVideo: {
     position: "absolute",
     width: 120,
