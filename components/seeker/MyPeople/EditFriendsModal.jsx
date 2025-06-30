@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   View,
   Text,
@@ -7,30 +8,57 @@ import {
   Pressable,
   Platform,
 } from "react-native";
+
 import Colors from "../../../constants/Colors";
+
 import MyPeopleFormInputs from "./MyPeopleFormInputs";
+
 import PrimaryButton from "../../UI/PrimaryButton";
+
 import { validateEmail, validateName } from "../../../util/Validation";
+
+import { createMeeting } from "../../../util/MeetingHttp"; // Make sure this import is correct
+
+import { useAuth } from "../../../store/AuthContext";
 
 const EditFriendsModal = ({
   visible,
+
   user,
+
   customFirstName,
+
   customLastName,
+
   onChangeMode,
+
   onRemove,
+
   onEdit,
+
+  navigation,
 }) => {
+  const { token } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
+
   const [isEditing, setIsEditing] = useState(false);
+
+  const [isCalling, setIsCalling] = useState(false);
+
   const [editFriendData, setEditFriendData] = useState({
     firstName: customFirstName,
+
     lastName: customLastName,
+
     email: user.email,
   });
+
   const [error, setError] = useState({
     firstName: "",
+
     lastName: "",
+
     email: "",
   });
 
@@ -38,6 +66,7 @@ const EditFriendsModal = ({
     setEditFriendData((prevState) => {
       return {
         ...prevState,
+
         [key]: value,
       };
     });
@@ -45,29 +74,81 @@ const EditFriendsModal = ({
 
   async function handleRemoveFriend() {
     setIsLoading(true);
+
     await onRemove(user._id);
+
     setIsLoading(false);
   }
 
   async function handleEditFriend() {
     const isFirstName = validateName(editFriendData.firstName);
+
     const isLastName = validateName(editFriendData.lastName);
+
     const isEmail = validateEmail(editFriendData.email);
 
     if (!(isFirstName || isLastName || isEmail)) {
       setIsEditing(true);
+
       const bodyRequest = {
         customFirstName: editFriendData.firstName,
+
         customLastName: editFriendData.lastName,
       };
+
       await onEdit(user._id, bodyRequest);
+
       setIsEditing(false);
     } else {
       setError({
         firstName: isFirstName,
+
         lastName: isLastName,
+
         email: isEmail,
       });
+    }
+  }
+
+  async function handleCallFriend() {
+    try {
+      setIsCalling(true);
+
+      const meetingData = {
+        type: "specific",
+
+        helperId: user._id,
+      };
+
+      const response = await createMeeting(token, meetingData); // Close the modal first
+
+      onChangeMode(false); // Make sure we have all required data before navigating
+
+      if (!response?.data) {
+        throw new Error("Invalid meeting response");
+      } // Navigate with structured data
+
+      navigation.navigate("CallVolunteer", {
+        meetingData: {
+          ...response.data,
+
+          type: "specific",
+
+          seeker: user._id,
+        },
+
+        isWaiting: true,
+
+        helperName: `${customFirstName} ${customLastName}`,
+
+        helperId: user._id,
+      });
+    } catch (error) {
+      console.error("Failed to create meeting:", error);
+
+      alert("Failed to send call request. Please try again.");
+    } finally {
+      setIsCalling(false);
     }
   }
 
@@ -89,7 +170,8 @@ const EditFriendsModal = ({
           </Text>
         </View>
 
-        <Text style={styles.name}>{`${customFirstName} ${customLastName}`}</Text>
+        <Text
+          style={styles.name}>{`${customFirstName} ${customLastName}`}</Text>
 
         <MyPeopleFormInputs
           form={editFriendData}
@@ -113,9 +195,8 @@ const EditFriendsModal = ({
             backgroundColor={Colors.MainColor}
             textColor={Colors.white}
             title='Call'
-            onPress={() => {
-              console.log("Call");
-            }}
+            onPress={handleCallFriend} // Updated to use the new function
+            isLoading={isCalling} // Show loading state while calling
           />
 
           <PrimaryButton
@@ -134,46 +215,75 @@ const EditFriendsModal = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     height: "40%",
+
     backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
+
   modalContainer: {
     flex: 1,
+
     alignItems: Platform.OS === "android" ? "center" : null,
+
     backgroundColor: Colors.white,
+
     paddingHorizontal: 50,
+
     borderRadius: 35,
+
     marginTop: -75,
   },
+
   avatarConatiner: {
     backgroundColor: Colors.MainColor,
+
     width: 108,
+
     height: 108,
+
     borderRadius: 54,
+
     justifyContent: "center",
+
     alignItems: "center",
+
     alignSelf: "center",
+
     marginTop: -54,
+
     marginBottom: 12,
   },
+
   avatarText: {
     color: Colors.white,
+
     fontSize: 40,
+
     fontWeight: "600",
+
     letterSpacing: 4,
   },
+
   name: {
     color: Colors.MainColor,
+
     fontSize: 24,
+
     fontWeight: "500",
+
     textAlign: "center",
+
     marginBottom: 20,
   },
+
   InputsContainer: {
     marginBottom: 20,
+
     gap: 8,
   },
+
   ButtonsContainer: {
     marginTop: 14,
+
     gap: 10,
   },
 });

@@ -4,12 +4,12 @@ import Colors from "../../../constants/Colors";
 import FriendDetails from "./FriendDetails";
 import { useSeeker } from "../../../store/SeekerContext";
 
-function MyPeopleList({ onShowForm }) {
+function MyPeopleList({ onShowForm, navigation }) {
   const { friends } = useSeeker();
 
   console.log(friends);
   function renderFriend({ item }) {
-    return <FriendDetails {...item} />;
+    return <FriendDetails {...item} navigation={navigation} />;
   }
 
   return (

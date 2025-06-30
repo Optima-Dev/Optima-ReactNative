@@ -7,7 +7,12 @@ import { editFriend, removeFriend } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
 import { useSeeker } from "../../../store/SeekerContext";
 
-const FriendDetails = ({ user, customFirstName, customLastName }) => {
+const FriendDetails = ({
+  user,
+  customFirstName,
+  customLastName,
+  navigation,
+}) => {
   const [showModal, setShowModal] = useState(false);
 
   const { token } = useAuth();
@@ -60,6 +65,7 @@ const FriendDetails = ({ user, customFirstName, customLastName }) => {
         customLastName={customLastName}
         onRemove={handleRemoveUser}
         onEdit={handleEditUser}
+        navigation={navigation}
       />
     </View>
   );

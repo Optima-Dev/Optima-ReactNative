@@ -98,7 +98,7 @@ export async function acceptFirstMeeting(token) {
 // 6. Get all pending specific meetings (for helper)
 export async function getPendingSpecificMeetings(token) {
   try {
-    const response = await axios.get(`${API_URL}/pending-specific`, {
+    const response = await axios.get(`${API_URL}/pending-agora-specific`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

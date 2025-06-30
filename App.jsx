@@ -174,7 +174,6 @@ const HelperTap = React.memo(({ hasRequest }) => (
 const SeekerSupport = React.memo(() => (
   <Stack.Navigator screenOptions={{ headerShown: false }} lazy={false}>
     <Stack.Screen name='SupportScreen' component={Support} />
-    <Stack.Screen name='CallVolunteer' component={CallVolunteer} />
   </Stack.Navigator>
 ));
 
@@ -247,6 +246,7 @@ const Navigation = React.memo(({ hasRequest }) => {
             <Stack.Screen name='Instructions' component={Instructions} />
           )}
           <Stack.Screen name='MyTabs' component={SeekerTap} />
+          <Stack.Screen name='CallVolunteer' component={CallVolunteer} />
         </Stack.Navigator>
       );
     }

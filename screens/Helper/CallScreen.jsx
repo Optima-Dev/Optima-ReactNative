@@ -1,31 +1,26 @@
+// File: src/screens/CallScreen.js
+
 import React, { useLayoutEffect, useState, useRef } from "react";
-import {
-  ImageBackground,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Platform, StyleSheet, Text, View, SafeAreaView } from "react-native";
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
 import { endMeeting } from "../../util/MeetingHttp";
 import AgoraVideoComponent from "../../components/AgoraVideoComponent";
 
-// The component now receives `route` as a prop to get navigation params
 const CallScreen = ({ navigation, route }) => {
-  // 1. Get videoInfo from route params instead of fetching it here
-  // We provide a default empty object to prevent crashes if params are undefined
-  const { videoInfo } = route.params || {};
+  const { videoInfo, seekerName } = route.params || {};
+
+  console.log("Received videoInfo:", videoInfo); // Good for debugging
 
   const [isEnding, setIsEnding] = useState(false);
+  const [error, setError] = useState(null);
   const { token } = useAuth();
   const agoraRef = useRef(null);
 
   useLayoutEffect(() => {
     const parentNav = navigation.getParent();
     parentNav?.setOptions({ tabBarStyle: { display: "none" } });
-
     return () => {
       parentNav?.setOptions({
         tabBarStyle: {
@@ -39,28 +34,28 @@ const CallScreen = ({ navigation, route }) => {
     };
   }, [navigation]);
 
-  // The useEffect for fetching data is no longer needed.
-
   const handleEndCall = async () => {
+    if (isEnding) return;
+    setIsEnding(true);
     try {
-      setIsEnding(true);
       await agoraRef.current?.disconnect();
-      // FIX: Use channelName to match the API response
-      if (videoInfo?.channelName) {
-        await endMeeting(token, videoInfo.channelName);
+      // **FIX**: Use the correct property name 'roomName'
+      if (videoInfo?.roomName) {
+        // NOTE: Your endMeeting function might need the channelName, not your auth token.
+        // This depends on your backend implementation.
+        await endMeeting(token, videoInfo.roomName);
       }
     } catch (err) {
-      console.error("End call error:", err);
+      console.error("❌ End call error:", err);
       setError("Failed to end call.");
     } finally {
       setTimeout(() => {
         if (navigation.canGoBack()) {
           navigation.goBack();
         } else {
-          // Fallback navigation if goBack is not possible
           navigation.navigate("Home");
         }
-      }, 1500);
+      }, 1000);
     }
   };
 
@@ -68,77 +63,105 @@ const CallScreen = ({ navigation, route }) => {
     agoraRef.current?.flipCamera();
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.videoContainer}>
-        {/* The component now renders immediately with the data it received */}
-        {videoInfo?.token && videoInfo?.channelName ? (
-          <AgoraVideoComponent
-            ref={agoraRef}
-            token={videoInfo.token}
-            channelName={videoInfo.channelName}
-            appId={videoInfo.appId}
-            // CRITICAL: Ensure the uid is passed as a number
-            uid={videoInfo.uid}
-            onEndCall={handleEndCall}
-            shouldConnect={true}
+  // ===================================================================
+  //  THE FIX: Check for the properties your API is actually sending.
+  //  Your backend MUST also send `appId` and `uid`.
+  // ===================================================================
+  if (
+    !videoInfo?.token ||
+    !videoInfo?.roomName ||
+    !videoInfo?.appId ||
+    !videoInfo?.uid
+  ) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.fallbackContainer}>
+          <Text style={styles.waiting}>
+            {error ||
+              "Meeting information is incomplete. Missing token, roomName, appId, or uid."}
+          </Text>
+          <PrimaryButton
+            backgroundColor={Colors.MainColor}
+            textColor='white'
+            title='Go Back'
+            onPress={() => navigation.goBack()}
+            style={{ marginTop: 20, width: "80%" }}
           />
-        ) : (
-          // This part now serves as a fallback in case data is not passed correctly
-          <View style={styles.fallbackContainer}>
-            <Text style={styles.waiting}>
-              Error: No meeting information found.
-            </Text>
-          </View>
-        )}
+        </View>
+      </View>
+    );
+  }
+
+  // This is the main UI when everything works correctly
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>
+          Call with {seekerName || "Seeker"}
+        </Text>
+      </View>
+
+      <View style={styles.videoContainer}>
+        {/* ===================================================================
+            THE FIX: Pass the correct property names to the component.
+            =================================================================== */}
+        <AgoraVideoComponent
+          ref={agoraRef}
+          token={videoInfo.token}
+          channelName={videoInfo.roomName} // Use roomName for channelName
+          appId={videoInfo.appId} // This MUST come from your backend
+          uid={Number(videoInfo.uid)} // This MUST come from your backend
+          onEndCall={handleEndCall}
+          shouldConnect={!isEnding}
+          remoteUserName={seekerName}
+        />
       </View>
 
       <View style={styles.buttonContainer}>
         <PrimaryButton
-          backgroundColor={Colors.MainColor}
-          textColor='white'
           title='Flip Camera'
-          style={styles.button}
           onPress={handleFlipCamera}
-          disabled={!videoInfo || isEnding}
+          disabled={isEnding}
+          style={styles.button}
         />
         <PrimaryButton
           backgroundColor={Colors.red600}
           textColor='white'
-          title='End Call'
+          title={isEnding ? "Ending..." : "End Call"}
+          onPress={handleEndCall}
+          disabled={isEnding}
           style={styles.button}
-          onPress={handleEndingCall}
-          disabled={isEnding || !videoInfo}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 export default CallScreen;
 
+// Styles remain the same
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  videoContainer: {
-    flex: 1,
-    justifyContent: "center",
+  container: { flex: 1, backgroundColor: "#000" },
+  header: {
+    padding: 10,
+    backgroundColor: "rgba(0,0,0,0.3)",
     alignItems: "center",
-    backgroundColor: "#000",
   },
+  headerText: { color: "white", fontSize: 16, fontWeight: "500" },
+  videoContainer: { flex: 1 },
   fallbackContainer: {
     flex: 1,
-    width: "100%",
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
+    backgroundColor: "#1C1C1E",
   },
   waiting: {
     fontSize: 22,
     fontWeight: "700",
     color: Colors.white,
     textAlign: "center",
-    padding: 20,
+    marginBottom: 20,
   },
   buttonContainer: {
     position: "absolute",
@@ -150,8 +173,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     zIndex: 10,
   },
-  button: {
-    flex: 1,
-    marginHorizontal: 10,
-  },
+  button: { flex: 1, marginHorizontal: 10 },
 });
