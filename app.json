@@ -46,13 +46,16 @@
           "recordAudioAndroid": true
         }
       ],
-      "./plugins/withTwilioVideoAndroid.js",
-      "./plugins/withTwilioVideoIOS.js",
       "expo-web-browser"
     ],
     "eas": {
       "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
     },
-    "owner": "ahmed_hatem25"
+    "owner": "ahmed_hatem25",
+    "extra": {
+      "eas": {
+        "projectId": "8ba5f0bf-ee7b-4eca-815b-5225ae53624a"
+      }
+    }
   }
 }

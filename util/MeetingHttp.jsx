@@ -5,13 +5,12 @@ const API_URL = "https://optima-api.onrender.com/api/meetings";
 // 1. Create a new meeting
 export async function createMeeting(token, data) {
   try {
-    // API expects { type: "global", helper: "string" } which is data here
     const requestBody = {
       type: data.type,
-      helper: data.helperId || null, // Helper ID or null if it's a volunteer meeting
+      helper: data.helperId || null,
     };
 
-    const response = await axios.post(`${API_URL}`, requestBody, {
+    const response = await axios.post(`${API_URL}/agora`, requestBody, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -19,6 +18,10 @@ export async function createMeeting(token, data) {
 
     return response.data;
   } catch (error) {
+    console.error(
+      "❌ createMeeting error:",
+      error.response?.data || error.message
+    );
     throw error?.response?.data?.message || "Unable to create meeting";
   }
 }
@@ -78,7 +81,7 @@ export async function acceptSpecificMeeting(token, meetingId) {
 export async function acceptFirstMeeting(token) {
   try {
     const response = await axios.post(
-      `${API_URL}/accept-first`,
+      `${API_URL}/accept-agora`,
       {},
       {
         headers: {
@@ -122,5 +125,19 @@ export async function endMeeting(token, meetingId) {
     return response.data;
   } catch (error) {
     throw error?.response?.data?.message || "Unable to end meeting";
+  }
+}
+
+// 8. NEW: Get all pending global meetings
+export async function getPendingGlobalMeetings(token) {
+  try {
+    const response = await axios.get(`${API_URL}/global`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || "Unable to fetch global meetings";
   }
 }

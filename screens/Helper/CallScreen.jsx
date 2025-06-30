@@ -1,5 +1,4 @@
-import { useLayoutEffect, useState, useEffect, useRef } from "react";
-import React from "react";
+import React, { useLayoutEffect, useState, useRef } from "react";
 import {
   ImageBackground,
   Platform,
@@ -10,19 +9,18 @@ import {
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
-import { endMeeting, acceptFirstMeeting } from "../../util/MeetingHttp";
-import TwilioVideoComponent from "../../components/TwilioVideoComponent";
+import { endMeeting } from "../../util/MeetingHttp";
+import AgoraVideoComponent from "../../components/AgoraVideoComponent";
 
-const CallVolunteer = ({ navigation }) => {
+// The component now receives `route` as a prop to get navigation params
+const CallScreen = ({ navigation, route }) => {
+  // 1. Get videoInfo from route params instead of fetching it here
+  // We provide a default empty object to prevent crashes if params are undefined
+  const { videoInfo } = route.params || {};
 
-  const [videoInfo, setVideoInfo] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-
+  const [isEnding, setIsEnding] = useState(false);
   const { token } = useAuth();
-
-  const twilioComponentRef = useRef(null);
+  const agoraRef = useRef(null);
 
   useLayoutEffect(() => {
     const parentNav = navigation.getParent();
@@ -41,85 +39,83 @@ const CallVolunteer = ({ navigation }) => {
     };
   }, [navigation]);
 
-  useEffect(() => {
-    async function setupCall() {
-      try {
-        setIsLoading(true);
-        const response = await acceptFirstMeeting(token);
-        
-        console.log("Joining Meeting response:", response.data);
-        setVideoInfo(response.data);
-        setIsConnected(true);
-      } catch (error) {
-        setIsError(error || "Failed to join meeting");
-        setTimeout(() => navigation.goBack(), 2000);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  // The useEffect for fetching data is no longer needed.
 
-    setupCall();
-  }, []);
-
-  async function handleEndingCall() {
+  const handleEndCall = async () => {
     try {
-      setIsLoading(true);
-      const data = await endMeeting(token, videoInfo.roomName);
-      
-      console.log("Ending call response:", data);
-      setIsConnected(false);
-      
-      setTimeout(() => navigation.goBack(), 2000);
-    } catch (error) {
-      setIsConnected(false);
-      setIsError(error || "Failed to end meeting");
-      setTimeout(() => navigation.goBack(), 2000);
+      setIsEnding(true);
+      await agoraRef.current?.disconnect();
+      // FIX: Use channelName to match the API response
+      if (videoInfo?.channelName) {
+        await endMeeting(token, videoInfo.channelName);
+      }
+    } catch (err) {
+      console.error("End call error:", err);
+      setError("Failed to end call.");
+    } finally {
+      setTimeout(() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          // Fallback navigation if goBack is not possible
+          navigation.navigate("Home");
+        }
+      }, 1500);
     }
-  }
+  };
+
+  const handleFlipCamera = () => {
+    agoraRef.current?.flipCamera();
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
-        {isConnected ? (
-          <>
-            <View style={styles.statusOverlay}>
-              <Text style={styles.statusText}> Video call should appear now </Text>
-              {/* <TwilioVideoComponent
-                ref={twilioComponentRef}
-                token={videoInfo.token}
-                roomName={videoInfo.roomName}
-                identity={videoInfo.identity}
-              /> */}
-            </View>
-          </>
+        {/* The component now renders immediately with the data it received */}
+        {videoInfo?.token && videoInfo?.channelName ? (
+          <AgoraVideoComponent
+            ref={agoraRef}
+            token={videoInfo.token}
+            channelName={videoInfo.channelName}
+            appId={videoInfo.appId}
+            // CRITICAL: Ensure the uid is passed as a number
+            uid={videoInfo.uid}
+            onEndCall={handleEndCall}
+            shouldConnect={true}
+          />
         ) : (
-          <>
-            <ImageBackground
-              source={require("../../assets/Images/volunteer.jpeg")}
-              style={styles.personImage}
-              blurRadius={12}
-            />
+          // This part now serves as a fallback in case data is not passed correctly
+          <View style={styles.fallbackContainer}>
             <Text style={styles.waiting}>
-              { isLoading && videoInfo?.token ? "Ending Call..." : isLoading ? "Joining Call..." : isError }
+              Error: No meeting information found.
             </Text>
-          </>
+          </View>
         )}
       </View>
 
       <View style={styles.buttonContainer}>
+        <PrimaryButton
+          backgroundColor={Colors.MainColor}
+          textColor='white'
+          title='Flip Camera'
+          style={styles.button}
+          onPress={handleFlipCamera}
+          disabled={!videoInfo || isEnding}
+        />
         <PrimaryButton
           backgroundColor={Colors.red600}
           textColor='white'
           title='End Call'
           style={styles.button}
           onPress={handleEndingCall}
+          disabled={isEnding || !videoInfo}
         />
       </View>
     </View>
   );
 };
 
-export default CallVolunteer;
+export default CallScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -131,44 +127,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#000",
   },
-  personImage: {
+  fallbackContainer: {
     flex: 1,
     width: "100%",
-  },
-  waiting: {
-    fontSize: 40,
-    fontWeight: "700",
-    color: Colors.white,
-    position: "absolute",
-    textAlign: "center",
-    padding: 20,
-  },
-  twilioVideo: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  statusOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  statusText: {
+  waiting: {
+    fontSize: 22,
+    fontWeight: "700",
     color: Colors.white,
-    fontSize: 18,
-    fontWeight: "bold",
     textAlign: "center",
     padding: 20,
   },
   buttonContainer: {
+    position: "absolute",
+    bottom: 40,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 20,
+    paddingHorizontal: 20,
+    zIndex: 10,
   },
   button: {
     flex: 1,
