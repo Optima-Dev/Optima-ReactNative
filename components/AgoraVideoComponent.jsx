@@ -20,7 +20,7 @@ import {
   RenderModeType,
 } from "react-native-agora";
 
-// Permission request helper function
+// Helper function to request permissions
 const requestAndroidPermissions = async () => {
   if (Platform.OS === "android") {
     try {
@@ -42,7 +42,6 @@ const requestAndroidPermissions = async () => {
   return true;
 };
 
-// This component is generic and handles rendering for both Seeker and Helper
 const AgoraVideoComponent = forwardRef(
   (
     {
@@ -84,21 +83,20 @@ const AgoraVideoComponent = forwardRef(
             channelProfile: ChannelProfileType.ChannelProfileCommunication,
           });
 
-          // Register all event handlers
           engineRef.current.registerEventHandler({
             onJoinChannelSuccess: (connection) => {
               console.log(
-                `✅ [${uid}] Successfully joined channel: ${connection.channelId}`
+                `✅ [UID: ${uid}] Successfully joined channel: ${connection.channelId}`
               );
               setIsJoined(true);
             },
             onUserJoined: (_, rUid) => {
-              console.log(`✅ [${uid}] Remote user ${rUid} has joined.`);
+              console.log(`✅ [UID: ${uid}] Remote user ${rUid} has joined.`);
               setRemoteUid(rUid);
               onRemoteUserJoined?.();
             },
             onUserOffline: () => {
-              console.log(`❌ [${uid}] Remote user has left.`);
+              console.log(`❌ [UID: ${uid}] Remote user has left.`);
               setRemoteUid(null);
               onEndCall?.();
             },
@@ -108,21 +106,23 @@ const AgoraVideoComponent = forwardRef(
             },
             onError: (err, msg) => {
               console.error(
-                `❌ [${uid}] Agora Error Code: ${err}, Message: ${msg}`
+                `❌ [UID: ${uid}] Agora Error Code: ${err}, Message: ${msg}`
               );
             },
           });
 
           engineRef.current.enableVideo();
           engineRef.current.startPreview();
-          setIsEngineReady(true); // Give the "green light"
+          setIsEngineReady(true);
         } catch (e) {
           console.error("Engine init error:", e);
         }
       };
       initEngine();
-      return () => engineRef.current?.release();
-    }, [appId]); // Runs once per call
+      return () => {
+        engineRef.current?.release();
+      };
+    }, [appId]);
 
     // Effect to join the channel once the engine is ready
     useEffect(() => {
@@ -134,21 +134,20 @@ const AgoraVideoComponent = forwardRef(
         typeof uid === "number"
       ) {
         console.log(
-          `[${uid}] Engine is ready. Joining channel "${channelName}"...`
+          `[UID: ${uid}] Engine is ready. Joining channel "${channelName}"...`
         );
         engineRef.current?.joinChannel(token, channelName, uid, {});
         engineRef.current?.setEnableSpeakerphone(true);
       }
     }, [isEngineReady, shouldConnect, token, channelName, uid]);
 
-    // Expose functions to the parent component
     useImperativeHandle(ref, () => ({
       disconnect: async () => await engineRef.current?.leaveChannel(),
       flipCamera: () => engineRef.current?.switchCamera(),
     }));
 
     // --- RENDER LOGIC ---
-    if (!hasPermission)
+    if (!hasPermission) {
       return (
         <View style={styles.placeholder}>
           <Text style={styles.placeholderText}>
@@ -156,6 +155,7 @@ const AgoraVideoComponent = forwardRef(
           </Text>
         </View>
       );
+    }
 
     const localViewStyle = alwaysShowLocalFullScreen
       ? styles.fullScreenVideo
@@ -176,33 +176,34 @@ const AgoraVideoComponent = forwardRef(
 
     return (
       <View style={styles.container}>
-        <RtcSurfaceView
-          canvas={{ uid: 0 }}
-          style={localViewStyle}
-          renderMode={RenderModeType.RenderModeHidden}
-          zOrderMediaOverlay={true}
-        />
-        {remoteUid && (
-          <RtcSurfaceView
-            canvas={{ uid: remoteUid }}
-            style={remoteViewStyle}
-            renderMode={RenderModeType.RenderModeHidden}
-          />
-        )}
-
-        {showWaitingOverlay && (
-          <View style={styles.waitingOverlay}>
-            <ActivityIndicator size='large' color='#FFF' />
-            <Text style={styles.waitingText}>
-              Waiting for {remoteUserName || "friend"} to join...
-            </Text>
-          </View>
-        )}
-
-        {!isJoined && isEngineReady && (
+        {isJoined ? (
+          <>
+            <RtcSurfaceView
+              canvas={{ uid: 0 }}
+              style={localViewStyle}
+              renderMode={RenderModeType.RenderModeHidden}
+              zOrderMediaOverlay={true}
+            />
+            {remoteUid && (
+              <RtcSurfaceView
+                canvas={{ uid: remoteUid }}
+                style={remoteViewStyle}
+                renderMode={RenderModeType.RenderModeHidden}
+              />
+            )}
+            {showWaitingOverlay && (
+              <View style={styles.waitingOverlay}>
+                <ActivityIndicator size='large' color='#FFF' />
+                <Text style={styles.waitingText}>
+                  Waiting for {remoteUserName || "friend"} to join...
+                </Text>
+              </View>
+            )}
+          </>
+        ) : (
           <View style={styles.placeholder}>
             <ActivityIndicator color='#FFF' />
-            <Text style={styles.placeholderText}>Connecting...</Text>
+            <Text style={styles.placeholderText}>Connecting to channel...</Text>
           </View>
         )}
       </View>

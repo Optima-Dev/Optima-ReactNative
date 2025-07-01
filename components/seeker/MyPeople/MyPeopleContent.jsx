@@ -7,7 +7,7 @@ import { sendFriendRequest } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
 import { useUser } from "../../../store/UserContext";
 
-function MyPeopleContent() {
+function MyPeopleContent({ navigation }) {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { token } = useAuth();
@@ -45,7 +45,10 @@ function MyPeopleContent() {
           isLoading={isLoading}
         />
       ) : (
-        <MyPeopleList onShowForm={() => setShowForm(true)} />
+        <MyPeopleList
+          onShowForm={() => setShowForm(true)}
+          navigation={navigation}
+        />
       )}
     </View>
   );

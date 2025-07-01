@@ -204,7 +204,6 @@ const NotificationsList = () => {
 
   return (
     <View style={styles.container}>
-           {" "}
       <FlatList
         data={allNotifications}
         keyExtractor={(item, index) =>
@@ -213,11 +212,10 @@ const NotificationsList = () => {
         renderItem={renderNotification}
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 20 }}>
-                        <Text>No new notifications.</Text>         {" "}
+            <Text>No new notifications.</Text>
           </View>
         }
       />
-         {" "}
     </View>
   );
 };

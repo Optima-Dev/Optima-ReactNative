@@ -39,11 +39,9 @@ const CallScreen = ({ navigation, route }) => {
     setIsEnding(true);
     try {
       await agoraRef.current?.disconnect();
-      // **FIX**: Use the correct property name 'roomName'
-      if (videoInfo?.roomName) {
-        // NOTE: Your endMeeting function might need the channelName, not your auth token.
-        // This depends on your backend implementation.
-        await endMeeting(token, videoInfo.roomName);
+     
+      if (videoInfo?.channelName) {
+        await endMeeting(token, videoInfo.channelName);
       }
     } catch (err) {
       console.error("❌ End call error:", err);
@@ -63,13 +61,10 @@ const CallScreen = ({ navigation, route }) => {
     agoraRef.current?.flipCamera();
   };
 
-  // ===================================================================
-  //  THE FIX: Check for the properties your API is actually sending.
-  //  Your backend MUST also send `appId` and `uid`.
-  // ===================================================================
+
   if (
     !videoInfo?.token ||
-    !videoInfo?.roomName ||
+    !videoInfo?.channelName ||
     !videoInfo?.appId ||
     !videoInfo?.uid
   ) {
@@ -102,13 +97,10 @@ const CallScreen = ({ navigation, route }) => {
       </View>
 
       <View style={styles.videoContainer}>
-        {/* ===================================================================
-            THE FIX: Pass the correct property names to the component.
-            =================================================================== */}
         <AgoraVideoComponent
           ref={agoraRef}
           token={videoInfo.token}
-          channelName={videoInfo.roomName} // Use roomName for channelName
+          channelName={videoInfo.channelName} // Use channelName for channelName
           appId={videoInfo.appId} // This MUST come from your backend
           uid={Number(videoInfo.uid)} // This MUST come from your backend
           onEndCall={handleEndCall}

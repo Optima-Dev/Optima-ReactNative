@@ -9,124 +9,92 @@ import {
 import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
-import { endMeeting, createMeeting } from "../../util/MeetingHttp";
+import { endMeeting, createMeeting } from "../../util/MeetingHttp"; // Keep createMeeting for global calls
 import AgoraVideoComponent from "../../components/AgoraVideoComponent";
 
-// IMPORTANT: Import your configured socket client from where it's initialized in your app
-// import { socket } from '../../socket'; // This is an example, use your actual import
-
 const CallVolunteer = ({ navigation, route }) => {
-  // --- STATE MANAGEMENT ---
-  // A single, unified state for all call information.
-  // It's initialized from the navigation parameters if they exist.
-  const [callData, setCallData] = useState(route.params?.meetingData || null);
+  // Get initial data. If it exists, it's a specific friend call.
+  const { meetingData: initialMeetingData, helperName } = route.params || {};
 
-  const [isWaiting, setIsWaiting] = useState(route.params?.isWaiting || false);
-  const [helperName] = useState(route.params?.helperName || "Volunteer");
-  const [isLoading, setIsLoading] = useState(!callData); // Only loading if it's a new global call
+  // A single state to hold the call data, whether it's from a specific or global call.
+  const [callData, setCallData] = useState(initialMeetingData);
+  
+  // isLoading is true only if we need to fetch data for a global call.
+  const [isLoading, setIsLoading] = useState(!initialMeetingData);
+  
   const [isEnding, setIsEnding] = useState(false);
-  const [error, setError] = useState(null);
-
-  const { token, user } = useAuth(); // Get user for potential socket authentication
+  const { token } = useAuth();
   const agoraRef = useRef(null);
+  const callTimeoutRef = useRef(null);
 
-  // --- HIDE TAB BAR (UNCHANGED) ---
   useLayoutEffect(() => {
     const parentNav = navigation.getParent();
     parentNav?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => {
-      parentNav?.setOptions({
-        tabBarStyle: {
-          display: "flex",
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
-          marginBottom: Platform.OS === "ios" ? 0 : 12,
-        },
-      });
-    };
+    return () => parentNav?.setOptions({ tabBarStyle: { display: "flex" } });
   }, [navigation]);
 
-  // --- REAL-TIME LISTENER FOR SPECIFIC CALLS ---
+  // This effect now correctly handles BOTH global and specific calls.
   useEffect(() => {
-    // This effect only runs if we are in the "waiting for a specific friend" state
-    if (isWaiting && callData?._id) {
-      console.log(`Seeker is now waiting for meeting ${callData._id} to be accepted.`);
-
-      // This function will be called by the socket event
-      const handleCallAccepted = (acceptedMeetingData) => {
-        // Ensure the accepted call from the server matches the one we are waiting for
-        if (acceptedMeetingData._id === callData._id) {
-          console.log("✅ Helper accepted the call! Joining now.", acceptedMeetingData);
-          setCallData(acceptedMeetingData); // Update state with the FINAL call info
-          setIsWaiting(false); // This triggers the UI to switch to the video call
-        }
-      };
-      
-      // ===================================================================
-      //  YOUR ACTION: Implement your socket listener here.
-      //  The event name 'callAccepted' must match what your backend emits.
-      // ===================================================================
-      // Example: socket.on('callAccepted', handleCallAccepted);
-
-      // It's also good practice to tell the server you're listening
-      // Example: socket.emit('seeker_is_waiting', { meetingId: callData._id });
-
-      // The cleanup function is crucial to prevent memory leaks
-      return () => {
-        console.log("Cleaning up listener for meeting:", callData._id);
-        // Example: socket.off('callAccepted', handleCallAccepted);
-      };
-    }
-  }, [isWaiting, callData]);
-
-
-  // --- LOGIC TO CREATE A NEW GLOBAL CALL ---
-  useEffect(() => {
-    // This effect only runs for global calls (when no callData is passed via navigation)
-    if (!callData && !isWaiting) {
-      const startGlobalCall = async () => {
+    // If we did NOT receive meeting data, it must be a global call.
+    if (!initialMeetingData) {
+      const createGlobalCall = async () => {
+        console.log("📞 No initial data found. Creating a new global call...");
         setIsLoading(true);
         try {
-          console.log("📞 Creating a new global call...");
           const response = await createMeeting(token, { type: "global" });
+          if (!response?.data) throw new Error("Invalid response from server for global call.");
           setCallData(response.data);
         } catch (err) {
-          console.error("❌ Create meeting error:", err);
-          setError("Failed to create call.");
-          setTimeout(() => navigation.goBack(), 2000);
+          console.error("❌ Failed to create global call:", err);
+          alert("Could not find an available volunteer at the moment. Please try again later.");
+          navigation.goBack();
         } finally {
           setIsLoading(false);
         }
       };
-      startGlobalCall();
+      createGlobalCall();
     }
-  }, [callData, isWaiting, token]);
+  }, [initialMeetingData, token]); // Runs only if initialMeetingData changes (i.e., on first load)
 
+  // This timeout effect ONLY runs for specific friend calls.
+  useEffect(() => {
+    // If it's a specific call (we have a helperName), set a timeout.
+    if (helperName) {
+      callTimeoutRef.current = setTimeout(() => {
+        alert(`${helperName} did not answer in time.`);
+        handleEndCall();
+      }, 30000); // 30 seconds
+    }
+    return () => {
+      if (callTimeoutRef.current) {
+        clearTimeout(callTimeoutRef.current);
+      }
+    };
+  }, [helperName]);
 
-  // --- CALL CONTROL FUNCTIONS ---
+  const handleRemoteUserJoined = () => {
+    console.log("✅ Other user has joined. Clearing timeout.");
+    if (callTimeoutRef.current) {
+      clearTimeout(callTimeoutRef.current);
+    }
+  };
+
   const handleEndCall = async () => {
     if (isEnding) return;
     setIsEnding(true);
     try {
       await agoraRef.current?.disconnect();
-      // Use roomName or channelName, whichever your unified callData object provides
       const channel = callData?.roomName || callData?.channelName;
       if (channel) {
         await endMeeting(token, channel);
       }
     } catch (err) {
       console.error("❌ End call error:", err);
-      setError("Failed to end call.");
     } finally {
       setTimeout(() => {
-        if (navigation.canGoBack()) {
-          navigation.goBack();
-        } else {
-          // Navigate to a screen that exists in the Seeker's stack
-          navigation.navigate("Support"); 
-        }
-      }, 1000);
+        if (navigation.canGoBack()) navigation.goBack();
+        else navigation.navigate("Support");
+      }, 500);
     }
   };
 
@@ -134,43 +102,15 @@ const CallVolunteer = ({ navigation, route }) => {
     agoraRef.current?.flipCamera();
   };
 
-  // --- RENDER LOGIC ---
-
-  if (isWaiting) {
-    return (
-      <View style={styles.waitingContainer}>
-        <ActivityIndicator size='large' color={Colors.white} />
-        <Text style={styles.waitingText}>
-          Waiting for {helperName} to accept your call...
-        </Text>
-        <PrimaryButton
-          backgroundColor={Colors.red600}
-          textColor='white'
-          title='Cancel Call'
-          onPress={handleEndCall}
-          style={{ width: '80%'}}
-        />
-      </View>
-    );
-  }
-
-  // Check for all required data points before attempting to render the call
+  // The check now uses the unified `callData` state.
   const channel = callData?.roomName || callData?.channelName;
-  if (isLoading || !callData?.token || !channel || !callData?.appId || !callData?.uid || error) {
+  if (isLoading || !callData?.token || !channel || !callData?.appId || !callData?.uid) {
     return (
       <View style={styles.fallbackContainer}>
-        <Text style={styles.waiting}>
-          {isLoading
-            ? "Connecting..."
-            : error || "Meeting information is incomplete."}
+        <ActivityIndicator size="large" color={Colors.white} />
+        <Text style={styles.waitingText}>
+          {isLoading ? "Connecting to a volunteer..." : "Call information is incomplete."}
         </Text>
-        {error && !isLoading && (
-          <PrimaryButton
-            title='Go Back'
-            onPress={() => navigation.goBack()}
-            style={{ marginTop: 20 }}
-          />
-        )}
       </View>
     );
   }
@@ -185,7 +125,10 @@ const CallVolunteer = ({ navigation, route }) => {
         uid={Number(callData.uid)}
         onEndCall={handleEndCall}
         shouldConnect={!isEnding}
-        userRole="seeker"
+        // This remains false to show the PiP view for the Seeker
+        alwaysShowLocalFullScreen={false} 
+        remoteUserName={helperName || 'Helper'}
+        onRemoteUserJoined={handleRemoteUserJoined}
       />
       <View style={styles.buttonContainer}>
         <PrimaryButton
@@ -219,13 +162,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#1C1C1E"
+    backgroundColor: "#1C1C1E",
   },
-  waiting: {
+  waitingText: {
     fontSize: 22,
     fontWeight: "700",
-    color: Colors.white,
+    color: "white",
     textAlign: "center",
+    marginTop: 20,
   },
   buttonContainer: {
     position: "absolute",
@@ -240,19 +184,6 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 10,
-  },
-  waitingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1C1C1E", // Darker background
-    padding: 20,
-  },
-  waitingText: {
-    color: Colors.white,
-    fontSize: 18,
-    marginVertical: 20,
-    textAlign: "center",
   },
 });
 
