@@ -1,5 +1,6 @@
 // importing react hooks
 import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // importing navigation
 import {
@@ -14,6 +15,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
@@ -335,16 +338,19 @@ export default function App() {
   return (
     <>
       <StatusBar barStyle='default' />
-
-      <AuthProvider>
-        <UserProvider>
-          <HelperProvider>
-            <SeekerProvider>
-              <Root />
-            </SeekerProvider>
-          </HelperProvider>
-        </UserProvider>
-      </AuthProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <UserProvider>
+              <HelperProvider>
+                <SeekerProvider>
+                  <Root />
+                </SeekerProvider>
+              </HelperProvider>
+            </UserProvider>
+          </AuthProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     </>
   );
 }

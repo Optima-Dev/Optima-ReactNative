@@ -11,6 +11,7 @@ import TermsList from "@/components/Terms/TermsList";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import MainModal from "../components/UI/MainModal";
 
+
 async function requestPermissions(setModalVisible) {
   try {
     // Request Camera Permission
@@ -21,13 +22,13 @@ async function requestPermissions(setModalVisible) {
       setModalVisible(true);
       return false;
     }
-    console.log("Camera permission granted ✅");    // Request Microphone Permission (for voice recognition)
+    console.log("Camera permission granted ✅"); // Request Microphone Permission (for voice recognition)
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-      
+
       const { status: micStatus } = await Audio.requestPermissionsAsync();
       if (micStatus !== "granted") {
         console.log("Microphone permission denied ❌");
@@ -66,49 +67,51 @@ function PrivacyTerms({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <Image
-          source={require("../assets/Images/TermsLogo.png")}
-          style={styles.image}
+
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <Image
+            source={require("../assets/Images/TermsLogo.png")}
+            style={styles.image}
+          />
+          <Text style={styles.MainText}>Privacy And Terms</Text>
+          <Text style={styles.SubText}>
+            To use Optima, you agree to the following:
+          </Text>
+        </View>
+
+        {/* Terms List */}
+        <View style={styles.TermsContainer}>
+          <TermsList />
+        </View>
+
+        {/* Confirm Button */}
+        <View style={styles.ButtonContainer}>
+          <PrimaryButton
+            title={"I Agree"}
+            onPress={agreementHandler}
+            backgroundColor={Colors.MainColor}
+            textColor='white'
+          />
+        </View>
+
+        <MainModal
+          onPress={() => setModalVisible(false)} // Close modal without navigating
+          isModalOpen={modalVisible}
+          logo={require("@/assets/Images/WarningIcon.png")}
+          backgroundColor={Colors.yellow700}
+          subTitle='Camera and microphone permissions are required to use this app. Please enable them in your device settings.'
+          title='Permission Required'
+          titleColor={Colors.black}
+          buttonText='Open Settings'
+          onButtonPress={() => {
+            Linking.openSettings();
+            setModalVisible(false);
+          }}
         />
-        <Text style={styles.MainText}>Privacy And Terms</Text>
-        <Text style={styles.SubText}>
-          To use Optima, you agree to the following:
-        </Text>
       </View>
 
-      {/* Terms List */}
-      <View style={styles.TermsContainer}>
-        <TermsList />
-      </View>
-
-      {/* Confirm Button */}
-      <View style={styles.ButtonContainer}>
-        <PrimaryButton
-          title={"I Agree"}
-          onPress={agreementHandler}
-          backgroundColor={Colors.MainColor}
-          textColor='white'
-        />
-      </View>
-
-      <MainModal
-        onPress={() => setModalVisible(false)} // Close modal without navigating
-        isModalOpen={modalVisible}
-        logo={require("@/assets/Images/WarningIcon.png")}
-        backgroundColor={Colors.yellow700}
-        subTitle='Camera and microphone permissions are required to use this app. Please enable them in your device settings.'
-        title='Permission Required'
-        titleColor={Colors.black}
-        buttonText='Open Settings'
-        onButtonPress={() => {
-          Linking.openSettings();
-          setModalVisible(false);
-        }}
-      />
-    </View>
   );
 }
 

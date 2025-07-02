@@ -16,7 +16,8 @@ import { AuthContext } from "../store/AuthContext";
 import { useUser } from "../store/UserContext";
 import { deleteUser, updateUser } from "../util/UserHttp";
 import { validateName } from "../util/Validation";
-// import { useDebounce } from "../hooks/useDebounce";
+import ScreenWrapper from "../components/UI/ScreenWrapper";
+
 
 const Account = ({ navigation }) => {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);

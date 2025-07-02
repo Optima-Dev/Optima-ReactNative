@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+} from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { CameraView } from "expo-camera";
 import { BallIndicator } from "react-native-indicators";
@@ -9,6 +16,7 @@ import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { GOOGLE_API_KEY } from "@env";
 import * as Speech from "expo-speech";
+import ScreenWrapper from "../../components/UI/ScreenWrapper";
 
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -26,29 +34,25 @@ const MyVision = () => {
   const isCancelledLoadingSpeechRef = useRef(false);
   const navigation = useNavigation();
 
-  // Helper function to update vision state
-  const updateVisionState = (updates) => setVisionState((prev) => ({ ...prev, ...updates }));
+  const updateVisionState = (updates) =>
+    setVisionState((prev) => ({ ...prev, ...updates }));
 
-  // Cancel speech synthesis
   const cancelSpeech = useCallback(() => {
     Speech.stop();
     isCancelledSpeechRef.current = true;
     isCancelledLoadingSpeechRef.current = true;
   }, []);
 
-  // Speak loading message
   const speakLoadingMessage = useCallback(() => {
     isCancelledLoadingSpeechRef.current = false;
     Speech.speak("Please wait while the description is being generated.");
   }, []);
 
-  // Handle navigation blur to stop speech
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", cancelSpeech);
     return unsubscribe;
   }, [navigation, cancelSpeech]);
 
-  // Manage camera activation on focus
   useFocusEffect(
     useCallback(() => {
       updateVisionState({ isCameraActive: true });
@@ -56,7 +60,6 @@ const MyVision = () => {
     }, [])
   );
 
-  // Handle taking a picture
   const handleTakePicture = useCallback(async () => {
     if (!cameraRef.current) {
       Speech.speak("Camera is not ready. Please try again.");
@@ -74,13 +77,11 @@ const MyVision = () => {
     }
   }, [cancelSpeech]);
 
-  // Handle retaking a picture
   const handleRetake = useCallback(() => {
     cancelSpeech();
     updateVisionState({ uri: null, answer: "", isLoading: false });
   }, [cancelSpeech]);
 
-  // Fetch image description from AI
   const getInfoFromAi = useCallback(
     async (imageUri) => {
       Speech.stop();
@@ -127,7 +128,6 @@ const MyVision = () => {
     [speakLoadingMessage]
   );
 
-  // Memoized content rendering
   const renderContent = useMemo(() => {
     if (!visionState.uri && visionState.isCameraActive) {
       return <CameraView style={styles.flexFill} ref={cameraRef} />;
@@ -158,37 +158,43 @@ const MyVision = () => {
   ]);
 
   return (
-    <View style={styles.container}>
-      {renderContent}
+    <ScreenWrapper>
+      <View style={styles.container}>
+        {renderContent}
 
-      <View style={styles.buttonsContainer}>
-        <PrimaryButton
-          title={visionState.uri ? "Retake A Picture" : "Take A Picture"}
-          backgroundColor={Colors.MainColor}
-          textColor="white"
-          isLoading={false}
-          onPress={visionState.uri ? handleRetake : handleTakePicture}
-          style={{ width: visionState.uri ? "49%" : "100%" }}
-        />
-
-        {visionState.uri && (
+        <View style={styles.buttonsContainer}>
           <PrimaryButton
-            title="Repeat"
-            backgroundColor={Colors.green500}
-            textColor={Colors.MainColor}
+            title={visionState.uri ? "Retake A Picture" : "Take A Picture"}
+            backgroundColor={Colors.MainColor}
+            textColor="white"
             isLoading={false}
-            onPress={() => getInfoFromAi(visionState.uri)}
-            style={{ width: "49%" }}
+            onPress={visionState.uri ? handleRetake : handleTakePicture}
+            style={{ width: visionState.uri ? "49%" : "100%" }}
           />
-        )}
+
+          {visionState.uri && (
+            <PrimaryButton
+              title="Repeat"
+              backgroundColor={Colors.green500}
+              textColor={Colors.MainColor}
+              isLoading={false}
+              onPress={() => getInfoFromAi(visionState.uri)}
+              style={{ width: "49%" }}
+            />
+          )}
+        </View>
       </View>
-    </View>
+    </ScreenWrapper>
   );
 };
 
 export default MyVision;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.MainColor, // adjust to match your design
+  },
   container: {
     flex: 1,
   },

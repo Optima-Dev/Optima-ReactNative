@@ -3,9 +3,12 @@ import Colors from "../../constants/Colors";
 import SettingsItem from "../../components/Terms/SettingsItem";
 import DetailItem from "../../components/Terms/DetailItem";
 import { useUser } from "../../store/UserContext";
+import ScreenWrapper from "../../components/UI/ScreenWrapper";
+
 const Settings = ({ navigation }) => {
   const { user } = useUser();
   return (
+    <ScreenWrapper>
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
 
@@ -61,6 +64,7 @@ const Settings = ({ navigation }) => {
         />
       </View>
     </View>
+    </ScreenWrapper>
   );
 };
 

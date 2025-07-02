@@ -11,6 +11,7 @@ import Colors from "../../constants/Colors";
 import { useAuth } from "../../store/AuthContext";
 import { endMeeting, createMeeting } from "../../util/MeetingHttp"; // Keep createMeeting for global calls
 import AgoraVideoComponent from "../../components/AgoraVideoComponent";
+import ScreenWrapper from "../../components/UI/ScreenWrapper";
 
 const CallVolunteer = ({ navigation, route }) => {
   // Get initial data. If it exists, it's a specific friend call.
@@ -18,10 +19,10 @@ const CallVolunteer = ({ navigation, route }) => {
 
   // A single state to hold the call data, whether it's from a specific or global call.
   const [callData, setCallData] = useState(initialMeetingData);
-  
+
   // isLoading is true only if we need to fetch data for a global call.
   const [isLoading, setIsLoading] = useState(!initialMeetingData);
-  
+
   const [isEnding, setIsEnding] = useState(false);
   const { token } = useAuth();
   const agoraRef = useRef(null);
@@ -42,11 +43,14 @@ const CallVolunteer = ({ navigation, route }) => {
         setIsLoading(true);
         try {
           const response = await createMeeting(token, { type: "global" });
-          if (!response?.data) throw new Error("Invalid response from server for global call.");
+          if (!response?.data)
+            throw new Error("Invalid response from server for global call.");
           setCallData(response.data);
         } catch (err) {
           console.error("❌ Failed to create global call:", err);
-          alert("Could not find an available volunteer at the moment. Please try again later.");
+          alert(
+            "Could not find an available volunteer at the moment. Please try again later."
+          );
           navigation.goBack();
         } finally {
           setIsLoading(false);
@@ -104,51 +108,61 @@ const CallVolunteer = ({ navigation, route }) => {
 
   // The check now uses the unified `callData` state.
   const channel = callData?.roomName || callData?.channelName;
-  if (isLoading || !callData?.token || !channel || !callData?.appId || !callData?.uid) {
+  if (
+    isLoading ||
+    !callData?.token ||
+    !channel ||
+    !callData?.appId ||
+    !callData?.uid
+  ) {
     return (
       <View style={styles.fallbackContainer}>
-        <ActivityIndicator size="large" color={Colors.white} />
+        <ActivityIndicator size='large' color={Colors.white} />
         <Text style={styles.waitingText}>
-          {isLoading ? "Connecting to a volunteer..." : "Call information is incomplete."}
+          {isLoading
+            ? "Connecting to a volunteer..."
+            : "Call information is incomplete."}
         </Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <AgoraVideoComponent
-        ref={agoraRef}
-        token={callData.token}
-        channelName={channel}
-        appId={callData.appId}
-        uid={Number(callData.uid)}
-        onEndCall={handleEndCall}
-        shouldConnect={!isEnding}
-        // This remains false to show the PiP view for the Seeker
-        alwaysShowLocalFullScreen={false} 
-        remoteUserName={helperName || 'Helper'}
-        onRemoteUserJoined={handleRemoteUserJoined}
-      />
-      <View style={styles.buttonContainer}>
-        <PrimaryButton
-          backgroundColor={Colors.MainColor}
-          textColor='white'
-          title='Flip Camera'
-          style={styles.button}
-          onPress={handleFlipCamera}
-          disabled={isEnding}
+    <ScreenWrapper>
+      <View style={styles.container}>
+        <AgoraVideoComponent
+          ref={agoraRef}
+          token={callData.token}
+          channelName={channel}
+          appId={callData.appId}
+          uid={Number(callData.uid)}
+          onEndCall={handleEndCall}
+          shouldConnect={!isEnding}
+          // This remains false to show the PiP view for the Seeker
+          alwaysShowLocalFullScreen={false}
+          remoteUserName={helperName || "Helper"}
+          onRemoteUserJoined={handleRemoteUserJoined}
         />
-        <PrimaryButton
-          backgroundColor={Colors.red600}
-          textColor='white'
-          title={isEnding ? "Ending..." : "End Call"}
-          style={styles.button}
-          onPress={handleEndCall}
-          disabled={isEnding}
-        />
+        <View style={styles.buttonContainer}>
+          <PrimaryButton
+            backgroundColor={Colors.MainColor}
+            textColor='white'
+            title='Flip Camera'
+            style={styles.button}
+            onPress={handleFlipCamera}
+            disabled={isEnding}
+          />
+          <PrimaryButton
+            backgroundColor={Colors.red600}
+            textColor='white'
+            title={isEnding ? "Ending..." : "End Call"}
+            style={styles.button}
+            onPress={handleEndCall}
+            disabled={isEnding}
+          />
+        </View>
       </View>
-    </View>
+    </ScreenWrapper>
   );
 };
 

@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View, ScrollView, Platform } from "react-native";
 import BackButton from "../../components/UI/BackButton";
 import Colors from "../../constants/Colors";
+import ScreenWrapper from "../../components/UI/ScreenWrapper";
+
 
 const VOICE_CONTROL = {
   "Nav Bar": [
@@ -18,6 +20,7 @@ const VOICE_CONTROL = {
 
 const VoiceControl = () => {
   return (
+    <ScreenWrapper>
     <View style={styles.container}>
       <BackButton />
       <Text style={styles.title}>Voice Control</Text>
@@ -46,6 +49,7 @@ const VoiceControl = () => {
         ))}
       </ScrollView>
     </View>
+    </ScreenWrapper>
   );
 };
 
