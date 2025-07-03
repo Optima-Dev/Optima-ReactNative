@@ -13,10 +13,6 @@ import PrimaryButton from "../../UI/PrimaryButton";
 import { validateEmail, validateName } from "../../../util/Validation";
 import { createMeeting } from "../../../util/MeetingHttp";
 import { useAuth } from "../../../store/AuthContext";
-
-// ===================================================================
-// STEP 1: Import the useNavigation hook
-// ===================================================================
 import { useNavigation } from "@react-navigation/native";
 
 const EditFriendsModal = ({
@@ -27,11 +23,9 @@ const EditFriendsModal = ({
   onChangeMode,
   onRemove,
   onEdit,
-  // The 'navigation' prop is no longer needed from the parent
+
 }) => {
-  // ===================================================================
-  // STEP 2: Get the navigation object directly using the hook
-  // ===================================================================
+ 
   const navigation = useNavigation();
 
   const { token } = useAuth();

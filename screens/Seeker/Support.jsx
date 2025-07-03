@@ -4,23 +4,28 @@ import {
   Text,
   View,
   Platform,
+  ScrollView,
   SafeAreaView,
   Animated,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+
+// 1. Import the necessary contexts to get user data and actions
+import { useUser } from "../../store/UserContext";
+import { useSeeker } from "../../store/SeekerContext";
+import { useAuth } from "../../store/AuthContext";
 
 import CallButton from "../../components/seeker/CallButton";
 import Colors from "../../constants/Colors";
 import ArrowButton from "../../components/UI/ArrowButton";
 import { useVoiceAssistant } from "../../hooks/useVoiceAssistant";
 import * as Speech from "expo-speech";
-import ScreenWrapper from "../../components/UI/ScreenWrapper";
 
 const Support = ({ navigation }) => {
   const {
-    status,
     isListening,
     finalText,
     startRecognition,
@@ -28,52 +33,74 @@ const Support = ({ navigation }) => {
     resetState,
   } = useVoiceAssistant();
 
+  // 2. Get the data and functions from your contexts
+  const { user } = useUser();
+  const { friends, callSpecificFriend } = useSeeker();
+  const { token } = useAuth();
+  
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const hasSpokenWelcome = useRef(false);
 
   useEffect(() => {
-    if (status === "listening") {
+    if (isListening) {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.1,
-            duration: 700,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 700,
-            useNativeDriver: true,
-          }),
+          Animated.timing(pulseAnim, { toValue: 1.1, duration: 700, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
         ])
       ).start();
     } else {
-      pulseAnim.stopAnimation();
       Animated.spring(pulseAnim, { toValue: 1, useNativeDriver: true }).start();
     }
-  }, [status, pulseAnim]);
+  }, [isListening, pulseAnim]);
 
-  // Stop listening when the user navigates away
   useFocusEffect(
     useCallback(() => {
+      if (!hasSpokenWelcome.current) {
+        const name = user?.firstName || "My Friend";
+        const welcomeMessage = `Hello ${name}. Swipe down with two fingers to give a voice command.`;
+        Speech.speak(welcomeMessage);
+        hasSpokenWelcome.current = true;
+      }
+
       return () => {
         stopRecognition();
+        hasSpokenWelcome.current = false; 
       };
-    }, [stopRecognition])
+    }, [stopRecognition, user])
   );
 
-  // Process the final voice command
+  // 3. Update the command processing logic
   useEffect(() => {
     if (finalText) {
       const command = finalText.toLowerCase().trim();
       let feedbackSpeech = "";
 
-      if (command.includes("call volunteer")) {
+      // Check for the "call [name]" command first
+      if (command.startsWith("call ")) {
+        const friendName = command.replace("call ", "").toLowerCase();
+        
+        // Find the friend in the list from the context
+        const friendToCall = friends.find(f => 
+          `${f.customFirstName} ${f.customLastName}`.toLowerCase().includes(friendName)
+        );
+
+        if (friendToCall) {
+          feedbackSpeech = `Calling ${friendToCall.customFirstName}.`;
+          // Use the centralized function from the context to make the call
+          callSpecificFriend(friendToCall, token, navigation);
+        } else {
+          feedbackSpeech = `Sorry, I could not find a friend named ${friendName}.`;
+        }
+      } 
+      // Fallback to other commands
+      else if (command.includes("call") && command.includes("volunteer")) {
         feedbackSpeech = "Calling a volunteer.";
         navigation.navigate("CallVolunteer");
-      } else if (command.includes("my vision")) {
+      } else if (command.includes("my") && command.includes("vision")) {
         feedbackSpeech = "Opening My Vision.";
         navigation.navigate("MyVision");
-      } else if (command.includes("my people")) {
+      } else if (command.includes("my") && command.includes("people")) {
         feedbackSpeech = "Opening My People.";
         navigation.navigate("MyPeople");
       } else {
@@ -82,13 +109,12 @@ const Support = ({ navigation }) => {
 
       Speech.speak(feedbackSpeech, { onDone: () => resetState() });
     }
-  }, [finalText, navigation, resetState]);
+  }, [finalText, navigation, resetState, friends, callSpecificFriend, token]);
 
-  // This function now handles the swipe gesture logic
   const handleSwipe = () => {
     if (!isListening) {
-      console.log("⬇️ Two-finger swipe down detected!");
-      Speech.speak("I'm listening", {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Speech.speak("I'm listening, you could speak now", {
         onDone: () => {
           startRecognition();
         },
@@ -96,14 +122,9 @@ const Support = ({ navigation }) => {
     }
   };
 
-  // ===================================================================
-  // THE FIX: Replaced the sensitive Fling gesture with a more robust Pan gesture.
-  // This will more reliably detect a two-finger downward swipe.
-  // ===================================================================
   const panGesture = Gesture.Pan()
-    .minPointers(2) // Require two fingers
+    .minPointers(2)
     .onEnd((event) => {
-      // Check if the swipe was primarily downward and long enough
       if (
         event.translationY > 50 &&
         Math.abs(event.translationX) < event.translationY
@@ -115,37 +136,35 @@ const Support = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <GestureDetector gesture={panGesture}>
-        <View style={styles.container}>
-          <View style={styles.topContent}>
-            <View style={styles.TitleContainer}>
-              <Text style={styles.title}>Optima</Text>
+        {/* The root view now allows the voice container to float on top */}
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            contentContainerStyle={styles.container}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.topContent}>
+              <View style={styles.TitleContainer}>
+                <Text style={styles.title}>Optima</Text>
+              </View>
+              <CallButton onPress={() => navigation.navigate("CallVolunteer")} />
+              <ArrowButton
+                text={"MY VISION"}
+                type={"MyVision"}
+                onPress={() => navigation.navigate("MyVision")}
+              />
+              <ArrowButton
+                text={"MY PEOPLE"}
+                type={"MyPeople"}
+                onPress={() => navigation.navigate("MyPeople")}
+              />
             </View>
-            <CallButton onPress={() => navigation.navigate("CallVolunteer")} />
 
-            <ArrowButton
-              text={"MY VISION"}
-              type={"MyVision"}
-              onPress={() => navigation.navigate("MyVision")}
-            />
-            <ArrowButton
-              text={"MY PEOPLE"}
-              type={"MyPeople"}
-              onPress={() => navigation.navigate("MyPeople")}
-            />
-          </View>
-
-          <View style={styles.instructionContainer}>
-            <Text style={styles.instructionText}>
-              Swipe down with two fingers to give a voice command.
-            </Text>
-          </View>
-
-          <View style={styles.voiceContainer}>
-            <Animated.View
-              style={[styles.micButton, { transform: [{ scale: pulseAnim }] }]}>
-              <Text style={styles.micText}>🎤</Text>
-            </Animated.View>
-          </View>
+            <View style={styles.instructionContainer}>
+              <Text style={styles.instructionText}>
+                Swipe down with two fingers to give a voice command.
+              </Text>
+            </View>
+          </ScrollView>
         </View>
       </GestureDetector>
     </SafeAreaView>
@@ -159,13 +178,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  // This container is now for the ScrollView content
   container: {
-    flex: 1,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 20 : 40,
-    paddingBottom: 40,
+    paddingTop: Platform.OS === "ios" ? 20 : 30,
     alignItems: "center",
-    justifyContent: "space-between",
   },
   topContent: {
     width: "100%",
@@ -173,7 +190,7 @@ const styles = StyleSheet.create({
   },
   TitleContainer: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 20,
   },
   title: {
     fontSize: Platform.OS === "ios" ? 32 : 28,
@@ -181,35 +198,18 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   instructionContainer: {
-    padding: 20,
-    backgroundColor: "#f5f5f5",
     borderRadius: 10,
-    width: "100%",
+    width: '100%',
   },
   instructionText: {
     fontSize: 16,
     color: "#666",
     textAlign: "center",
   },
+  // Styles for the floating mic are restored
   voiceContainer: {
     position: "absolute",
     bottom: 40,
     right: 20,
-  },
-  micButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: Colors.MainColor,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 8,
-    shadowColor: Colors.MainColor,
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  micText: {
-    fontSize: 30,
   },
 });

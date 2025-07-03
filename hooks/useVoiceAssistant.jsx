@@ -20,6 +20,7 @@ export const useVoiceAssistant = () => {
   }, []);
 
   const onSpeechEnd = useCallback(() => {
+    // If a final text was set, we are processing, otherwise we go back to idle.
     setState(prev => ({ ...prev, isListening: false, status: prev.finalText ? 'processing' : 'idle' }));
   }, []);
 

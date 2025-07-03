@@ -30,7 +30,8 @@
         "android.permission.ACCESS_WIFI_STATE",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.BLUETOOTH",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.VIBRATE"
       ],
       "package": "com.ahmed_hatem25.Optima"
     },

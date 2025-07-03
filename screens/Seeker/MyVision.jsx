@@ -1,27 +1,24 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  Platform,
-} from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { CameraView } from "expo-camera";
 import { BallIndicator } from "react-native-indicators";
 import { readAsStringAsync, EncodingType } from "expo-file-system";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import PrimaryButton from "../../components/UI/PrimaryButton";
 import Colors from "../../constants/Colors";
 import { GOOGLE_API_KEY } from "@env";
 import * as Speech from "expo-speech";
 import ScreenWrapper from "../../components/UI/ScreenWrapper";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
+import PrimaryButton from "../../components/UI/PrimaryButton";
+import * as Haptics from "expo-haptics";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const MyVision = () => {
+const MyVision = ({ navigation }) => {
   const [visionState, setVisionState] = useState({
     isCameraActive: true,
     uri: null,
@@ -30,180 +27,189 @@ const MyVision = () => {
   });
 
   const cameraRef = useRef();
-  const isCancelledSpeechRef = useRef(false);
-  const isCancelledLoadingSpeechRef = useRef(false);
-  const navigation = useNavigation();
+  const hasSpokenIntro = useRef(false);
 
   const updateVisionState = (updates) =>
     setVisionState((prev) => ({ ...prev, ...updates }));
 
   const cancelSpeech = useCallback(() => {
     Speech.stop();
-    isCancelledSpeechRef.current = true;
-    isCancelledLoadingSpeechRef.current = true;
   }, []);
-
-  const speakLoadingMessage = useCallback(() => {
-    isCancelledLoadingSpeechRef.current = false;
-    Speech.speak("Please wait while the description is being generated.");
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("blur", cancelSpeech);
-    return unsubscribe;
-  }, [navigation, cancelSpeech]);
 
   useFocusEffect(
     useCallback(() => {
       updateVisionState({ isCameraActive: true });
-      return () => updateVisionState({ isCameraActive: false });
+      if (!hasSpokenIntro.current) {
+        Speech.speak(
+          "My Vision is active. Swipe up to take a picture. After that, swipe up to retake or swipe down to repeat the description."
+        );
+        hasSpokenIntro.current = true;
+      }
+
+      return () => {
+        updateVisionState({ isCameraActive: false });
+        cancelSpeech();
+        hasSpokenIntro.current = false;
+      };
     }, [])
   );
 
+  const getInfoFromAi = useCallback(
+    async (imageUri) => {
+      if (!imageUri || visionState.isLoading) return;
+      cancelSpeech();
+      updateVisionState({ isLoading: true });
+      Speech.speak("Analyzing image.");
+      try {
+        const base64Image = await readAsStringAsync(imageUri, {
+          encoding: EncodingType.Base64,
+        });
+        const imagePart = {
+          inlineData: { mimeType: "image/jpeg", data: base64Image },
+        };
+        const result = await model.generateContent([
+          "Describe this image in detail for a visually impaired person.",
+          imagePart,
+        ]);
+        const responseText = result.response.text();
+        updateVisionState({ answer: responseText });
+        Speech.speak(responseText);
+      } catch (error) {
+        Speech.speak("Sorry, I could not describe the image.");
+        updateVisionState({ answer: "Failed to describe image." });
+      } finally {
+        updateVisionState({ isLoading: false });
+      }
+    },
+    [visionState.isLoading, cancelSpeech]
+  );
+
   const handleTakePicture = useCallback(async () => {
-    if (!cameraRef.current) {
-      Speech.speak("Camera is not ready. Please try again.");
-      return;
-    }
-
+    if (!cameraRef.current || visionState.isLoading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     cancelSpeech();
-
     try {
       const photo = await cameraRef.current.takePictureAsync();
       updateVisionState({ uri: photo.uri, answer: "", isLoading: true });
       await getInfoFromAi(photo.uri);
     } catch (error) {
-      Speech.speak("Failed to take a picture. Please try again.");
+      Speech.speak("Failed to take a picture.");
+      updateVisionState({ isLoading: false });
     }
-  }, [cancelSpeech]);
+  }, [cancelSpeech, visionState.isLoading, getInfoFromAi]);
 
   const handleRetake = useCallback(() => {
+    if (visionState.isLoading) return;
     cancelSpeech();
     updateVisionState({ uri: null, answer: "", isLoading: false });
-  }, [cancelSpeech]);
+    Speech.speak("Ready for a new picture.");
+  }, [cancelSpeech, visionState.isLoading]);
 
-  const getInfoFromAi = useCallback(
-    async (imageUri) => {
-      Speech.stop();
-      updateVisionState({ isLoading: true });
-      isCancelledSpeechRef.current = false;
-      speakLoadingMessage();
-
-      try {
-        const base64Image = await readAsStringAsync(imageUri, {
-          encoding: EncodingType.Base64,
-        });
-
-        const imagePart = {
-          inlineData: {
-            mimeType: "image/jpeg",
-            data: base64Image,
-          },
-        };
-
-        const result = await model.generateContent([
-          "Describe this image in detail.",
-          imagePart,
-        ]);
-
-        if (isCancelledSpeechRef.current || isCancelledLoadingSpeechRef.current) {
-          return;
-        }
-
-        const responseText = result.response.text();
-        updateVisionState({ answer: responseText });
-
-        if (!isCancelledSpeechRef.current) {
-          Speech.speak(responseText);
-        }
-      } catch (error) {
-        Speech.speak("Failed to describe the image. Please try again.");
-        updateVisionState({
-          answer: "Failed to describe image. Please try again.",
-        });
-      } finally {
-        updateVisionState({ isLoading: false });
-      }
-    },
-    [speakLoadingMessage]
-  );
-
-  const renderContent = useMemo(() => {
-    if (!visionState.uri && visionState.isCameraActive) {
-      return <CameraView style={styles.flexFill} ref={cameraRef} />;
+  const handleRepeat = useCallback(() => {
+    if (visionState.uri && visionState.answer && !visionState.isLoading) {
+      cancelSpeech();
+      Speech.speak("Repeating description.", {
+        onDone: () => Speech.speak(visionState.answer),
+      });
     }
+  }, [visionState]);
 
-    return (
-      <>
-        <Image source={{ uri: visionState.uri }} style={styles.flexFill} />
-        <ScrollView style={styles.answerContainer}>
-          {visionState.isLoading ? (
-            <BallIndicator
-              color="white"
-              size={80}
-              count={9}
-              style={styles.loader}
-            />
-          ) : (
-            <Text style={styles.answer}>{visionState.answer}</Text>
-          )}
-        </ScrollView>
-      </>
-    );
-  }, [
-    visionState.uri,
-    visionState.isCameraActive,
-    visionState.isLoading,
-    visionState.answer,
-  ]);
+  const handleSwipe = (direction) => {
+  console.log("Swiped", direction);
+  if (visionState.isLoading) return;
+
+  if (direction === "up") {
+    console.log("Triggering takePicture or retake");
+    if (visionState.uri) {
+      handleRetake();
+    } else {
+      handleTakePicture();
+    }
+  } else if (direction === "down") {
+    if (visionState.uri && visionState.answer) {
+      handleRepeat();
+    }
+  }
+};
+
+  const panGesture = Gesture.Pan()
+    .minPointers(2)
+    .onEnd((event) => {
+      const verticalSwipe = event.translationY;
+      const horizontalSwipe = event.translationX;
+
+      if (
+        Math.abs(verticalSwipe) > 50 &&
+        Math.abs(verticalSwipe) > Math.abs(horizontalSwipe)
+      ) {
+        const direction = verticalSwipe < 0 ? "up" : "down";
+        runOnJS(handleSwipe)(direction);
+      }
+    });
+
+  const renderContent = () => {
+    if (visionState.isCameraActive && !visionState.uri) {
+      return (
+        <GestureHandlerRootView style={styles.flexFill}>
+          <CameraView
+            ref={cameraRef}
+            style={styles.flexFill}
+            onCameraReady={() => updateVisionState({ isCameraActive: true })}
+          />
+        </GestureHandlerRootView>
+      );
+    }
+    if (visionState.uri) {
+      return (
+        <>
+          <Image source={{ uri: visionState.uri }} style={styles.flexFill} />
+          <ScrollView style={styles.answerContainer} contentContainerStyle={visionState.isLoading ? { flex: 1, justifyContent: "center", alignItems: "center" } : undefined}>
+        {visionState.isLoading ? (
+          <BallIndicator color='white' size={80} count={9} />
+        ) : (
+          <Text style={styles.answer}>{visionState.answer}</Text>
+        )}
+          </ScrollView>
+        </>
+      );
+    }
+    return null;
+  };
 
   return (
     <ScreenWrapper>
-      <View style={styles.container}>
-        {renderContent}
-
-        <View style={styles.buttonsContainer}>
-          <PrimaryButton
-            title={visionState.uri ? "Retake A Picture" : "Take A Picture"}
-            backgroundColor={Colors.MainColor}
-            textColor="white"
-            isLoading={false}
-            onPress={visionState.uri ? handleRetake : handleTakePicture}
-            style={{ width: visionState.uri ? "49%" : "100%" }}
-          />
-
-          {visionState.uri && (
+      <GestureDetector gesture={panGesture}>
+        <View style={styles.container}>
+          {renderContent()}
+          <View style={styles.buttonsContainer}>
             <PrimaryButton
-              title="Repeat"
-              backgroundColor={Colors.green500}
-              textColor={Colors.MainColor}
-              isLoading={false}
-              onPress={() => getInfoFromAi(visionState.uri)}
-              style={{ width: "49%" }}
+              title={visionState.uri ? "Retake" : "Take Picture"}
+              backgroundColor={Colors.MainColor}
+              textColor='white'
+              isLoading={visionState.isLoading}
+              onPress={visionState.uri ? handleRetake : handleTakePicture}
+              style={{ width: visionState.uri ? "49%" : "100%" }}
             />
-          )}
+            {visionState.uri && (
+              <PrimaryButton
+                title='Repeat'
+                backgroundColor={Colors.green500}
+                textColor={Colors.MainColor}
+                isLoading={visionState.isLoading}
+                onPress={handleRepeat}
+                style={{ width: "49%" }}
+              />
+            )}
+          </View>
         </View>
-      </View>
+      </GestureDetector>
     </ScreenWrapper>
   );
 };
 
-export default MyVision;
-
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.MainColor, // adjust to match your design
-  },
-  container: {
-    flex: 1,
-  },
-  flexFill: {
-    flex: 1,
-  },
-  loader: {
-    top: "360%",
-  },
+  container: { flex: 1 },
+  flexFill: { flex: 1 },
   answerContainer: {
     backgroundColor: "#41403DD6",
     position: "absolute",
@@ -226,5 +232,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
+    width: "100%",
   },
 });
+
+export default MyVision;
