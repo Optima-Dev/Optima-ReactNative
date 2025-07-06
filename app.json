@@ -4,7 +4,7 @@
     "slug": "Optima",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Images/Main-Logo-blue 1.png",
     "splash": {
       "image": "./assets/Splash-Logo.png",
       "resizeMode": "contain",
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/Images/Main-Logo-blue 1.png",
         "backgroundColor": "#FFFFFF"
       },
       "permissions": [

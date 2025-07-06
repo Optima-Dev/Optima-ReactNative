@@ -14,24 +14,30 @@ function MainHeader({ title, subtitle, login, noImage, imageTitle }) {
       )}
 
       {imageTitle && (
-        <View style={styles.logoContainer}>
+        <View style={[styles.logoContainer, login && { marginRight: 20 }]}>
           <Text style={styles.imageTitle}>Optima</Text>
         </View>
       )}
 
       {title && (
-        <Text style={[styles.title, imageTitle && { fontSize: 26 }]}>
+        <Text
+          style={[
+            styles.title,
+            imageTitle && { fontSize: 26 },
+            login && { marginRight: 30 },
+          ]}>
           {title}
         </Text>
       )}
-      <Text style={styles.subtitle}>{subtitle}</Text>
+      <Text style={[styles.subtitle, login && { marginRight: 30 }]}>
+        {subtitle}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    // alignItems: "center",
     zIndex: 1,
   },
   position: {

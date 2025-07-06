@@ -37,7 +37,7 @@ const Support = ({ navigation }) => {
   const { user } = useUser();
   const { friends, callSpecificFriend } = useSeeker();
   const { token } = useAuth();
-  
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const hasSpokenWelcome = useRef(false);
 
@@ -45,8 +45,16 @@ const Support = ({ navigation }) => {
     if (isListening) {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.1, duration: 700, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 700,
+            useNativeDriver: true,
+          }),
         ])
       ).start();
     } else {
@@ -57,7 +65,7 @@ const Support = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       if (!hasSpokenWelcome.current) {
-        const name = user?.firstName || "My Friend";
+        const name = user?.lastName || "My Friend";
         const welcomeMessage = `Hello ${name}. Swipe down with two fingers to give a voice command.`;
         Speech.speak(welcomeMessage);
         hasSpokenWelcome.current = true;
@@ -65,7 +73,7 @@ const Support = ({ navigation }) => {
 
       return () => {
         stopRecognition();
-        hasSpokenWelcome.current = false; 
+        hasSpokenWelcome.current = false;
       };
     }, [stopRecognition, user])
   );
@@ -76,13 +84,25 @@ const Support = ({ navigation }) => {
       const command = finalText.toLowerCase().trim();
       let feedbackSpeech = "";
 
+      if (
+        command.includes("need") ||
+        command.includes("volunteer") ||
+        command.includes("help") ||
+        command.includes("support") ||
+        command.includes("call a volunteer")
+      ) {
+        feedbackSpeech = "Calling a volunteer.";
+        navigation.navigate("CallVolunteer");
+      }
       // Check for the "call [name]" command first
-      if (command.startsWith("call ")) {
+      else if (command.startsWith("call ")) {
         const friendName = command.replace("call ", "").toLowerCase();
-        
+
         // Find the friend in the list from the context
-        const friendToCall = friends.find(f => 
-          `${f.customFirstName} ${f.customLastName}`.toLowerCase().includes(friendName)
+        const friendToCall = friends.find((f) =>
+          `${f.customFirstName} ${f.customLastName}`
+            .toLowerCase()
+            .includes(friendName)
         );
 
         if (friendToCall) {
@@ -92,11 +112,6 @@ const Support = ({ navigation }) => {
         } else {
           feedbackSpeech = `Sorry, I could not find a friend named ${friendName}.`;
         }
-      } 
-      // Fallback to other commands
-      else if (command.includes("call") && command.includes("volunteer")) {
-        feedbackSpeech = "Calling a volunteer.";
-        navigation.navigate("CallVolunteer");
       } else if (command.includes("my") && command.includes("vision")) {
         feedbackSpeech = "Opening My Vision.";
         navigation.navigate("MyVision");
@@ -140,13 +155,14 @@ const Support = ({ navigation }) => {
         <View style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={styles.container}
-            showsVerticalScrollIndicator={false}
-          >
+            showsVerticalScrollIndicator={false}>
             <View style={styles.topContent}>
               <View style={styles.TitleContainer}>
                 <Text style={styles.title}>Optima</Text>
               </View>
-              <CallButton onPress={() => navigation.navigate("CallVolunteer")} />
+              <CallButton
+                onPress={() => navigation.navigate("CallVolunteer")}
+              />
               <ArrowButton
                 text={"MY VISION"}
                 type={"MyVision"}
@@ -199,7 +215,7 @@ const styles = StyleSheet.create({
   },
   instructionContainer: {
     borderRadius: 10,
-    width: '100%',
+    width: "100%",
   },
   instructionText: {
     fontSize: 16,

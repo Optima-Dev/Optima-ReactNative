@@ -12,29 +12,51 @@ import DetailItem from "../../components/Terms/DetailItem";
 import Colors from "../../constants/Colors";
 import { useUser } from "../../store/UserContext";
 import FriendsList from "../../components/helper/Home/FriendsList";
+import { getPendingGlobalMeetings } from "../../util/MeetingHttp";
+import { useAuth } from "../../store/AuthContext";
+import { useEffect , useState } from "react";
 
 const Home = ({ navigation }) => {
   const { user } = useUser();
+  const [meetingsSize, setMeetingsSize] = useState(0);
+  const { token } = useAuth();
+
+  // Fetch pending meetings when the component mounts
+  useEffect(() => {
+    const fetchPendingMeetings = async () => {
+      try {
+        const meetings = await getPendingGlobalMeetings(token);
+        console.log("Fetched meetings response:", meetings);
+        setMeetingsSize(Array.isArray(meetings) ? meetings.length : 0);
+      } catch (error) {
+        console.error(
+          "Error fetching pending meetings:",
+          error?.message || error
+        );
+        setMeetingsSize(0);
+      }
+    };
+    fetchPendingMeetings();
+  }, [token]);
 
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        alwaysBounceVertical={false}
-      >
+        alwaysBounceVertical={false}>
         <View style={styles.contentContainer}>
           <MainHeader
             title={`Hello, ${user.firstName} ${user.lastName}!`}
-            subtitle="We would like to thank you for investing your precious time in helping people."
+            subtitle='We would like to thank you for investing your precious time in helping people.'
             imageTitle
           />
-          
-          {/* <Image
-            source={require("../../assets/Images/Ellipse 1.png")}
-            style={[styles.ring2]}
-          /> */}
 
-          <Pressable style={styles.buttonContainer} onPress={() => navigation.navigate('CallScreen')}>
+          <Image
+            source={require("../../assets/Images/Ellipse 1.pdf")}
+            style={[styles.ring2]}
+          />
+
+          <Pressable style={styles.buttonContainer} onPress={() => navigation.navigate("Notifications")}>
             <Text style={styles.buttonText}>
               People who are waiting today for help from all over the world
             </Text>
@@ -44,11 +66,11 @@ const Home = ({ navigation }) => {
                 source={require("../../assets/Images/Ellipse 10.png")}
                 style={styles.ring}
               />
-              <Text style={styles.numberText}>200</Text>
+              <Text style={styles.numberText}>{meetingsSize}</Text>
             </View>
             <Image
               source={require("../../assets/Images/Ellipse 11.png")}
-              style={[styles.ring, { top: 88, left: 0 }]}
+              style={[styles.ring, { top: 130, left: 0 }]}
             />
           </Pressable>
 
@@ -56,7 +78,7 @@ const Home = ({ navigation }) => {
             onPress={() => {
               navigation.navigate("Instructions");
             }}
-            text="How to pick-up a call"
+            text='How to pick-up a call'
             backgroundColor={Colors.green500}
             iconSource={require("../../assets/Images/Forward-Arrow.png")}
           />
@@ -69,10 +91,10 @@ const Home = ({ navigation }) => {
         <Text style={styles.bottomText}>
           We will notify you when someone needs help.
         </Text>
-        {/* <Image
-          source={require("../../assets/Images/Ellipse 2.png")}
+        <Image
+          source={require("../../assets/Images/Ellipse 2.pdf")}
           style={[styles.ring2]}
-        /> */}
+        />
       </View>
     </View>
   );
@@ -89,7 +111,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 10,
     paddingTop: Platform.OS === "android" ? 60 : 0,
-    marginBottom: 46,
+    marginBottom: 90,
   },
   buttonContainer: {
     flexDirection: "row",
