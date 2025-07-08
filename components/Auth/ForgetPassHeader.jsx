@@ -4,11 +4,11 @@ import Colors from "../../constants/Colors";
 const ForgetPassHeader = ({ title, subTitle, community }) => {
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, community && { fontSize: 30 }]}>{ title }</Text>
-      <Text style={styles.subTitle}>{ subTitle }</Text>
+      <Text style={[styles.title, community && { fontSize: 30 }]}>{title}</Text>
+      <Text style={styles.subTitle}>{subTitle}</Text>
     </View>
   );
-}
+};
 
 export default ForgetPassHeader;
 
@@ -26,5 +26,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     textAlign: "center",
     lineHeight: 25,
-  }
+    color: Colors.black,
+  },
 });

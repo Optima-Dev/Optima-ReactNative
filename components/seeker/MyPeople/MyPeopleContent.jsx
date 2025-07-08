@@ -5,14 +5,11 @@ import MyPeopleForm from "./MyPeopleForm";
 import MyPeopleList from "./MyPeopleList";
 import { sendFriendRequest } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
-// useUser is no longer needed here for this specific function
-// import { useUser } from "../../../store/UserContext";
 
 function MyPeopleContent({ navigation }) {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { token } = useAuth();
-  // const { user } = useUser(); // We don't need the user's name here anymore
 
   async function handleAddPerson(personData) {
     setIsLoading(true);
@@ -36,9 +33,12 @@ function MyPeopleContent({ navigation }) {
     ? "Create a simple way to reach to your family and friends."
     : "Add the person’s information for a faster connection.";
 
+  // Debug subtitle prop
+  console.log("[MyPeopleContent] Subtitle:", Subtitle);
+
   return (
     <View style={styles.container}>
-      <ForgetPassHeader title='My People' subTitle={Subtitle} />
+      <ForgetPassHeader title="My People" subTitle={Subtitle} />
       {showForm ? (
         <MyPeopleForm
           onAddPerson={handleAddPerson}

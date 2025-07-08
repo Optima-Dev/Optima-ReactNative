@@ -8,7 +8,7 @@ import {
   Platform,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { CameraView } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { BallIndicator } from "react-native-indicators";
 import { readAsStringAsync, EncodingType } from "expo-file-system";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -30,25 +30,36 @@ console.error = () => {};
 
 const MyVision = ({ navigation }) => {
   const [visionState, setVisionState] = useState({
-    isCameraActive: true,
+    isCameraActive: false,
     uri: null,
     isLoading: false,
     answer: "",
   });
-
-  const cameraRef = useRef();
+  const [cameraKey, setCameraKey] = useState(0);
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef(null);
+  const isMounted = useRef(true);
   const hasSpokenIntro = useRef(false);
   const abortControllerRef = useRef(null);
   const speechInProgress = useRef(false);
   const firstMount = useRef(true);
   const retryCount = useRef(0);
+  const cameraReadyTimeout = useRef(null);
 
-  const updateVisionState = (updates) =>
-    setVisionState((prev) => ({ ...prev, ...updates }));
+  const updateVisionState = useCallback((updates) => {
+    if (isMounted.current) {
+      setVisionState((prev) => ({ ...prev, ...updates }));
+    }
+  }, []);
 
-  const cancelSpeech = useCallback(() => {
-    Speech.stop();
-    console.log("[MyVision] Speech stopped");
+  // Clear speech queue with timeout
+  const clearSpeechQueue = useCallback(async () => {
+    if (await Speech.isSpeakingAsync()) {
+      console.log("[MyVision] Speech active, stopping existing", { platform: Platform.OS });
+      await Speech.stop();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log("[MyVision] Speech queue cleared", { platform: Platform.OS });
+    }
   }, []);
 
   const speakIntroMessage = useCallback(async () => {
@@ -65,20 +76,18 @@ const MyVision = ({ navigation }) => {
       return;
     }
 
-    // Check if speech is active and stop it
-    const isSpeaking = await Speech.isSpeakingAsync();
-    if (isSpeaking) {
-      console.log("[MyVision] Speech active, stopping existing");
-      Speech.stop();
-    }
-
     speechInProgress.current = true;
-    console.log("[MyVision] Intro message initiated", {
-      platform: Platform.OS,
-    });
+    console.log("[MyVision] Intro message initiated", { platform: Platform.OS });
     const introMessage =
       "My Vision is active. Swipe up to take a picture. After that, swipe up to retake or swipe down to repeat the description.";
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch((err) => {
+      console.log("[MyVision] Haptics error:", err);
+    });
+    await clearSpeechQueue();
     Speech.speak(introMessage, {
+      language: "en-US",
+      rate: 0.85,
+      pitch: 1.0,
       onDone: () => {
         console.log("[MyVision] Intro message done");
         speechInProgress.current = false;
@@ -87,11 +96,9 @@ const MyVision = ({ navigation }) => {
         firstMount.current = false;
       },
       onError: (err) => {
-        console.log("[MyVision] Intro message error:", err, {
-          platform: Platform.OS,
-        });
+        console.log("[MyVision] Intro message error:", err, { platform: Platform.OS });
         speechInProgress.current = false;
-        if (visionState.isCameraActive && retryCount.current < 2) {
+        if (visionState.isCameraActive && retryCount.current < 2 && isMounted.current) {
           retryCount.current += 1;
           console.log("[MyVision] Retrying intro message", {
             retryCount: retryCount.current,
@@ -100,27 +107,99 @@ const MyVision = ({ navigation }) => {
         }
       },
     });
-  }, [visionState.isCameraActive]);
+  }, [visionState.isCameraActive, clearSpeechQueue]);
 
+  // Handle camera permissions
   useEffect(() => {
-    if (firstMount.current && visionState.isCameraActive) {
-      console.log("[MyVision] First mount, triggering intro message");
-      speakIntroMessage();
-    }
-  }, [speakIntroMessage, visionState.isCameraActive]);
+    isMounted.current = true;
+    const checkPermissions = async () => {
+      if (!permission) {
+        console.log("[MyVision] Requesting camera permission");
+        const result = await requestPermission();
+        if (result.granted) {
+          console.log("[MyVision] Camera permission granted");
+          updateVisionState({ isCameraActive: true });
+        } else {
+          console.log("[MyVision] Camera permission denied");
+          speechInProgress.current = true;
+          await clearSpeechQueue();
+          Speech.speak("Camera permission is required to take pictures.", {
+            language: "en-US",
+            rate: 0.85,
+            pitch: 1.0,
+            onDone: () => {
+              console.log("[MyVision] Permission denied speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log("[MyVision] Permission denied speech error:", err, {
+                platform: Platform.OS,
+              });
+              speechInProgress.current = false;
+            },
+          });
+          updateVisionState({ isCameraActive: false });
+        }
+      } else if (permission.granted) {
+        updateVisionState({ isCameraActive: true });
+      } else {
+        updateVisionState({ isCameraActive: false });
+      }
+    };
+    checkPermissions();
+
+    return () => {
+      isMounted.current = false;
+      if (cameraReadyTimeout.current) {
+        clearTimeout(cameraReadyTimeout.current);
+        cameraReadyTimeout.current = null;
+      }
+    };
+  }, [permission, requestPermission, clearSpeechQueue, updateVisionState]);
 
   useFocusEffect(
     useCallback(() => {
-      updateVisionState({ isCameraActive: true });
       console.log("[MyVision] Screen focused");
-      if (!hasSpokenIntro.current) {
+      // Re-check permissions on focus
+      const initializeCamera = async () => {
+        if (permission?.granted) {
+          updateVisionState({ isCameraActive: true });
+        } else {
+          console.log("[MyVision] Re-requesting camera permission on focus");
+          const result = await requestPermission();
+          if (result.granted) {
+            updateVisionState({ isCameraActive: true });
+          } else {
+            speechInProgress.current = true;
+            await clearSpeechQueue();
+            Speech.speak("Camera permission is required to take pictures.", {
+              language: "en-US",
+              rate: 0.85,
+              pitch: 1.0,
+              onDone: () => {
+                console.log("[MyVision] Permission denied speech done");
+                speechInProgress.current = false;
+              },
+              onError: (err) => {
+                console.log("[MyVision] Permission denied speech error:", err, {
+                  platform: Platform.OS,
+                });
+                speechInProgress.current = false;
+              },
+            });
+            updateVisionState({ isCameraActive: false });
+          }
+        }
+      };
+      initializeCamera();
+      if (!hasSpokenIntro.current && permission?.granted) {
         speakIntroMessage();
       }
 
       return () => {
         console.log("[MyVision] Screen losing focus, cleaning up");
         updateVisionState({
-          isCameraActive: true,
+          isCameraActive: false,
           uri: null,
           isLoading: false,
           answer: "",
@@ -130,23 +209,31 @@ const MyVision = ({ navigation }) => {
           abortControllerRef.current.abort();
           abortControllerRef.current = null;
         }
-        cancelSpeech();
+        clearSpeechQueue();
         speechInProgress.current = false;
         hasSpokenIntro.current = false;
         firstMount.current = true;
         retryCount.current = 0;
+        cameraRef.current = null; // Clear camera reference
+        if (cameraReadyTimeout.current) {
+          clearTimeout(cameraReadyTimeout.current);
+          cameraReadyTimeout.current = null;
+        }
       };
-    }, [cancelSpeech, speakIntroMessage])
+    }, [clearSpeechQueue, speakIntroMessage, permission, requestPermission, updateVisionState])
   );
 
   const getInfoFromAi = useCallback(
     async (imageUri) => {
       if (!imageUri || visionState.isLoading) return;
-      cancelSpeech();
+      await clearSpeechQueue();
       updateVisionState({ isLoading: true });
       speechInProgress.current = true;
       console.log("[MyVision] Speaking: Analyzing image");
       Speech.speak("Analyzing image.", {
+        language: "en-US",
+        rate: 0.85,
+        pitch: 1.0,
         onDone: () => {
           console.log("[MyVision] Analyzing image speech done");
           speechInProgress.current = false;
@@ -178,6 +265,9 @@ const MyVision = ({ navigation }) => {
         speechInProgress.current = true;
         console.log("[MyVision] Speaking image description");
         Speech.speak(responseText, {
+          language: "en-US",
+          rate: 0.85,
+          pitch: 1.0,
           onDone: () => {
             console.log("[MyVision] Image description speech done");
             speechInProgress.current = false;
@@ -194,7 +284,11 @@ const MyVision = ({ navigation }) => {
         if (error.name === "AbortError") {
           console.log("[MyVision] Image analysis aborted");
           speechInProgress.current = true;
+          await clearSpeechQueue();
           Speech.speak("Image analysis cancelled.", {
+            language: "en-US",
+            rate: 0.85,
+            pitch: 1.0,
             onDone: () => {
               console.log("[MyVision] Analysis cancelled speech done");
               speechInProgress.current = false;
@@ -211,7 +305,11 @@ const MyVision = ({ navigation }) => {
             platform: Platform.OS,
           });
           speechInProgress.current = true;
+          await clearSpeechQueue();
           Speech.speak("Sorry, I could not describe the image.", {
+            language: "en-US",
+            rate: 0.85,
+            pitch: 1.0,
             onDone: () => {
               console.log("[MyVision] Error speech done");
               speechInProgress.current = false;
@@ -230,23 +328,34 @@ const MyVision = ({ navigation }) => {
         abortControllerRef.current = null;
       }
     },
-    [visionState.isLoading, cancelSpeech]
+    [visionState.isLoading, clearSpeechQueue, updateVisionState]
   );
 
   const handleTakePicture = useCallback(async () => {
-    if (!cameraRef.current || visionState.isLoading) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    cancelSpeech();
+    if (!cameraRef.current || visionState.isLoading || !visionState.isCameraActive) {
+      console.log("[MyVision] Take picture skipped:", {
+        cameraRef: !!cameraRef.current,
+        isLoading: visionState.isLoading,
+        isCameraActive: visionState.isCameraActive,
+      });
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch((err) => {
+      console.log("[MyVision] Haptics error:", err);
+    });
+    await clearSpeechQueue();
     try {
       const photo = await cameraRef.current.takePictureAsync();
       updateVisionState({ uri: photo.uri, answer: "", isLoading: true });
       await getInfoFromAi(photo.uri);
     } catch (error) {
-      console.log("[MyVision] Take picture error:", error, {
-        platform: Platform.OS,
-      });
+      console.log("[MyVision] Take picture error:", error, { platform: Platform.OS });
       speechInProgress.current = true;
+      await clearSpeechQueue();
       Speech.speak("Failed to take a picture.", {
+        language: "en-US",
+        rate: 0.85,
+        pitch: 1.0,
         onDone: () => {
           console.log("[MyVision] Take picture error speech done");
           speechInProgress.current = false;
@@ -260,83 +369,129 @@ const MyVision = ({ navigation }) => {
       });
       updateVisionState({ isLoading: false });
     }
-  }, [cancelSpeech, visionState.isLoading, getInfoFromAi]);
+  }, [visionState.isLoading, visionState.isCameraActive, clearSpeechQueue, getInfoFromAi, updateVisionState]);
 
   const handleRetake = useCallback(() => {
     if (visionState.isLoading) return;
-    cancelSpeech();
-    updateVisionState({ uri: null, answer: "", isLoading: false });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch((err) => {
+      console.log("[MyVision] Haptics error:", err);
+    });
+    setCameraKey((prev) => prev + 1); // Force camera remount
+    cameraRef.current = null; // Clear camera reference
+    updateVisionState({ uri: null, answer: "", isLoading: false, isCameraActive: false });
+    setTimeout(() => {
+      if (isMounted.current) {
+        updateVisionState({ isCameraActive: permission?.granted });
+      }
+    }, 100); // Delay to ensure camera unmounts
     speechInProgress.current = true;
     console.log("[MyVision] Speaking: Ready for a new picture");
-    Speech.speak("Ready for a new picture.", {
-      onDone: () => {
-        console.log("[MyVision] Retake speech done");
-        speechInProgress.current = false;
-      },
-      onError: (err) => {
-        console.log("[MyVision] Retake speech error:", err, {
-          platform: Platform.OS,
-        });
-        speechInProgress.current = false;
-      },
-    });
-  }, [cancelSpeech, visionState.isLoading]);
-
-  const handleRepeat = useCallback(() => {
-    if (visionState.uri && visionState.answer && !visionState.isLoading) {
-      cancelSpeech();
-      speechInProgress.current = true;
-      console.log("[MyVision] Speaking: Repeating description");
-      Speech.speak("Repeating description.", {
+    clearSpeechQueue().then(() => {
+      Speech.speak("Ready for a new picture.", {
+        language: "en-US",
+        rate: 0.85,
+        pitch: 1.0,
         onDone: () => {
-          console.log("[MyVision] Repeating description speech done");
-          speechInProgress.current = true;
-          Speech.speak(visionState.answer, {
-            onDone: () => {
-              console.log("[MyVision] Repeated description speech done");
-              speechInProgress.current = false;
-            },
-            onError: (err) => {
-              console.log(
-                "[MyVision] Repeated description speech error:",
-                err,
-                { platform: Platform.OS }
-              );
-              speechInProgress.current = false;
-            },
-          });
+          console.log("[MyVision] Retake speech done");
+          speechInProgress.current = false;
         },
         onError: (err) => {
-          console.log("[MyVision] Repeating description speech error:", err, {
-            platform: Platform.OS,
-          });
+          console.log("[MyVision] Retake speech error:", err, { platform: Platform.OS });
           speechInProgress.current = false;
         },
       });
-    }
-  }, [visionState, cancelSpeech]);
+    });
+  }, [visionState.isLoading, clearSpeechQueue, permission, updateVisionState]);
 
-  const handleSwipe = (direction) => {
-    console.log("[MyVision] Swiped", direction);
-    if (visionState.isLoading) return;
-
-    if (direction === "up") {
-      console.log("[MyVision] Triggering takePicture or retake");
-      if (visionState.uri) {
-        handleRetake();
-      } else {
-        handleTakePicture();
-      }
-    } else if (direction === "down") {
-      if (visionState.uri && visionState.answer) {
-        handleRepeat();
-      }
+  const handleRepeat = useCallback(() => {
+    if (visionState.uri && visionState.answer && !visionState.isLoading) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch((err) => {
+        console.log("[MyVision] Haptics error:", err);
+      });
+      speechInProgress.current = true;
+      console.log("[MyVision] Speaking: Repeating description");
+      clearSpeechQueue().then(() => {
+        Speech.speak("Repeating description.", {
+          language: "en-US",
+          rate: 0.85,
+          pitch: 1.0,
+          onDone: () => {
+            console.log("[MyVision] Repeating description speech done");
+            speechInProgress.current = true;
+            Speech.speak(visionState.answer, {
+              language: "en-US",
+              rate: 0.85,
+              pitch: 1.0,
+              onDone: () => {
+                console.log("[MyVision] Repeated description speech done");
+                speechInProgress.current = false;
+              },
+              onError: (err) => {
+                console.log("[MyVision] Repeated description speech error:", err, {
+                  platform: Platform.OS,
+                });
+                speechInProgress.current = false;
+              },
+            });
+          },
+          onError: (err) => {
+            console.log("[MyVision] Repeating description speech error:", err, {
+              platform: Platform.OS,
+            });
+            speechInProgress.current = false;
+          },
+        });
+      });
     }
-  };
+  }, [visionState, clearSpeechQueue]);
+
+  const handleSwipe = useCallback(
+    (direction) => {
+      console.log("[MyVision] Swiped", direction);
+      if (visionState.isLoading) {
+        console.log("[MyVision] Swipe ignored due to isLoading");
+        return;
+      }
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch((err) => {
+        console.log("[MyVision] Haptics error:", err);
+      });
+      if (direction === "up") {
+        console.log("[MyVision] Triggering takePicture or retake");
+        if (visionState.uri) {
+          handleRetake();
+        } else {
+          handleTakePicture();
+        }
+      } else if (direction === "down") {
+        if (visionState.uri && visionState.answer) {
+          handleRepeat();
+        }
+      }
+    },
+    [visionState, handleTakePicture, handleRetake, handleRepeat]
+  );
 
   const panGesture = Gesture.Pan()
-    .minPointers(2)
-    .minDistance(15)
+    .minPointers(Platform.OS === "android" ? 1 : 2)
+    .maxPointers(2)
+    .minDistance(8)
+    .activeOffsetY([-10, 10])
+    .onStart((event) => {
+      console.log("[MyVision] Gesture started", {
+        pointers: event.numberOfPointers,
+        minPointers: Platform.OS === "android" ? 1 : 2,
+        maxPointers: 2,
+        platform: Platform.OS,
+      });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch((err) => {
+        console.log("[MyVision] Haptics error:", err);
+      });
+      if (Platform.OS === "android" && event.numberOfPointers === 1) {
+        console.log("[MyVision] Android fallback: single-pointer swipe", {
+          platform: Platform.OS,
+        });
+      }
+    })
     .onEnd((event) => {
       console.log("[MyVision] Pan gesture evaluated:", {
         translationY: event.translationY,
@@ -345,82 +500,210 @@ const MyVision = ({ navigation }) => {
         velocityX: event.velocityX,
         pointers: event.numberOfPointers,
       });
+      const minPointers = Platform.OS === "android" ? 1 : 2;
+      if (event.numberOfPointers < minPointers) {
+        console.log("[MyVision] Pointer validation failed: insufficient pointers", {
+          pointers: event.numberOfPointers,
+          minPointers,
+        });
+        speechInProgress.current = true;
+        clearSpeechQueue().then(() => {
+          Speech.speak("Please use a two-finger swipe.", {
+            language: "en-US",
+            rate: 0.85,
+            pitch: 1.0,
+            onDone: () => {
+              console.log("[MyVision] Invalid swipe speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log("[MyVision] Invalid swipe speech error:", err, {
+                platform: Platform.OS,
+              });
+              speechInProgress.current = false;
+            },
+          });
+        });
+        return;
+      }
       const verticalSwipe = event.translationY;
       const horizontalSwipe = event.translationX;
-
       if (
-        Math.abs(verticalSwipe) > 50 &&
+        Math.abs(verticalSwipe) > 20 &&
         Math.abs(verticalSwipe) > Math.abs(horizontalSwipe)
       ) {
         const direction = verticalSwipe < 0 ? "up" : "down";
         runOnJS(handleSwipe)(direction);
       } else {
         console.log("[MyVision] Pan gesture ignored");
+        speechInProgress.current = true;
+        clearSpeechQueue().then(() => {
+          Speech.speak("Please swipe up or down.", {
+            language: "en-US",
+            rate: 0.85,
+            pitch: 1.0,
+            onDone: () => {
+              console.log("[MyVision] Invalid swipe direction speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log("[MyVision] Invalid swipe direction speech error:", err, {
+                platform: Platform.OS,
+              });
+              speechInProgress.current = false;
+            },
+          });
+        });
       }
     });
 
   const renderContent = () => {
-    if (visionState.isCameraActive && !visionState.uri) {
+    if (visionState.isCameraActive && !visionState.uri && permission?.granted) {
       return (
-        <GestureHandlerRootView style={styles.flexFill}>
-          <CameraView
-            ref={cameraRef}
-            style={styles.flexFill}
-            onCameraReady={() => updateVisionState({ isCameraActive: true })}
-          />
-        </GestureHandlerRootView>
+        <GestureDetector gesture={panGesture}>
+          <GestureHandlerRootView style={styles.flexFill}>
+            <CameraView
+              key={cameraKey}
+              ref={(ref) => (cameraRef.current = ref)}
+              style={styles.flexFill}
+              onCameraReady={() => {
+                console.log("[MyVision] Camera ready");
+                if (cameraReadyTimeout.current) {
+                  clearTimeout(cameraReadyTimeout.current);
+                  cameraReadyTimeout.current = null;
+                }
+                updateVisionState({ isCameraActive: true });
+              }}
+              onMountError={(error) => {
+                console.log("[MyVision] Camera mount error:", error, { platform: Platform.OS });
+                updateVisionState({ isCameraActive: false });
+                speechInProgress.current = true;
+                clearSpeechQueue().then(() => {
+                  Speech.speak("Camera failed to initialize.", {
+                    language: "en-US",
+                    rate: 0.85,
+                    pitch: 1.0,
+                    onDone: () => {
+                      console.log("[MyVision] Camera error speech done");
+                      speechInProgress.current = false;
+                    },
+                    onError: (err) => {
+                      console.log("[MyVision] Camera error speech error:", err, {
+                        platform: Platform.OS,
+                      });
+                      speechInProgress.current = false;
+                    },
+                  });
+                });
+              }}
+            />
+          </GestureHandlerRootView>
+        </GestureDetector>
       );
     }
     if (visionState.uri) {
       return (
-        <>
-          <Image source={{ uri: visionState.uri }} style={styles.flexFill} />
-          <ScrollView
-            style={styles.answerContainer}
-            contentContainerStyle={
-              visionState.isLoading
-                ? { flex: 1, justifyContent: "center", alignItems: "center" }
-                : undefined
-            }>
-            {visionState.isLoading ? (
-              <BallIndicator color='white' size={80} count={9} />
-            ) : (
-              <Text style={styles.answer}>{visionState.answer}</Text>
-            )}
-          </ScrollView>
-        </>
+        <GestureDetector gesture={panGesture}>
+          <View style={styles.flexFill}>
+            <Image source={{ uri: visionState.uri }} style={styles.flexFill} />
+            <ScrollView
+              style={styles.answerContainer}
+              contentContainerStyle={
+                visionState.isLoading
+                  ? { flex: 1, justifyContent: "center", alignItems: "center" }
+                  : undefined
+              }
+              scrollEnabled={false} // Disable scrolling to avoid gesture conflicts
+            >
+              {visionState.isLoading ? (
+                <BallIndicator color="white" size={80} count={9} />
+              ) : (
+                <Text style={styles.answer}>{visionState.answer}</Text>
+              )}
+            </ScrollView>
+          </View>
+        </GestureDetector>
       );
     }
-    return null;
+    return (
+      <View style={styles.flexFill}>
+        <Text style={styles.errorText}>
+          Camera permission is required to use this feature.
+        </Text>
+      </View>
+    );
   };
+
+  // Retry camera initialization if not ready
+  useEffect(() => {
+    if (visionState.isCameraActive && permission?.granted && !cameraRef.current) {
+      cameraReadyTimeout.current = setTimeout(() => {
+        if (isMounted.current && !cameraRef.current) {
+          console.log("[MyVision] Camera not ready, retrying");
+          setCameraKey((prev) => prev + 1);
+          speechInProgress.current = true;
+          clearSpeechQueue().then(() => {
+            Speech.speak("Camera is not ready, please try again.", {
+              language: "en-US",
+              rate: 0.85,
+              pitch: 1.0,
+              onDone: () => {
+                console.log("[MyVision] Camera not ready speech done");
+                speechInProgress.current = false;
+              },
+              onError: (err) => {
+                console.log("[MyVision] Camera not ready speech error:", err, {
+                  platform: Platform.OS,
+                });
+                speechInProgress.current = false;
+              },
+            });
+          });
+        }
+      }, 2000);
+    }
+    return () => {
+      if (cameraReadyTimeout.current) {
+        clearTimeout(cameraReadyTimeout.current);
+        cameraReadyTimeout.current = null;
+      }
+    };
+  }, [visionState.isCameraActive, permission, clearSpeechQueue]);
+
+  // Delay gesture initialization to ensure GestureHandlerRootView is ready
+  useEffect(() => {
+    const gestureDelay = setTimeout(() => {
+      console.log("[MyVision] Gesture handler initialized");
+    }, 100);
+    return () => clearTimeout(gestureDelay);
+  }, []);
 
   return (
     <ScreenWrapper>
-      <GestureDetector gesture={panGesture}>
-        <View style={styles.container}>
-          {renderContent()}
-          <View style={styles.buttonsContainer}>
+      <View style={styles.container}>
+        {renderContent()}
+        <View style={styles.buttonsContainer}>
+          <PrimaryButton
+            title={visionState.uri ? "Retake" : "Take Picture"}
+            backgroundColor={Colors.MainColor}
+            textColor="white"
+            isLoading={visionState.isLoading}
+            onPress={visionState.uri ? handleRetake : handleTakePicture}
+            disabled={!visionState.isCameraActive || !permission?.granted}
+            style={{ width: visionState.uri ? "49%" : "100%" }}
+          />
+          {visionState.uri && (
             <PrimaryButton
-              title={visionState.uri ? "Retake" : "Take Picture"}
-              backgroundColor={Colors.MainColor}
-              textColor='white'
+              title="Repeat"
+              backgroundColor={Colors.green500}
+              textColor={Colors.MainColor}
               isLoading={visionState.isLoading}
-              onPress={visionState.uri ? handleRetake : handleTakePicture}
-              style={{ width: visionState.uri ? "49%" : "100%" }}
+              onPress={handleRepeat}
+              style={{ width: "49%" }}
             />
-            {visionState.uri && (
-              <PrimaryButton
-                title='Repeat'
-                backgroundColor={Colors.green500}
-                textColor={Colors.MainColor}
-                isLoading={visionState.isLoading}
-                onPress={handleRepeat}
-                style={{ width: "49%" }}
-              />
-            )}
-          </View>
+          )}
         </View>
-      </GestureDetector>
+      </View>
     </ScreenWrapper>
   );
 };
@@ -451,6 +734,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+  },
+  errorText: {
+    fontSize: 16,
+    color: Colors.red,
+    textAlign: "center",
+    padding: 20,
   },
 });
 

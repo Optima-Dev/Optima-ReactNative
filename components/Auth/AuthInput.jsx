@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { View, TextInput, Pressable, StyleSheet, Platform, Text } from "react-native";
+import {
+  View,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  Platform,
+  Text,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 
@@ -31,6 +38,7 @@ function AuthInput({
         <TextInput
           style={[styles.input, textStyle]}
           placeholder={placeholder}
+          placeholderTextColor={Colors.grey400 || "#666666"} // Added placeholder color
           secureTextEntry={isPasswordVisible}
           value={value}
           autoCapitalize='none'
@@ -49,7 +57,7 @@ function AuthInput({
         )}
       </View>
 
-      { error && <Text style={styles.errorMessage}>{ error }</Text> }
+      {error && <Text style={styles.errorMessage}>{error}</Text>}
     </>
   );
 }
@@ -76,9 +84,10 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 15,
-    color: Colors.black,
-    fontWeight: "300",
+    fontSize: 16, // Increased for readability
+    color: Colors.black || "#000000", // Fallback color
+    fontWeight: "400", // Slightly bolder
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Debug visibility
   },
   errorInput: {
     borderColor: Colors.red600,
@@ -90,7 +99,7 @@ const styles = StyleSheet.create({
     fontWeight: "300",
     lineHeight: 22,
     marginBottom: 5,
-  }
+  },
 });
 
 export default AuthInput;
