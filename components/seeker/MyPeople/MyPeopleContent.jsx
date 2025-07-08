@@ -5,20 +5,21 @@ import MyPeopleForm from "./MyPeopleForm";
 import MyPeopleList from "./MyPeopleList";
 import { sendFriendRequest } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
-import { useUser } from "../../../store/UserContext";
+// useUser is no longer needed here for this specific function
+// import { useUser } from "../../../store/UserContext";
 
 function MyPeopleContent({ navigation }) {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { token } = useAuth();
-  const { user } = useUser();
+  // const { user } = useUser(); // We don't need the user's name here anymore
 
   async function handleAddPerson(personData) {
     setIsLoading(true);
     try {
       const requestBody = {
-        customFirstName: user.firstName,
-        customLastName: user.lastName,
+        customFirstName: personData.firstName,
+        customLastName: personData.lastName,
         helperEmail: personData.email,
       };
 

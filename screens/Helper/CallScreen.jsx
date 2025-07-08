@@ -39,7 +39,7 @@ const CallScreen = ({ navigation, route }) => {
     setIsEnding(true);
     try {
       await agoraRef.current?.disconnect();
-     
+
       if (videoInfo?.channelName) {
         await endMeeting(token, videoInfo.channelName);
       }
@@ -60,7 +60,6 @@ const CallScreen = ({ navigation, route }) => {
   const handleFlipCamera = () => {
     agoraRef.current?.flipCamera();
   };
-
 
   if (
     !videoInfo?.token ||
@@ -111,18 +110,20 @@ const CallScreen = ({ navigation, route }) => {
 
       <View style={styles.buttonContainer}>
         <PrimaryButton
+          backgroundColor={Colors.MainColor}
+          textColor='white'
           title='Flip Camera'
+          style={styles.button}
           onPress={handleFlipCamera}
           disabled={isEnding}
-          style={styles.button}
         />
         <PrimaryButton
           backgroundColor={Colors.red600}
           textColor='white'
           title={isEnding ? "Ending..." : "End Call"}
+          style={styles.button}
           onPress={handleEndCall}
           disabled={isEnding}
-          style={styles.button}
         />
       </View>
     </SafeAreaView>

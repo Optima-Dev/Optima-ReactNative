@@ -61,6 +61,7 @@ import AuthProvider, { useAuth } from "./store/AuthContext";
 import UserProvider, { useUser } from "./store/UserContext";
 import HelperProvider, { useHelper } from "./store/HelperContext";
 import SeekerProvider, { useSeeker } from "./store/SeekerContext";
+import { VoiceAssistantProvider } from "./store/VoiceAssistantContext";
 
 // importing util functions
 import { getUser } from "./util/UserHttp";
@@ -341,13 +342,15 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <AuthProvider>
-            <UserProvider>
-              <HelperProvider>
-                <SeekerProvider>
-                  <Root />
-                </SeekerProvider>
-              </HelperProvider>
-            </UserProvider>
+            <VoiceAssistantProvider>
+              <UserProvider>
+                <HelperProvider>
+                  <SeekerProvider>
+                    <Root />
+                  </SeekerProvider>
+                </HelperProvider>
+              </UserProvider>
+            </VoiceAssistantProvider>
           </AuthProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

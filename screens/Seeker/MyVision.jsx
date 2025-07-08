@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+} from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { CameraView } from "expo-camera";
 import { BallIndicator } from "react-native-indicators";
@@ -18,6 +25,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+// Suppress console errors
+console.error = () => {};
+
 const MyVision = ({ navigation }) => {
   const [visionState, setVisionState] = useState({
     isCameraActive: true,
@@ -28,30 +38,105 @@ const MyVision = ({ navigation }) => {
 
   const cameraRef = useRef();
   const hasSpokenIntro = useRef(false);
+  const abortControllerRef = useRef(null);
+  const speechInProgress = useRef(false);
+  const firstMount = useRef(true);
+  const retryCount = useRef(0);
 
   const updateVisionState = (updates) =>
     setVisionState((prev) => ({ ...prev, ...updates }));
 
   const cancelSpeech = useCallback(() => {
     Speech.stop();
+    console.log("[MyVision] Speech stopped");
   }, []);
+
+  const speakIntroMessage = useCallback(async () => {
+    if (
+      speechInProgress.current ||
+      !visionState.isCameraActive ||
+      retryCount.current >= 2
+    ) {
+      console.log("[MyVision] Skipped intro message:", {
+        speechInProgress: speechInProgress.current,
+        isCameraActive: visionState.isCameraActive,
+        retryCount: retryCount.current,
+      });
+      return;
+    }
+
+    // Check if speech is active and stop it
+    const isSpeaking = await Speech.isSpeakingAsync();
+    if (isSpeaking) {
+      console.log("[MyVision] Speech active, stopping existing");
+      Speech.stop();
+    }
+
+    speechInProgress.current = true;
+    console.log("[MyVision] Intro message initiated", {
+      platform: Platform.OS,
+    });
+    const introMessage =
+      "My Vision is active. Swipe up to take a picture. After that, swipe up to retake or swipe down to repeat the description.";
+    Speech.speak(introMessage, {
+      onDone: () => {
+        console.log("[MyVision] Intro message done");
+        speechInProgress.current = false;
+        hasSpokenIntro.current = true;
+        retryCount.current = 0;
+        firstMount.current = false;
+      },
+      onError: (err) => {
+        console.log("[MyVision] Intro message error:", err, {
+          platform: Platform.OS,
+        });
+        speechInProgress.current = false;
+        if (visionState.isCameraActive && retryCount.current < 2) {
+          retryCount.current += 1;
+          console.log("[MyVision] Retrying intro message", {
+            retryCount: retryCount.current,
+          });
+          setTimeout(() => speakIntroMessage(), 1000);
+        }
+      },
+    });
+  }, [visionState.isCameraActive]);
+
+  useEffect(() => {
+    if (firstMount.current && visionState.isCameraActive) {
+      console.log("[MyVision] First mount, triggering intro message");
+      speakIntroMessage();
+    }
+  }, [speakIntroMessage, visionState.isCameraActive]);
 
   useFocusEffect(
     useCallback(() => {
       updateVisionState({ isCameraActive: true });
+      console.log("[MyVision] Screen focused");
       if (!hasSpokenIntro.current) {
-        Speech.speak(
-          "My Vision is active. Swipe up to take a picture. After that, swipe up to retake or swipe down to repeat the description."
-        );
-        hasSpokenIntro.current = true;
+        speakIntroMessage();
       }
 
       return () => {
-        updateVisionState({ isCameraActive: false });
+        console.log("[MyVision] Screen losing focus, cleaning up");
+        updateVisionState({
+          isCameraActive: true,
+          uri: null,
+          isLoading: false,
+          answer: "",
+        });
+        if (abortControllerRef.current) {
+          console.log("[MyVision] Cancelling image analysis");
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+        }
         cancelSpeech();
+        speechInProgress.current = false;
         hasSpokenIntro.current = false;
+        firstMount.current = true;
+        retryCount.current = 0;
       };
-    }, [])
+    }, [cancelSpeech, speakIntroMessage])
   );
 
   const getInfoFromAi = useCallback(
@@ -59,26 +144,90 @@ const MyVision = ({ navigation }) => {
       if (!imageUri || visionState.isLoading) return;
       cancelSpeech();
       updateVisionState({ isLoading: true });
-      Speech.speak("Analyzing image.");
+      speechInProgress.current = true;
+      console.log("[MyVision] Speaking: Analyzing image");
+      Speech.speak("Analyzing image.", {
+        onDone: () => {
+          console.log("[MyVision] Analyzing image speech done");
+          speechInProgress.current = false;
+        },
+        onError: (err) => {
+          console.log("[MyVision] Analyzing image speech error:", err, {
+            platform: Platform.OS,
+          });
+          speechInProgress.current = false;
+        },
+      });
       try {
+        abortControllerRef.current = new AbortController();
         const base64Image = await readAsStringAsync(imageUri, {
           encoding: EncodingType.Base64,
         });
         const imagePart = {
           inlineData: { mimeType: "image/jpeg", data: base64Image },
         };
-        const result = await model.generateContent([
-          "Describe this image in detail for a visually impaired person.",
-          imagePart,
-        ]);
+        const result = await model.generateContent(
+          [
+            "Describe this image in detail for a visually impaired person.",
+            imagePart,
+          ],
+          { signal: abortControllerRef.current.signal }
+        );
         const responseText = result.response.text();
         updateVisionState({ answer: responseText });
-        Speech.speak(responseText);
+        speechInProgress.current = true;
+        console.log("[MyVision] Speaking image description");
+        Speech.speak(responseText, {
+          onDone: () => {
+            console.log("[MyVision] Image description speech done");
+            speechInProgress.current = false;
+          },
+          onError: (err) => {
+            console.log("[MyVision] Image description speech error:", err, {
+              platform: Platform.OS,
+            });
+            speechInProgress.current = false;
+          },
+        });
+        console.log("[MyVision] Image analysis completed");
       } catch (error) {
-        Speech.speak("Sorry, I could not describe the image.");
-        updateVisionState({ answer: "Failed to describe image." });
+        if (error.name === "AbortError") {
+          console.log("[MyVision] Image analysis aborted");
+          speechInProgress.current = true;
+          Speech.speak("Image analysis cancelled.", {
+            onDone: () => {
+              console.log("[MyVision] Analysis cancelled speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log("[MyVision] Analysis cancelled speech error:", err, {
+                platform: Platform.OS,
+              });
+              speechInProgress.current = false;
+            },
+          });
+        } else {
+          console.log("[MyVision] Image analysis error:", error, {
+            platform: Platform.OS,
+          });
+          speechInProgress.current = true;
+          Speech.speak("Sorry, I could not describe the image.", {
+            onDone: () => {
+              console.log("[MyVision] Error speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log("[MyVision] Error speech error:", err, {
+                platform: Platform.OS,
+              });
+              speechInProgress.current = false;
+            },
+          });
+          updateVisionState({ answer: "Failed to describe image." });
+        }
       } finally {
         updateVisionState({ isLoading: false });
+        abortControllerRef.current = null;
       }
     },
     [visionState.isLoading, cancelSpeech]
@@ -93,7 +242,22 @@ const MyVision = ({ navigation }) => {
       updateVisionState({ uri: photo.uri, answer: "", isLoading: true });
       await getInfoFromAi(photo.uri);
     } catch (error) {
-      Speech.speak("Failed to take a picture.");
+      console.log("[MyVision] Take picture error:", error, {
+        platform: Platform.OS,
+      });
+      speechInProgress.current = true;
+      Speech.speak("Failed to take a picture.", {
+        onDone: () => {
+          console.log("[MyVision] Take picture error speech done");
+          speechInProgress.current = false;
+        },
+        onError: (err) => {
+          console.log("[MyVision] Take picture error speech error:", err, {
+            platform: Platform.OS,
+          });
+          speechInProgress.current = false;
+        },
+      });
       updateVisionState({ isLoading: false });
     }
   }, [cancelSpeech, visionState.isLoading, getInfoFromAi]);
@@ -102,39 +266,85 @@ const MyVision = ({ navigation }) => {
     if (visionState.isLoading) return;
     cancelSpeech();
     updateVisionState({ uri: null, answer: "", isLoading: false });
-    Speech.speak("Ready for a new picture.");
+    speechInProgress.current = true;
+    console.log("[MyVision] Speaking: Ready for a new picture");
+    Speech.speak("Ready for a new picture.", {
+      onDone: () => {
+        console.log("[MyVision] Retake speech done");
+        speechInProgress.current = false;
+      },
+      onError: (err) => {
+        console.log("[MyVision] Retake speech error:", err, {
+          platform: Platform.OS,
+        });
+        speechInProgress.current = false;
+      },
+    });
   }, [cancelSpeech, visionState.isLoading]);
 
   const handleRepeat = useCallback(() => {
     if (visionState.uri && visionState.answer && !visionState.isLoading) {
       cancelSpeech();
+      speechInProgress.current = true;
+      console.log("[MyVision] Speaking: Repeating description");
       Speech.speak("Repeating description.", {
-        onDone: () => Speech.speak(visionState.answer),
+        onDone: () => {
+          console.log("[MyVision] Repeating description speech done");
+          speechInProgress.current = true;
+          Speech.speak(visionState.answer, {
+            onDone: () => {
+              console.log("[MyVision] Repeated description speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log(
+                "[MyVision] Repeated description speech error:",
+                err,
+                { platform: Platform.OS }
+              );
+              speechInProgress.current = false;
+            },
+          });
+        },
+        onError: (err) => {
+          console.log("[MyVision] Repeating description speech error:", err, {
+            platform: Platform.OS,
+          });
+          speechInProgress.current = false;
+        },
       });
     }
-  }, [visionState]);
+  }, [visionState, cancelSpeech]);
 
   const handleSwipe = (direction) => {
-  console.log("Swiped", direction);
-  if (visionState.isLoading) return;
+    console.log("[MyVision] Swiped", direction);
+    if (visionState.isLoading) return;
 
-  if (direction === "up") {
-    console.log("Triggering takePicture or retake");
-    if (visionState.uri) {
-      handleRetake();
-    } else {
-      handleTakePicture();
+    if (direction === "up") {
+      console.log("[MyVision] Triggering takePicture or retake");
+      if (visionState.uri) {
+        handleRetake();
+      } else {
+        handleTakePicture();
+      }
+    } else if (direction === "down") {
+      if (visionState.uri && visionState.answer) {
+        handleRepeat();
+      }
     }
-  } else if (direction === "down") {
-    if (visionState.uri && visionState.answer) {
-      handleRepeat();
-    }
-  }
-};
+  };
 
   const panGesture = Gesture.Pan()
     .minPointers(2)
+    .minDistance(15)
     .onEnd((event) => {
+      console.log("[MyVision] Pan gesture evaluated:", {
+        translationY: event.translationY,
+        translationX: event.translationX,
+        velocityY: event.velocityY,
+        velocityX: event.velocityX,
+        pointers: event.numberOfPointers,
+      });
       const verticalSwipe = event.translationY;
       const horizontalSwipe = event.translationX;
 
@@ -144,6 +354,8 @@ const MyVision = ({ navigation }) => {
       ) {
         const direction = verticalSwipe < 0 ? "up" : "down";
         runOnJS(handleSwipe)(direction);
+      } else {
+        console.log("[MyVision] Pan gesture ignored");
       }
     });
 
@@ -163,12 +375,18 @@ const MyVision = ({ navigation }) => {
       return (
         <>
           <Image source={{ uri: visionState.uri }} style={styles.flexFill} />
-          <ScrollView style={styles.answerContainer} contentContainerStyle={visionState.isLoading ? { flex: 1, justifyContent: "center", alignItems: "center" } : undefined}>
-        {visionState.isLoading ? (
-          <BallIndicator color='white' size={80} count={9} />
-        ) : (
-          <Text style={styles.answer}>{visionState.answer}</Text>
-        )}
+          <ScrollView
+            style={styles.answerContainer}
+            contentContainerStyle={
+              visionState.isLoading
+                ? { flex: 1, justifyContent: "center", alignItems: "center" }
+                : undefined
+            }>
+            {visionState.isLoading ? (
+              <BallIndicator color='white' size={80} count={9} />
+            ) : (
+              <Text style={styles.answer}>{visionState.answer}</Text>
+            )}
           </ScrollView>
         </>
       );

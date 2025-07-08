@@ -1,113 +1,269 @@
-import React, { useEffect, useCallback } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import React, { useEffect, useCallback, useRef, useState } from "react";
+import { View, StyleSheet, Text, Platform } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import * as Speech from "expo-speech";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
+
+import { useSeeker } from "../../store/SeekerContext";
+import { useAuth } from "../../store/AuthContext";
+import { useVoiceAssistant } from "../../store/VoiceAssistantContext";
 import MyPeopleContent from "../../components/seeker/MyPeople/MyPeopleContent";
 import Colors from "../../constants/Colors";
 import ScreenWrapper from "../../components/UI/ScreenWrapper";
 
-// 1. Import Gesture Handler and related tools
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
-import * as Haptics from 'expo-haptics';
-
-import { useVoiceAssistant } from "../../hooks/useVoiceAssistant";
-import { useSeeker } from "../../store/SeekerContext";
-import { useAuth } from "../../store/AuthContext";
-import * as Speech from "expo-speech";
-
 const MyPeople = ({ navigation }) => {
-  const {
-    isListening,
-    finalText,
-    startRecognition,
-    stopRecognition,
-    resetState,
-  } = useVoiceAssistant();
-  const { friends, callSpecificFriend } = useSeeker();
-  const { token } = useAuth();
+  const { error, resetState } = useVoiceAssistant();
+  const { friends } = useSeeker();
 
-  // This hook now only handles cleanup when the user navigates away
+  const isScreenActive = useRef(true);
+  const speechInProgress = useRef(false);
+  const retryCount = useRef(0);
+  const gestureRef = useRef(null);
+
+  const speakWelcomeMessage = useCallback(async () => {
+    if (
+      speechInProgress.current ||
+      !isScreenActive.current ||
+      retryCount.current >= 2
+    ) {
+      console.log("[MyPeople] Skipped welcome message:", {
+        speechInProgress: speechInProgress.current,
+        isScreenActive: isScreenActive.current,
+        retryCount: retryCount.current,
+        platform: Platform.OS,
+      });
+      return;
+    }
+
+    const isSpeaking = await Speech.isSpeakingAsync();
+    if (isSpeaking) {
+      console.log("[MyPeople] Speech active, stopping existing", {
+        platform: Platform.OS,
+      });
+      await Speech.stop();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    speechInProgress.current = true;
+    console.log("[MyPeople] Welcome message initiated", {
+      platform: Platform.OS,
+    });
+    const welcomeMessage =
+      "Welcome to My People. Swipe down with two fingers to hear your friends list.";
+    Speech.speak(welcomeMessage, {
+      language: "en-US",
+      rate: 0.85,
+      pitch: 1.0,
+      onDone: () => {
+        console.log("[MyPeople] Welcome message done", {
+          platform: Platform.OS,
+        });
+        speechInProgress.current = false;
+        retryCount.current = 0;
+      },
+      onError: (err) => {
+        console.log("[MyPeople] Welcome message error:", err, {
+          platform: Platform.OS,
+        });
+        speechInProgress.current = false;
+        if (isScreenActive.current && retryCount.current < 2) {
+          retryCount.current += 1;
+          console.log("[MyPeople] Retrying welcome message", {
+            retryCount: retryCount.current,
+          });
+          setTimeout(() => speakWelcomeMessage(), 1000);
+        }
+      },
+    });
+  }, []);
+
+  const speakFriendList = useCallback(async () => {
+    if (
+      speechInProgress.current ||
+      !isScreenActive.current ||
+      retryCount.current >= 2
+    ) {
+      console.log("[MyPeople] Skipped friend list speech:", {
+        speechInProgress: speechInProgress.current,
+        isScreenActive: isScreenActive.current,
+        retryCount: retryCount.current,
+        platform: Platform.OS,
+      });
+      return;
+    }
+
+    const isSpeaking = await Speech.isSpeakingAsync();
+    if (isSpeaking) {
+      console.log(
+        "[MyPeople] Speech active for friend list, stopping existing",
+        { platform: Platform.OS }
+      );
+      await Speech.stop();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    speechInProgress.current = true;
+    const friendListMessage =
+      friends.length === 0
+        ? "You currently have no friends added."
+        : `You have ${friends.length} friend${
+            friends.length === 1 ? "" : "s"
+          }: ${friends
+            .map((f) => f.customLastName)
+            .slice(0, 5)
+            .join(", ")}.`;
+    console.log("[MyPeople] Speaking friend list:", friendListMessage, {
+      platform: Platform.OS,
+    });
+    Speech.speak(friendListMessage, {
+      language: "en-US",
+      rate: 0.85,
+      pitch: 1.0,
+      onDone: () => {
+        console.log("[MyPeople] Friend list speech done", {
+          platform: Platform.OS,
+        });
+        speechInProgress.current = false;
+        retryCount.current = 0;
+      },
+      onError: (err) => {
+        console.log("[MyPeople] Friend list speech error:", err, {
+          platform: Platform.OS,
+        });
+        speechInProgress.current = false;
+        if (isScreenActive.current && retryCount.current < 2) {
+          retryCount.current += 1;
+          console.log("[MyPeople] Retrying friend list speech", {
+            retryCount: retryCount.current,
+          });
+          setTimeout(() => speakFriendList(), 1000);
+        }
+      },
+    });
+  }, [friends]);
+
   useFocusEffect(
     useCallback(() => {
-      // Speak instructions when the user first enters the screen
-      Speech.speak("You are on the My People screen. Swipe down with two fingers to call a friend by name.");
-      
+      isScreenActive.current = true;
+      console.log("[MyPeople] Screen focused, triggering welcome message", {
+        platform: Platform.OS,
+      });
+      const timer = setTimeout(() => {
+        if (isScreenActive.current) {
+          speakWelcomeMessage();
+        }
+      }, 500);
+
       return () => {
-        stopRecognition();
+        console.log("[MyPeople] Cleaning up on screen blur", {
+          platform: Platform.OS,
+        });
+        clearTimeout(timer);
+        isScreenActive.current = false;
+        speechInProgress.current = false;
         Speech.stop();
+        retryCount.current = 0;
+        resetState();
       };
-    }, [stopRecognition])
+    }, [speakWelcomeMessage, resetState])
   );
 
-  // Process the recognized voice command
   useEffect(() => {
-    if (finalText) {
-      const command = finalText.toLowerCase().trim();
-      let feedbackSpeech = "";
-
-      if (command.startsWith("call ")) {
-        const friendName = command.replace("call ", "").toLowerCase();
-        
-        const friendToCall = friends.find(f => 
-          `${f.customFirstName} ${f.customLastName}`.toLowerCase().includes(friendName)
-        );
-
-        if (friendToCall) {
-          feedbackSpeech = `Calling ${friendToCall.customLastName}.`;
-          callSpecificFriend(friendToCall, token, navigation);
-        } else {
-          feedbackSpeech = `Sorry, I could not find a friend named ${friendName}.`;
-        }
-      } else {
-        feedbackSpeech = "Sorry, I didn't understand that command.";
-      }
-
-      // Give spoken feedback and then reset the state.
-      // The user will swipe again to issue a new command.
-      Speech.speak(feedbackSpeech, { 
-        onDone: () => {
+    if (
+      error &&
+      isScreenActive.current &&
+      !error.includes("Didn't understand")
+    ) {
+      console.log("[MyPeople] Displaying error:", error, {
+        platform: Platform.OS,
+      });
+      setTimeout(() => {
+        if (isScreenActive.current) {
+          console.log("[MyPeople] Clearing error");
           resetState();
         }
+      }, 3000);
+    } else if (error && error.includes("Didn't understand")) {
+      console.log("[MyPeople] Skipping error 11 display:", error, {
+        platform: Platform.OS,
       });
     }
-  }, [finalText, navigation, resetState, friends, callSpecificFriend, token]);
+  }, [error, resetState]);
 
-  // 2. Define the function to handle the swipe gesture
-  const handleSwipe = () => {
-    if (!isListening) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      Speech.speak("I'm listening", {
-        onDone: () => {
-          startRecognition();
-        },
+  const handleSwipe = (direction) => {
+    console.log("[MyPeople] Swipe detected:", direction, {
+      platform: Platform.OS,
+    });
+    if (direction === "down" && !speechInProgress.current) {
+      console.log("[MyPeople] Swipe down processed, triggering friend list");
+      speakFriendList();
+    } else {
+      console.log("[MyPeople] Swipe ignored:", {
+        direction,
+        speechInProgress: speechInProgress.current,
+        platform: Platform.OS,
       });
     }
   };
 
-  // 3. Create the gesture recognizer
   const panGesture = Gesture.Pan()
-    .minPointers(2)
-    .onEnd((event) => {
-      if (
-        event.translationY > 50 &&
-        Math.abs(event.translationX) < event.translationY
-      ) {
-        runOnJS(handleSwipe)();
+    .minPointers(Platform.OS === "android" ? 1 : 2)
+    .maxPointers(2)
+    .minDistance(10)
+    .activeOffsetY([-10, 10])
+    .onStart((event) => {
+      console.log("[MyPeople] Gesture started", {
+        pointers: event.numberOfPointers,
+        minPointers: Platform.OS === "android" ? 1 : 2,
+        maxPointers: 2,
+        platform: Platform.OS,
+      });
+      if (Platform.OS === "android" && event.numberOfPointers === 1) {
+        console.log("[MyPeople] Android fallback: single-pointer swipe", {
+          platform: Platform.OS,
+        });
       }
-    });
+    })
+    .onEnd((event) => {
+      console.log("[MyPeople] Pan gesture evaluated:", {
+        translationY: event.translationY,
+        translationX: event.translationX,
+        velocityY: event.velocityY,
+        velocityX: event.velocityX,
+        pointers: event.numberOfPointers,
+        platform: Platform.OS,
+      });
+      const minPointers = Platform.OS === "android" ? 1 : 2;
+      if (event.numberOfPointers < minPointers) {
+        console.log(
+          "[MyPeople] Pointer validation failed: insufficient pointers",
+          { pointers: event.numberOfPointers, minPointers }
+        );
+        return;
+      }
+      const verticalSwipe = event.translationY;
+      const horizontalSwipe = event.translationX;
+
+      if (
+        Math.abs(verticalSwipe) > 40 &&
+        Math.abs(verticalSwipe) > Math.abs(horizontalSwipe)
+      ) {
+        const direction = verticalSwipe > 0 ? "down" : "up";
+        runOnJS(handleSwipe)(direction);
+      } else {
+        console.log("[MyPeople] Pan gesture ignored", {
+          platform: Platform.OS,
+        });
+      }
+    })
+    .withRef(gestureRef);
 
   return (
     <ScreenWrapper>
-      {/* 4. Wrap the main view with the GestureDetector */}
       <GestureDetector gesture={panGesture}>
         <View style={styles.container}>
           <MyPeopleContent navigation={navigation} />
-          {/* Optional: Add a subtle visual instruction at the bottom */}
-          <View style={styles.instructionContainer}>
-            <Text style={styles.instructionText}>
-              Swipe down with two fingers to speak
-            </Text>
-          </View>
         </View>
       </GestureDetector>
     </ScreenWrapper>
@@ -121,17 +277,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
-  instructionContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 15,
-    backgroundColor: 'rgba(245, 245, 245, 0.9)',
-    alignItems: 'center',
+  feedbackContainer: {
+    alignItems: "center",
+    marginVertical: 10,
   },
-  instructionText: {
-    color: '#666',
+  errorText: {
     fontSize: 14,
-  }
+    color: Colors.red,
+    textAlign: "center",
+    marginTop: 8,
+  },
 });
