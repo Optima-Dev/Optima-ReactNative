@@ -66,6 +66,15 @@ import { VoiceAssistantProvider } from "./store/VoiceAssistantContext";
 // importing util functions
 import { getUser } from "./util/UserHttp";
 import { getFriendRequests, getFriends } from "./util/FriendsHttp";
+import { LogBox } from 'react-native';
+
+// These specific ignores are for Reanimated warnings
+LogBox.ignoreLogs([
+  "[Reanimated]",
+  "Tried to modify key `current` of an object",
+  "valueUnpacker", // This should handle the specific error you're seeing
+  "Error: ENOENT: no such file or directory"
+]);
 
 // creating stack navigator
 const Stack = createNativeStackNavigator();

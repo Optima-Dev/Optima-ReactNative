@@ -51,9 +51,6 @@ function HelpRequests() {
     return () => clearInterval(intervalId);
   }, [token]);
 
-  // ===================================================================
-  // THE FIX: This function is now more robust and handles errors gracefully.
-  // ===================================================================
   async function handleAcceptCall() {
     setIsAccepting(true);
     try {
@@ -100,6 +97,15 @@ function HelpRequests() {
     setModalInfo({ visible: false, title: "", subTitle: "" });
   };
 
+  // Determine button title and modal title based on state
+  const buttonTitle = isAskingForHelp
+    ? isAccepting
+      ? "Accepting..."
+      : "Accept The Call"
+    : "No One Is Calling";
+
+  const modalTitle = modalInfo.title || (!isAskingForHelp && !isAccepting ? "No One Is Calling" : "");
+
   return (
     <View style={styles.container}>
       <MainModal
@@ -107,7 +113,7 @@ function HelpRequests() {
         onPress={closeModal}
         logo={require("../../../assets/Images/Sorry-modal.png")}
         backgroundColor={Colors.MainColor}
-        title={modalInfo.title}
+        title={modalTitle}
         titleColor={Colors.MainColor}
         subTitle={modalInfo.subTitle}
         buttonText="OK"
@@ -118,7 +124,7 @@ function HelpRequests() {
       </View>
       <View style={styles.buttonContainer}>
         <PrimaryButton
-          title={isAccepting ? "Accepting..." : "Accept The Call"}
+          title={buttonTitle}
           backgroundColor={isAskingForHelp ? Colors.MainColor : Colors.grey400}
           textColor={"white"}
           disabled={!isAskingForHelp || isAccepting}

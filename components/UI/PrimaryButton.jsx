@@ -20,9 +20,19 @@ function PrimaryButton({
 
   // Use black text for white background, otherwise use provided textColor or fallback
   const resolvedTextColor =
-    backgroundColor === "white" ? Colors.black || "#000000" : textColor || "white";
+    backgroundColor === "white"
+      ? Colors.black || "#000000"
+      : textColor || "white";
   const buttonBackgroundColor =
-    backgroundColor === "white" ? "white" : backgroundColor || Colors.MainColor || "#007AFF";
+    backgroundColor === "white"
+      ? "white"
+      : backgroundColor || Colors.MainColor || "#007AFF";
+
+  // Determine border color: if background is Colors.red600, use same for border
+  const borderColor =
+    buttonBackgroundColor === Colors.MainColor || buttonBackgroundColor === "white"
+      ? Colors.MainColor
+      : buttonBackgroundColor;
 
   return (
     <Pressable
@@ -31,16 +41,15 @@ function PrimaryButton({
         pressed && styles.pressed,
         {
           backgroundColor: buttonBackgroundColor,
-          borderColor: Colors.MainColor || "#007AFF",
+          borderColor: borderColor,
           borderWidth: 2,
         },
         style,
       ]}
-      onPress={onPress}
-    >
+      onPress={onPress}>
       <Text style={[styles.text, { color: resolvedTextColor }]}>
         {isLoading ? (
-          <ActivityIndicator size="large" color={resolvedTextColor} />
+          <ActivityIndicator size='large' color={resolvedTextColor} />
         ) : (
           title
         )}

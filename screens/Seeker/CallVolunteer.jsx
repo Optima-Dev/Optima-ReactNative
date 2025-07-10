@@ -86,33 +86,36 @@ const CallVolunteer = ({ navigation, route }) => {
     });
     const message =
       "Connecting to a volunteer. Double-tap to flip the camera. Swipe down with two fingers to end the call. The front camera is active.";
-    Speech.speak(message, {
-      language: "en-US",
-      rate: 0.85,
-      pitch: 1.0,
-      onDone: () => {
-        console.log("[CallVolunteer] Connecting message done", {
-          platform: Platform.OS,
-        });
-        speechInProgress.current = false;
-        pendingSpeech.current = null;
-        retryCount.current = 0;
-      },
-      onError: (err) => {
-        console.log("[CallVolunteer] Connecting message error:", err, {
-          platform: Platform.OS,
-        });
-        speechInProgress.current = false;
-        pendingSpeech.current = null;
-        if (isScreenActive.current && retryCount.current < 2 && !isEnding) {
-          retryCount.current += 1;
-          console.log("[CallVolunteer] Retrying connecting message", {
-            retryCount: retryCount.current,
+    // Add a small delay before speaking to ensure the user hears the message
+    setTimeout(() => {
+      Speech.speak(message, {
+        language: "en-US",
+        rate: 0.85,
+        pitch: 1.0,
+        onDone: () => {
+          console.log("[CallVolunteer] Connecting message done", {
+            platform: Platform.OS,
           });
-          setTimeout(() => speakConnectingMessage(), 500);
-        }
-      },
-    });
+          speechInProgress.current = false;
+          pendingSpeech.current = null;
+          retryCount.current = 0;
+        },
+        onError: (err) => {
+          console.log("[CallVolunteer] Connecting message error:", err, {
+            platform: Platform.OS,
+          });
+          speechInProgress.current = false;
+          pendingSpeech.current = null;
+          if (isScreenActive.current && retryCount.current < 2 && !isEnding) {
+            retryCount.current += 1;
+            console.log("[CallVolunteer] Retrying connecting message", {
+              retryCount: retryCount.current,
+            });
+            setTimeout(() => speakConnectingMessage(), 500);
+          }
+        },
+      });
+    }, 3500); // 3500ms delay before speaking
   }, [isEnding, clearSpeechQueue]);
 
   useEffect(() => {
@@ -362,7 +365,11 @@ const CallVolunteer = ({ navigation, route }) => {
         platform: Platform.OS,
       });
       Speech.speak(
-        `${newCameraState ? "The front camera is active" : "The back camera is active"}.`,
+        `${
+          newCameraState
+            ? "The front camera is active"
+            : "The back camera is active"
+        }.`,
         {
           language: "en-US",
           rate: 0.85,
@@ -467,9 +474,13 @@ const CallVolunteer = ({ navigation, route }) => {
     return (
       <ScreenWrapper>
         <View style={styles.fallbackContainer}>
-          <ActivityIndicator size="large" color={Colors.white} />
+          <ActivityIndicator size='large' color={Colors.white} />
           <Text style={styles.waitingText}>
-            {isLoading ? "Connecting..." : "Call information is incomplete."}
+            {isEnding
+              ? "Ending..."
+              : isLoading
+              ? "Connecting..."
+              : "Call information is incomplete."}
           </Text>
         </View>
       </ScreenWrapper>
@@ -495,15 +506,15 @@ const CallVolunteer = ({ navigation, route }) => {
           <View style={styles.buttonContainer}>
             <PrimaryButton
               backgroundColor={Colors.MainColor}
-              textColor="white"
-              title="Flip Camera"
+              textColor='white'
+              title='Flip Camera'
               style={styles.button}
               onPress={handleFlipCamera}
               disabled={isEnding}
             />
             <PrimaryButton
               backgroundColor={Colors.red600}
-              textColor="white"
+              textColor='white'
               title={isEnding ? "Ending..." : "End Call"}
               style={styles.button}
               onPress={handleEndCall}
