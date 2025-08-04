@@ -2,6 +2,7 @@ import { View, StyleSheet } from "react-native";
 import AuthContent from "../../components/Auth/AuthContent";
 import Colors from "@/constants/Colors";
 
+
 function Login() {
   return (
     <View style={styles.container}>

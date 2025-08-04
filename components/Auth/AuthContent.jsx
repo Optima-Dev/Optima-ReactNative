@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -8,40 +8,40 @@ import {
   Platform,
   KeyboardAvoidingView,
   Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-// Google Sign-in imports commented out
-// import * as WebBrowser from "expo-web-browser";
-// import * as Google from "expo-auth-session/providers/google";
+// 1. Import Google Auth and WebBrowser
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 
-// Import your components and utils
 import MainHeader from "../UI/MainHeader";
 import AuthForm from "./AuthForm";
 import PrimaryButton from "../UI/PrimaryButton";
-// import GoogleButton from "../UI/GoogleButton"; // Google button temporarily disabled
+import GoogleButton from "../UI/GoogleButton";
 import Colors from "../../constants/Colors";
 import { AuthContext } from "../../store/AuthContext";
 import { getUser } from "../../util/UserHttp";
 import { useUser } from "../../store/UserContext";
-import { login, signup, GoogleLogin } from "../../util/AuthHttp"; // Ensure GoogleLogin exists and is correctly implemented
+// 2. Import your GoogleLogin function
+import { login, signup, GoogleLogin } from "../../util/AuthHttp";
 import {
   validateEmail,
   validateName,
   validatePassword,
 } from "../../util/Validation";
 
-// Necessary for expo-auth-session
-// WebBrowser.maybeCompleteAuthSession();
+// This is required for the Google Auth flow to work correctly
+WebBrowser.maybeCompleteAuthSession();
 
 function AuthContent({ type }) {
   const navigation = useNavigation();
-  const { authenticate, role, setNewUser } = useContext(AuthContext); // Get role from context
+  const { authenticate, role, setNewUser } = React.useContext(AuthContext);
   const { setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
-  // const [isGoogleLoading, setIsGoogleLoading] = useState(false); // Loading state for Google Sign-In
 
-  // State for standard form
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -55,89 +55,68 @@ function AuthContent({ type }) {
     lastName: null,
   });
 
-  // --- Google Sign-In Hook ---
-  // Initialize Google Sign-In Hook with actual client ID
-  /*
+  // 3. Setup the Google Auth Request Hook
   const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: "YOUR_ANDROID_CLIENT_ID", // Replace with your actual client ID
-    expoClientId: "YOUR_EXPO_CLIENT_ID", // Replace with your actual client ID
-    webClientId: "YOUR_WEB_CLIENT_ID", // Replace with your actual client ID
+    // Replace these with the actual IDs you got from Google Cloud Console
+    iosClientId:
+      "680106169592-7qu4n3pe06tlv9aca16554vuhbaltvj2.apps.googleusercontent.com",
+    androidClientId:
+      "680106169592-3hdne4t1vkbd6j13r2rupnuj1mbjj0ki.apps.googleusercontent.com",
+    expoClientId:
+      "680106169592-ma692m9jk89d16d49uacflfn7sr46ji1.apps.googleusercontent.com",
   });
 
-  // --- Effect to handle Google Sign-In response ---
+  // 4. Create a useEffect to handle the response from Google
   useEffect(() => {
     if (response?.type === "success") {
-      setIsGoogleLoading(true); // Start loading indicator for backend call
       const { authentication } = response;
-      // console.log("Google Auth Response:", authentication); // For debugging
-
-      // Get user info from Google
-      fetchUserInfo(authentication.accessToken);
+      // Call a function to handle the token and get user info
+      handleGoogleSignIn(authentication.accessToken);
     } else if (response?.type === "error") {
-      console.error("Google Authentication Error:", response.error);
       Alert.alert(
         "Authentication Failed",
         "Could not sign in with Google. Please try again."
       );
-      setIsGoogleLoading(false);
-    } else if (response?.type === "cancel") {
-      // User cancelled the login flow
-      console.log("Google Authentication Cancelled");
-      setIsGoogleLoading(false);
+      console.error("Google Auth Error:", response.error);
     }
   }, [response]);
 
-  // --- Function to fetch user info from Google API ---
-  async function fetchUserInfo(token) {
+  // 5. Create a function to process the Google sign-in
+  async function handleGoogleSignIn(accessToken) {
+    setIsLoading(true);
     try {
+      // Get user profile info from Google
       const userInfoResponse = await fetch(
         "https://www.googleapis.com/userinfo/v2/me",
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
       const userInfo = await userInfoResponse.json();
-      // console.log("Google User Info:", userInfo); // For debugging
 
-      if (!userInfo.id || !userInfo.email || !userInfo.given_name || !userInfo.family_name) {
-          throw new Error("Incomplete user information received from Google.");
-      }
+      // Call your backend with the user's Google info
+      const backendResponse = await GoogleLogin(
+        userInfo.id,
+        userInfo.email,
+        userInfo.given_name,
+        userInfo.family_name,
+        role
+      );
 
-      // --- Call your backend API for Google Login/Signup ---
-      // Ensure the 'role' is correctly determined (using context here)
-      if (!role) {
-           Alert.alert("Role Error", "User role is not defined. Cannot complete Google Sign-In.");
-           setIsGoogleLoading(false);
-           return;
-      }
-
-      const backendResponse = await GoogleLogin({
-        googleId: userInfo.id,
-        email: userInfo.email,
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
-        role: role, // Pass the role determined by your app's logic
-      });
-
-      // --- Handle backend response ---
+      // Authenticate the user in your app
       authenticate(backendResponse.token);
-      setNewUser(true); // Or determine if new based on backend response if available
-
+      setNewUser(false); // Google users are never "new" in terms of needing instructions
       const userData = await getUser(backendResponse.token);
       setUser(userData.user);
-      // Navigation will likely happen automatically due to context changes
-
     } catch (error) {
-      console.error("Error fetching user info or calling backend:", error);
       Alert.alert(
-        "Login Error",
-        error.message || "An error occurred during Google Sign-In. Please try again."
+        "Google Sign-In Failed",
+        error.message || "An unknown error occurred."
       );
     } finally {
-      setIsGoogleLoading(false); // Stop loading indicator
+      setIsLoading(false);
     }
   }
-  */
 
   // --- Standard Form Handling ---
   function handleChange(key, value) {
@@ -243,128 +222,108 @@ function AuthContent({ type }) {
     }
   };
 
-  // --- Google Button Press Handler ---
-  const handleGoogleSignIn = () => {
-    Alert.alert("Feature Unavailable", "Google Sign-in is currently disabled.");
-  };
+  const dismissKeyboard = () => Keyboard.dismiss();
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}>
-      <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.scrollViewContent} // Use contentContainerStyle for ScrollView content
-        keyboardShouldPersistTaps='handled' // Dismiss keyboard on tap outside inputs
-      >
-        <View style={styles.container}>
-          {/* Auth Header */}
-          <MainHeader
-            title={
-              type === "login"
-                ? `WELCOME\nBACK, FRIEND!`
-                : `LET’S GET\nSTARTED, FRIEND!`
-            }
-            subtitle={
-              type === "login"
-                ? "Login now to continue your past experience with us!"
-                : "Create an account to have a full experience with us!"
-            }
-            login={type === "login"}
-          />
-
-          {/* Auth Form */}
-          <AuthForm
-            type={type}
-            form={form}
-            onChange={handleChange}
-            errors={isError} // Pass down error state
-          />
-
-          {/* Confirm Button */}
-          <View style={styles.ButtonContainer}>
-            <PrimaryButton
-              backgroundColor={Colors.MainColor}
-              title={type === "login" ? "Login" : "Sign up"}
-              onPress={handleFormSubmission}
-              textColor='white'
-              isLoading={isLoading} // Use standard loading state
-              disabled={isLoading} // Disable if any loading is active
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.screen}>
+        <ScrollView
+          style={styles.screen}
+          contentContainerStyle={styles.scrollViewContent}
+          keyboardShouldPersistTaps='handled'>
+          <View style={styles.container}>
+            <MainHeader
+              title={
+                type === "login"
+                  ? `WELCOME\nBACK, FRIEND!`
+                  : `LET’S GET\nSTARTED, FRIEND!`
+              }
+              subtitle={
+                type === "login"
+                  ? "Login now to continue your past experience with us!"
+                  : "Create an account to have a full experience with us!"
+              }
+              login={type === "login"}
             />
-          </View>
+            <AuthForm
+              type={type}
+              form={form}
+              onChange={handleChange}
+              errors={isError}
+            />
+            <View style={styles.ButtonContainer}>
+              <PrimaryButton
+                backgroundColor={Colors.MainColor}
+                title={type === "login" ? "Login" : "Sign up"}
+                onPress={handleFormSubmission}
+                textColor='white'
+                isLoading={isLoading}
+                disabled={isLoading}
+              />
 
-          {/* Google Sign-in temporarily disabled */}
-          {/* <View style={styles.optionContainer}>
-            <Text style={styles.optionText}>or continue with</Text>
-          </View>
-          <GoogleButton
-            onPress={handleGoogleSignIn}
-            disabled={true}
-          /> */}
+              <View style={styles.optionContainer}>
+                <Text style={styles.optionText}>or continue with</Text>
+              </View>
 
-          {/* Switch Button */}
-          <Pressable
-            onPress={swithModeHandler}
-            disabled={isLoading} // Disable if any loading is active
-            style={({ pressed }) => [
-              styles.switchButton,
-              isLoading && styles.disabledButton, // Optional: style when disabled
-              { opacity: pressed && !isLoading ? 0.6 : 1 }, // Only change opacity if not disabled
-            ]}>
-            <View style={styles.textContainer}>
-              <Text style={styles.normalText}>
-                {type === "login"
-                  ? "Don't have an account? "
-                  : "Already have an account? "}
-              </Text>
-              <Text style={styles.linkText}>
-                {type === "login" ? "Sign Up" : "Login"}
-              </Text>
+              {/* 6. Add the Google Sign-In button */}
+              <GoogleButton
+                onPress={() => promptAsync()}
+                disabled={!request || isLoading}
+              />
             </View>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <Pressable
+              onPress={swithModeHandler}
+              disabled={isLoading}
+              style={({ pressed }) => [
+                styles.switchButton,
+                isLoading && styles.disabledButton,
+                { opacity: pressed && !isLoading ? 0.6 : 1 },
+              ]}>
+              <View style={styles.textContainer}>
+                <Text style={styles.normalText}>
+                  {type === "login"
+                    ? "Don't have an account? "
+                    : "Already have an account? "}
+                </Text>
+                <Text style={styles.linkText}>
+                  {type === "login" ? "Sign Up" : "Login"}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
-// --- Styles ---
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
   scrollViewContent: {
-    flexGrow: 1, // Ensures content can grow to fill space, important for centering
-    justifyContent: "center", // Center content vertically
+    flexGrow: 1,
+    justifyContent: "center",
   },
   container: {
-    // flex: 1, // Removed flex: 1 here, let ScrollView handle growth
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20, // Use horizontal padding
-    paddingVertical: 30, // Add vertical padding
-    // marginBottom: 30, // Removed, paddingVertical handles spacing
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingBottom: 30,
   },
   ButtonContainer: {
-    width: "100%", // Make button width relative
-    maxWidth: 364, // Optional: set a max width for larger screens
+    width: "100%",
+    maxWidth: 364,
     marginBottom: 10,
-    alignItems: "center", // Center button if maxWidth is used
-  },
-  optionContainer: {
-    marginVertical: 15, // Adjusted margin
-  },
-  optionText: {
-    fontSize: 16,
-    color: "#555", // Slightly lighter color
-    textAlign: "center",
-    fontWeight: "300",
+    alignItems: "center",
   },
   textContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20, // Increased margin
   },
   normalText: {
     fontSize: 16,
@@ -374,14 +333,22 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 16,
     color: Colors.MainColor,
-    fontWeight: "600", // Bolder link
+    fontWeight: "600",
   },
   switchButton: {
-    padding: 10, // Add padding to make it easier to press
+    padding: 10,
   },
   disabledButton: {
-    // Optional style for disabled state
     opacity: 0.5,
+  },
+  optionContainer: {
+    marginVertical: 5, // Adjusted margin
+  },
+  optionText: {
+    fontSize: 16,
+    color: "#555", // Slightly lighter color
+    textAlign: "center",
+    fontWeight: "300",
   },
 });
 

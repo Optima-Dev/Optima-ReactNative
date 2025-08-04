@@ -5,20 +5,18 @@ import MyPeopleForm from "./MyPeopleForm";
 import MyPeopleList from "./MyPeopleList";
 import { sendFriendRequest } from "../../../util/FriendsHttp";
 import { useAuth } from "../../../store/AuthContext";
-import { useUser } from "../../../store/UserContext";
 
-function MyPeopleContent() {
+function MyPeopleContent({ navigation }) {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { token } = useAuth();
-  const { user } = useUser();
 
   async function handleAddPerson(personData) {
     setIsLoading(true);
     try {
       const requestBody = {
-        customFirstName: user.firstName,
-        customLastName: user.lastName,
+        customFirstName: personData.firstName,
+        customLastName: personData.lastName,
         helperEmail: personData.email,
       };
 
@@ -35,9 +33,12 @@ function MyPeopleContent() {
     ? "Create a simple way to reach to your family and friends."
     : "Add the person’s information for a faster connection.";
 
+  // Debug subtitle prop
+  console.log("[MyPeopleContent] Subtitle:", Subtitle);
+
   return (
     <View style={styles.container}>
-      <ForgetPassHeader title='My People' subTitle={Subtitle} />
+      <ForgetPassHeader title="My People" subTitle={Subtitle} />
       {showForm ? (
         <MyPeopleForm
           onAddPerson={handleAddPerson}
@@ -45,7 +46,10 @@ function MyPeopleContent() {
           isLoading={isLoading}
         />
       ) : (
-        <MyPeopleList onShowForm={() => setShowForm(true)} />
+        <MyPeopleList
+          onShowForm={() => setShowForm(true)}
+          navigation={navigation}
+        />
       )}
     </View>
   );

@@ -17,6 +17,8 @@ import { validateEmail, validatePassword } from "../../util/Validation";
 import BackButton from "../../components/UI/BackButton";
 import { AuthContext } from "../../store/AuthContext";
 import MainModal from "../../components/UI/MainModal";
+import ScreenWrapper from "../../components/UI/ScreenWrapper";
+
 
 const content = [
   {

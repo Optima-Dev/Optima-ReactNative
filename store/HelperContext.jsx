@@ -1,14 +1,21 @@
 import { createContext, useContext, useState } from "react";
 
+// The default value for the context
 export const HelperContext = createContext({
   requests: [],
   setRequests: () => {},
   acceptFriendRequest: () => {},
   rejectFriendRequest: () => {},
+  meetingRequests: [],
+  setMeetingRequests: () => {},
+  acceptMeetingRequest: () => {},
+  rejectMeetingRequest: () => {},
 });
 
 function HelperProvider({ children }) {
+  // All useState hooks are called here at the top level, in the same order every time.
   const [requests, setRequests] = useState([]);
+  const [meetingRequests, setMeetingRequests] = useState([]);
 
   const acceptFriendRequest = (requestId) => {
     setRequests((prevRequests) =>
@@ -26,11 +33,24 @@ function HelperProvider({ children }) {
     );
   };
 
+  const acceptMeetingRequest = (meetingId) => {
+    console.log(`Context: Accepted meeting ${meetingId}`);
+  };
+
+  const rejectMeetingRequest = (meetingId) => {
+    console.log(`Context: Rejected meeting ${meetingId}`);
+  };
+
+  // The value object provided to all child components
   const value = {
     requests,
     setRequests,
     acceptFriendRequest,
     rejectFriendRequest,
+    meetingRequests,
+    setMeetingRequests,
+    acceptMeetingRequest,
+    rejectMeetingRequest,
   };
 
   return (

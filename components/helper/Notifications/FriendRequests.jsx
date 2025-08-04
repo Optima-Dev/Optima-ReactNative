@@ -1,10 +1,10 @@
 import { Text, View, StyleSheet, Platform } from "react-native";
 import NotificationsList from "./NotificationsList";
 
-function FriendRequests() {
+function FriendRequests({navigation}) {
   return (
     <View style={styles.container}>
-      <NotificationsList />
+      <NotificationsList navigation={navigation} />
     </View>
   );
 }

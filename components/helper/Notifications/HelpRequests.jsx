@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { View, StyleSheet, Platform, Alert } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+
 import HelpIcon from "./HelpIcon";
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
@@ -11,83 +12,119 @@ import {
   acceptFirstMeeting,
 } from "../../../util/MeetingHttp";
 
+// 1. Import your custom MainModal component
+import MainModal from "../../UI/MainModal";
+
 function HelpRequests() {
   const [isAskingForHelp, setIsAskingForHelp] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
+  
+  const [modalInfo, setModalInfo] = useState({
+    visible: false,
+    title: "",
+    subTitle: "",
+  });
+
   const navigation = useNavigation();
   const { token } = useAuth();
 
   // This useEffect now polls the backend for pending global meetings
   useEffect(() => {
-    // Don't start polling if the user isn't authenticated
     if (!token) return;
 
     const fetchPendingCalls = async () => {
       try {
         const response = await getPendingGlobalMeetings(token);
-        // Check if the meetings array exists and has items
         if (response && response.data && response.data.meetings.length > 0) {
           setIsAskingForHelp(true);
         } else {
           setIsAskingForHelp(false);
         }
       } catch (error) {
-        // In case of an error, assume no help is available
         console.error("Error fetching pending global calls:", error);
         setIsAskingForHelp(false);
       }
     };
 
-    // Fetch once immediately when the component mounts
     fetchPendingCalls();
-
-    // Set up an interval to poll every 5 seconds
     const intervalId = setInterval(fetchPendingCalls, 5000);
-
-    // Clean up the interval when the component unmounts to prevent memory leaks
     return () => clearInterval(intervalId);
-  }, [token]); // This effect depends on the user's auth token
+  }, [token]);
 
   async function handleAcceptCall() {
     setIsAccepting(true);
     try {
-      // Call the API to accept the first available meeting
       const response = await acceptFirstMeeting(token);
 
-      // On success, navigate to the CallScreen with the meeting data
+      // Case 1: Success - we got call data and can navigate
       if (response && response.data) {
         navigation.navigate("CallScreen", {
           videoInfo: response.data,
         });
-      } else {
-        Alert.alert(
-          "No Calls Available",
-          "There are currently no pending help requests."
-        );
-        // The call might be gone, so update the state
-        setIsAskingForHelp(false);
+        // We are navigating away, so we don't need to change state here.
+        // We return early to skip the finally block's state changes.
+        setIsAccepting(false);
+        return;
       }
+      
+      // Case 2: The API call was successful, but returned no data.
+      // This means no calls were available. This is not a "technical" error.
+      setModalInfo({
+          visible: true,
+          title: "Sorry :(",
+          subTitle: "It seems another volunteer accepted the call first. Thanks for trying!"
+      });
+
     } catch (error) {
-      console.error("❌ Accept meeting error:", error);
-      Alert.alert(
-        "Error Accepting Call",
-        "The call may have already been accepted by another volunteer."
-      );
-      // The call might be gone, so update the state
-      setIsAskingForHelp(false);
+      // Case 3: The API call itself failed (e.g., network error, server error).
+      // We log it for debugging but show a user-friendly message.
+      console.log("An error occurred while trying to accept a call:", error);
+      setModalInfo({
+        visible: true,
+        title: "An Error Occurred",
+        subTitle: "Could not accept the call at this time. There's no pending call right now."
+      });
     } finally {
+      // This will run after the try or catch block completes.
+      // It ensures the UI is reset correctly in all scenarios.
+      setIsAskingForHelp(false);
       setIsAccepting(false);
     }
   }
 
+  // Function to close the modal
+  const closeModal = () => {
+    setModalInfo({ visible: false, title: "", subTitle: "" });
+  };
+
+  // Determine button title and modal title based on state
+  const buttonTitle = isAskingForHelp
+    ? isAccepting
+      ? "Accepting..."
+      : "Accept The Call"
+    : "No One Is Calling";
+
+  const modalTitle = modalInfo.title || (!isAskingForHelp && !isAccepting ? "No One Is Calling" : "");
+
   return (
     <View style={styles.container}>
+      <MainModal
+        isModalOpen={modalInfo.visible}
+        onPress={closeModal}
+        logo={require("../../../assets/Images/Sorry-modal.png")}
+        backgroundColor={Colors.MainColor}
+        title={modalTitle}
+        titleColor={Colors.MainColor}
+        subTitle={modalInfo.subTitle}
+        buttonText="OK"
+      />
+
       <View style={styles.askForHelpIcon}>
         <HelpIcon isAskingForHelp={isAskingForHelp} />
       </View>
       <View style={styles.buttonContainer}>
         <PrimaryButton
-          title={isAccepting ? "Accepting..." : "Accept The Call"}
+          title={buttonTitle}
           backgroundColor={isAskingForHelp ? Colors.MainColor : Colors.grey400}
           textColor={"white"}
           disabled={!isAskingForHelp || isAccepting}

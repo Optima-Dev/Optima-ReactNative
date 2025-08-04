@@ -1,9 +1,11 @@
 import { View, Text, StyleSheet, Image, Platform } from "react-native";
 import Colors from "@/constants/Colors";
 import Card from "@/components/UI/Card";
+import ScreenWrapper from "../components/UI/ScreenWrapper";
 
 function Start() {
   return (
+
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.title}>OPTIMA</Text>
@@ -44,6 +46,7 @@ function Start() {
         />
       </View>
     </View>
+
   );
 }
 

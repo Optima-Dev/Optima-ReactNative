@@ -5,8 +5,7 @@ import OnBoardingContent from "../components/OnBoarding/OnBoardingContent";
 import onBoardingImage1 from "@/assets/Images/OnBoarding1.png";
 import onBoardingImage2 from "@/assets/Images/OnBoarding2.png";
 import onBoardingImage3 from "@/assets/Images/OnBoarding3.png";
-import { SafeAreaView } from "react-native";
-import Colors from "../constants/Colors";
+import ScreenWrapper from "../components/UI/ScreenWrapper";
 
 function OnBoarding1({ navigation }) {
   const [step, setStep] = useState(1);
@@ -58,7 +57,7 @@ function OnBoarding1({ navigation }) {
     );
   }
 
-  return <>{content}</>;
+  return <ScreenWrapper>{content}</ScreenWrapper>;
 }
 
 export default OnBoarding1;

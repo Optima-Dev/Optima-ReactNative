@@ -11,6 +11,9 @@ import Colors from "../../../constants/Colors";
 import MyPeopleFormInputs from "./MyPeopleFormInputs";
 import PrimaryButton from "../../UI/PrimaryButton";
 import { validateEmail, validateName } from "../../../util/Validation";
+import { createMeeting } from "../../../util/MeetingHttp";
+import { useAuth } from "../../../store/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
 const EditFriendsModal = ({
   visible,
@@ -20,9 +23,15 @@ const EditFriendsModal = ({
   onChangeMode,
   onRemove,
   onEdit,
+
 }) => {
+ 
+  const navigation = useNavigation();
+
+  const { token } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isCalling, setIsCalling] = useState(false);
   const [editFriendData, setEditFriendData] = useState({
     firstName: customFirstName,
     lastName: customLastName,
@@ -71,6 +80,41 @@ const EditFriendsModal = ({
     }
   }
 
+  async function handleCallFriend() {
+    try {
+      setIsCalling(true);
+      const meetingData = {
+        type: "specific",
+        helperId: user._id,
+      };
+      const response = await createMeeting(token, meetingData);
+
+      // Close the modal first
+      onChangeMode(false);
+
+      if (!response?.data) {
+        throw new Error("Invalid meeting response");
+      }
+
+      // This call will now work perfectly because `navigation` is defined.
+      navigation.navigate("CallVolunteer", {
+        meetingData: {
+          ...response.data,
+          type: "specific",
+          seeker: user._id,
+        },
+        isWaiting: true,
+        helperName: `${customFirstName} ${customLastName}`,
+        helperId: user._id,
+      });
+    } catch (error) {
+      console.error("Failed to create meeting:", error);
+      alert("Failed to send call request. Please try again.");
+    } finally {
+      setIsCalling(false);
+    }
+  }
+
   return (
     <Modal
       animationType='slide'
@@ -81,16 +125,14 @@ const EditFriendsModal = ({
         style={styles.modalOverlay}
         onPress={() => onChangeMode(!visible)}
       />
-
       <View style={styles.modalContainer}>
         <View style={styles.avatarConatiner}>
           <Text style={styles.avatarText}>
             {customFirstName[0].toUpperCase() + customLastName[0].toUpperCase()}
           </Text>
         </View>
-
-        <Text style={styles.name}>{`${customFirstName} ${customLastName}`}</Text>
-
+        <Text
+          style={styles.name}>{`${customFirstName} ${customLastName}`}</Text>
         <MyPeopleFormInputs
           form={editFriendData}
           onChange={handleChangeInputs}
@@ -98,7 +140,6 @@ const EditFriendsModal = ({
           error={error}
           disabled
         />
-
         <View style={styles.ButtonsContainer}>
           <PrimaryButton
             backgroundColor={"white"}
@@ -108,16 +149,13 @@ const EditFriendsModal = ({
             onPress={handleEditFriend}
             isLoading={isEditing}
           />
-
           <PrimaryButton
             backgroundColor={Colors.MainColor}
             textColor={Colors.white}
             title='Call'
-            onPress={() => {
-              console.log("Call");
-            }}
+            onPress={handleCallFriend}
+            isLoading={isCalling}
           />
-
           <PrimaryButton
             backgroundColor={Colors.red600}
             textColor={Colors.white}

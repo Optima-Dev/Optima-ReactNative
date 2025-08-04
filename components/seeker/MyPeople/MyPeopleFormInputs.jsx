@@ -5,30 +5,30 @@ const MyPeopleFormInputs = ({ form, onChange, disabled, error }) => {
   return (
     <View style={styles.InputsContainer}>
       <AuthInput
-        placeholder='First Name'
+        placeholder="First Name"
         value={form.firstName}
         onChangeText={(text) => onChange("firstName", text)}
-        icon={"person-outline"}
+        icon="person-outline"
         error={error.firstName}
       />
       <AuthInput
-        placeholder='Last Name'
+        placeholder="Last Name"
         value={form.lastName}
         onChangeText={(text) => onChange("lastName", text)}
-        icon={"person-outline"}
+        icon="person-outline"
         error={error.lastName}
       />
       <AuthInput
-        placeholder='Email'
+        placeholder="Email"
         value={form.email}
         onChangeText={(text) => onChange("email", text)}
-        icon={"mail-outline"}
+        icon="mail-outline"
         isDisabled={disabled || null}
         error={error.email}
       />
     </View>
   );
-}
+};
 
 export default MyPeopleFormInputs;
 

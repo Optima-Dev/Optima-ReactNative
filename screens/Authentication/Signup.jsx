@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import AuthContent from "../../components/Auth/AuthContent";
 import Colors from "@/constants/Colors";
 
+
 function Signup() {
   return (
     <View style={styles.container}>

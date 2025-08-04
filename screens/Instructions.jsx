@@ -6,6 +6,8 @@ import InstructionItem from "@/components/Instructions/InstructionItem";
 import Colors from "@/constants/Colors";
 import PrimaryButton from "@/components/UI/PrimaryButton";
 import { AuthContext } from "@/store/AuthContext";
+import ScreenWrapper from "../components/UI/ScreenWrapper";
+
 
 const INSTRUCTIONS = {
   seeker: [
@@ -78,6 +80,7 @@ const Instructions = ({ navigation }) => {
   }
 
   return (
+    <ScreenWrapper>
     <View style={styles.container}>
       <Image
         source={require("../assets/LargeImages-Backup/Ellipse 1.png")}
@@ -104,6 +107,7 @@ const Instructions = ({ navigation }) => {
         />
       </View>
     </View>
+    </ScreenWrapper>  
   );
 };
 

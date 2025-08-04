@@ -10,6 +10,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../constants/Colors";
 import BackButton from "../components/UI/BackButton";
 import SearchInput from "../components/UI/SearchInput";
+import ScreenWrapper from "../components/UI/ScreenWrapper";
 
 const LANGAUGES = [
   {
@@ -41,51 +42,53 @@ const LANGAUGES = [
 
 const Language = () => {
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.screen}>
-      <ScrollView
-        style={styles.screen}
-        contentContainerStyle={{ flexGrow: 1 }}
-        scrollEnabled={false}>
-        <View style={styles.container}>
-          <BackButton />
+    <ScreenWrapper>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.screen}>
+        <ScrollView
+          style={styles.screen}
+          contentContainerStyle={{ flexGrow: 1 }}
+          scrollEnabled={false}>
+          <View style={styles.container}>
+            <BackButton />
 
-          <Text style={styles.title}>Language</Text>
-          <SearchInput />
+            <Text style={styles.title}>Language</Text>
+            <SearchInput />
 
-          <Text style={styles.subTitle}>
-            We preferer to use your native language as main language to make it
-            easier for us to assign you with people with the same native
-            language as yours.
-          </Text>
+            <Text style={styles.subTitle}>
+              We preferer to use your native language as main language to make
+              it easier for us to assign you with people with the same native
+              language as yours.
+            </Text>
 
-          <ScrollView style={styles.languagesContainer}>
-            <View>
-              {LANGAUGES.map((lang) => (
-                <View
-                  key={lang.id}
-                  style={[
-                    styles.languageContainer,
-                    lang.id !== 5 && styles.applyBorder,
-                  ]}>
-                  <Text style={styles.languageText}>{lang.name}</Text>
-                  <Text style={styles.languageText2}>{lang.name2}</Text>
-                  {lang.id === 1 && (
-                    <Ionicons
-                      name='checkmark-sharp'
-                      size={24}
-                      color={Colors.MainColor}
-                      style={styles.activeMark}
-                    />
-                  )}
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <ScrollView style={styles.languagesContainer}>
+              <View>
+                {LANGAUGES.map((lang) => (
+                  <View
+                    key={lang.id}
+                    style={[
+                      styles.languageContainer,
+                      lang.id !== 5 && styles.applyBorder,
+                    ]}>
+                    <Text style={styles.languageText}>{lang.name}</Text>
+                    <Text style={styles.languageText2}>{lang.name2}</Text>
+                    {lang.id === 1 && (
+                      <Ionicons
+                        name='checkmark-sharp'
+                        size={24}
+                        color={Colors.MainColor}
+                        style={styles.activeMark}
+                      />
+                    )}
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ScreenWrapper>
   );
 };
 

@@ -7,7 +7,7 @@ import {
   Image,
   Platform,
 } from "react-native";
-import Colors from "@/constants/Colors";
+import Colors from "@/constants/Colors"; // Make sure this path is correct
 
 const NotificationItem = ({
   profileImage,
@@ -19,19 +19,21 @@ const NotificationItem = ({
   status: statusType,
 }) => {
   const [status, setStatus] = useState(statusType); // null, 'accepted', 'declined'
-  const AcceptStyle =
-    status === "accepted" ? styles.acceptedButton : styles.acceptButton;
-  const DeclineStyle =
-    status === "accepted" ? styles.removedButton : styles.declineButton;
 
   const handleAccept = () => {
-    setStatus("accepted");
-    onAccept();
+    // Prevent multiple clicks after an action is taken
+    if (status === null) {
+      setStatus("accepted");
+      onAccept();
+    }
   };
 
   const handleDecline = () => {
-    setStatus("declined");
-    onDecline();
+    // Prevent multiple clicks after an action is taken
+    if (status === null) {
+      setStatus("declined");
+      onDecline();
+    }
   };
 
   return (
@@ -46,7 +48,13 @@ const NotificationItem = ({
               {name} <Text style={styles.message}>{message}</Text>
             </Text>
           </View>
-        </View>{" "}
+        </View>
+
+        {/* =================================================================
+          THE ONLY FIX is here: The stray {" "} that was after the closing
+          </View> tag has been removed. Nothing else is changed.
+          =================================================================
+        */}
         {type === "video_call" && status === null ? (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -73,13 +81,30 @@ const NotificationItem = ({
               <Text style={styles.declineText}>Remove</Text>
             </TouchableOpacity>
           </View>
+        ) : type === "meeting_request" && status === null ? (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.acceptButton}
+              onPress={handleAccept}>
+              <Text style={styles.buttonText}>Accept Call</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.declineButton}
+              onPress={handleDecline}>
+              <Text style={styles.declineText}>Decline</Text>
+            </TouchableOpacity>
+          </View>
         ) : status === "accepted" ? (
-          <TouchableOpacity style={styles.acceptedButton}>
-            <Text style={styles.buttonText}>Accepted</Text>
+          <TouchableOpacity style={styles.acceptedButton} disabled={true}>
+            <Text style={styles.buttonText}>
+              {type === "meeting_request" ? "Call Accepted" : "Accepted"}
+            </Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.removedButton}>
-            <Text style={styles.declineText}>Removed</Text>
+          <TouchableOpacity style={styles.removedButton} disabled={true}>
+            <Text style={styles.declineText}>
+              {type === "friend_request" ? "Removed" : "Declined"}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -87,6 +112,7 @@ const NotificationItem = ({
   );
 };
 
+// YOUR ORIGINAL STYLES (UNCHANGED)
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",

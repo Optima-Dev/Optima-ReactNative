@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
+import ScreenWrapper from "../components/UI/ScreenWrapper";
+
 
 function Splash({ navigation }) {
   useEffect(() => {
@@ -11,18 +13,20 @@ function Splash({ navigation }) {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.image}
-        source={require("../assets/Images/Splash-Logo.png")}
-      />
-      <View style={styles.textContainer}>
+    <ScreenWrapper>
+      <View style={styles.container}>
+        <Image
+          style={styles.image}
+          source={require("../assets/Images/Splash-Logo.png")}
+        />
+        <View style={styles.textContainer}>
         <Text style={styles.text}>A Glimpse of vision</Text>
         <Text style={styles.copyright}>
           © All rights reserved to Optima 2025
         </Text>
       </View>
     </View>
+    </ScreenWrapper>
   );
 }
 

@@ -15,21 +15,41 @@ function PrimaryButton({
   textColor,
   style,
 }) {
+  // Debug props
+  console.log("[PrimaryButton] Props:", { backgroundColor, textColor });
+
+  // Use black text for white background, otherwise use provided textColor or fallback
+  const resolvedTextColor =
+    backgroundColor === "white"
+      ? Colors.black || "#000000"
+      : textColor || "white";
   const buttonBackgroundColor =
-    backgroundColor === "white" ? Colors.MainColor : backgroundColor;
+    backgroundColor === "white"
+      ? "white"
+      : backgroundColor || Colors.MainColor || "#007AFF";
+
+  // Determine border color: if background is Colors.red600, use same for border
+  const borderColor =
+    buttonBackgroundColor === Colors.MainColor || buttonBackgroundColor === "white"
+      ? Colors.MainColor
+      : buttonBackgroundColor;
 
   return (
     <Pressable
       style={({ pressed }) => [
         styles.button,
         pressed && styles.pressed,
-        { backgroundColor, borderColor: buttonBackgroundColor, borderWidth: 2 },
+        {
+          backgroundColor: buttonBackgroundColor,
+          borderColor: borderColor,
+          borderWidth: 2,
+        },
         style,
       ]}
       onPress={onPress}>
-      <Text style={[styles.text, { color: textColor }]}>
+      <Text style={[styles.text, { color: resolvedTextColor }]}>
         {isLoading ? (
-          <ActivityIndicator size='large' color={textColor} />
+          <ActivityIndicator size='large' color={resolvedTextColor} />
         ) : (
           title
         )}

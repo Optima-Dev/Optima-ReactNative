@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: Platform.OS === "android" ? "center" : null,
-    paddingHorizontal: Platform.OS === "android" ? 0 : 20,
+    paddingHorizontal: Platform.OS === "android" ? 5 : 20,
   },
   headerText: {
     marginBottom: 20,

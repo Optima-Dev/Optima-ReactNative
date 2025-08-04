@@ -63,7 +63,7 @@ export async function rejectMeeting(token, meetingId) {
 export async function acceptSpecificMeeting(token, meetingId) {
   try {
     const response = await axios.post(
-      `${API_URL}/accept-specific`,
+      `${API_URL}/accept-agora-specific`,
       { meetingId },
       {
         headers: {

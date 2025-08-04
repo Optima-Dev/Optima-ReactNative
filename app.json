@@ -4,7 +4,7 @@
     "slug": "Optima",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Images/Main-Logo-blue 1.png",
     "splash": {
       "image": "./assets/Splash-Logo.png",
       "resizeMode": "contain",
@@ -19,8 +19,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/Images/Main-Logo-blue 1.png",
+        "backgroundColor": "#2727C4"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -30,7 +30,8 @@
         "android.permission.ACCESS_WIFI_STATE",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.BLUETOOTH",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.VIBRATE"
       ],
       "package": "com.ahmed_hatem25.Optima"
     },
@@ -44,6 +45,13 @@
           "cameraPermission": "This app needs access to your camera so you can take pictures and do things like that.",
           "microphonePermission": "This app needs access to your microphone so you can record audio.",
           "recordAudioAndroid": true
+        }
+      ],
+      [
+        "@react-native-voice/voice",
+        {
+          "microphonePermission": "We need access to your microphone to listen for voice commands.",
+          "speechRecognitionPermission": "We need access to speech recognition to process your commands."
         }
       ],
       "expo-web-browser"

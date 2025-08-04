@@ -1,5 +1,6 @@
 // importing react hooks
 import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // importing navigation
 import {
@@ -14,6 +15,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // importing icons
 import { Ionicons } from "@expo/vector-icons";
@@ -58,10 +61,20 @@ import AuthProvider, { useAuth } from "./store/AuthContext";
 import UserProvider, { useUser } from "./store/UserContext";
 import HelperProvider, { useHelper } from "./store/HelperContext";
 import SeekerProvider, { useSeeker } from "./store/SeekerContext";
+import { VoiceAssistantProvider } from "./store/VoiceAssistantContext";
 
 // importing util functions
 import { getUser } from "./util/UserHttp";
 import { getFriendRequests, getFriends } from "./util/FriendsHttp";
+import { LogBox } from 'react-native';
+
+// These specific ignores are for Reanimated warnings
+LogBox.ignoreLogs([
+  "[Reanimated]",
+  "Tried to modify key `current` of an object",
+  "valueUnpacker", // This should handle the specific error you're seeing
+  "Error: ENOENT: no such file or directory"
+]);
 
 // creating stack navigator
 const Stack = createNativeStackNavigator();
@@ -174,7 +187,6 @@ const HelperTap = React.memo(({ hasRequest }) => (
 const SeekerSupport = React.memo(() => (
   <Stack.Navigator screenOptions={{ headerShown: false }} lazy={false}>
     <Stack.Screen name='SupportScreen' component={Support} />
-    <Stack.Screen name='CallVolunteer' component={CallVolunteer} />
   </Stack.Navigator>
 ));
 
@@ -247,6 +259,7 @@ const Navigation = React.memo(({ hasRequest }) => {
             <Stack.Screen name='Instructions' component={Instructions} />
           )}
           <Stack.Screen name='MyTabs' component={SeekerTap} />
+          <Stack.Screen name='CallVolunteer' component={CallVolunteer} />
         </Stack.Navigator>
       );
     }
@@ -335,16 +348,21 @@ export default function App() {
   return (
     <>
       <StatusBar barStyle='default' />
-
-      <AuthProvider>
-        <UserProvider>
-          <HelperProvider>
-            <SeekerProvider>
-              <Root />
-            </SeekerProvider>
-          </HelperProvider>
-        </UserProvider>
-      </AuthProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <VoiceAssistantProvider>
+              <UserProvider>
+                <HelperProvider>
+                  <SeekerProvider>
+                    <Root />
+                  </SeekerProvider>
+                </HelperProvider>
+              </UserProvider>
+            </VoiceAssistantProvider>
+          </AuthProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     </>
   );
 }

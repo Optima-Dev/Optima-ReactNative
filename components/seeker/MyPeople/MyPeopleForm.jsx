@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
 import PrimaryButton from "../../UI/PrimaryButton";
 import Colors from "../../../constants/Colors";
 import MyPeopleFormInputs from "./MyPeopleFormInputs";
@@ -44,29 +44,34 @@ function MyPeopleForm({ onAddPerson, onHideForm, isLoading }) {
   }
 
   return (
-    <View style={styles.container}>
-      <MyPeopleFormInputs
-        form={peopleForm}
-        onChange={handleChangeInputs}
-        error={error}
-      />
-
-      <View style={styles.ButtonsContainer}>
-        <PrimaryButton
-          title='Add Member'
-          onPress={handleSubmit}
-          backgroundColor={Colors.MainColor}
-          textColor={"white"}
-          isLoading={isLoading}
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingContainer}
+      behavior={Platform.OS === "ios" ? "padding" : null}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+      enabled>
+      <View style={styles.container}>
+        <MyPeopleFormInputs
+          form={peopleForm}
+          onChange={handleChangeInputs}
+          error={error}
         />
-        <PrimaryButton
-          title='Cancel'
-          onPress={onHideForm}
-          backgroundColor={"white"}
-          style={{ borderWidth: 4 }}
-        />
+        <View style={styles.ButtonsContainer}>
+          <PrimaryButton
+            title='Add Member'
+            onPress={handleSubmit}
+            backgroundColor={Colors.MainColor}
+            textColor='white'
+            isLoading={isLoading}
+          />
+          <PrimaryButton
+            title='Cancel'
+            onPress={onHideForm}
+            backgroundColor='white'
+            style={{ borderWidth: 4 }}
+          />
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
