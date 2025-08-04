@@ -515,53 +515,93 @@ const MyVision = ({ navigation }) => {
     .maxPointers(2)
     .minDistance(8)
     .activeOffsetY([-10, 10])
-    .onStart(() => {
-      // Keep this minimal - no ref modifications
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+    .onStart((event) => {
+      console.log("[MyVision] Gesture started", {
+        pointers: event.numberOfPointers,
+        minPointers: Platform.OS === "android" ? 1 : 2,
+        maxPointers: 2,
+        platform: Platform.OS,
+      });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch((err) => {
+        console.log("[MyVision] Haptics error:", err);
+      });
+      if (Platform.OS === "android" && event.numberOfPointers === 1) {
+        console.log("[MyVision] Android fallback: single-pointer swipe", {
+          platform: Platform.OS,
+        });
+      }
     })
     .onEnd((event) => {
-      // Extract only the data needed from the event
-      const translationY = event.translationY;
-      const translationX = event.translationX;
-
-      // Call a JS function to handle the complex logic
-      runOnJS(handleGestureEnd)(
-        translationY,
-        translationX,
-        event.numberOfPointers
-      );
-    });
-
-  // Move complex logic to a separate function
-  const handleGestureEnd = useCallback(
-    (translationY, translationX, pointerCount) => {
+      console.log("[MyVision] Pan gesture evaluated:", {
+        translationY: event.translationY,
+        translationX: event.translationX,
+        velocityY: event.velocityY,
+        velocityX: event.velocityX,
+        pointers: event.numberOfPointers,
+      });
       const minPointers = Platform.OS === "android" ? 1 : 2;
-
-      if (pointerCount < minPointers) {
-        // Handle insufficient pointers
+      if (event.numberOfPointers < minPointers) {
+        console.log(
+          "[MyVision] Pointer validation failed: insufficient pointers",
+          {
+            pointers: event.numberOfPointers,
+            minPointers,
+          }
+        );
+        speechInProgress.current = true;
         clearSpeechQueue().then(() => {
-          Speech.speak("Please use a two-finger swipe.");
-          // Update refs here, not in the worklet
-          speechInProgress.current = true;
+          Speech.speak("Please use a two-finger swipe.", {
+            language: "en-US",
+            rate: 0.85,
+            pitch: 1.0,
+            onDone: () => {
+              console.log("[MyVision] Invalid swipe speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log("[MyVision] Invalid swipe speech error:", err, {
+                platform: Platform.OS,
+              });
+              speechInProgress.current = false;
+            },
+          });
         });
         return;
       }
-
+      const verticalSwipe = event.translationY;
+      const horizontalSwipe = event.translationX;
       if (
-        Math.abs(translationY) > 20 &&
-        Math.abs(translationY) > Math.abs(translationX)
+        Math.abs(verticalSwipe) > 20 &&
+        Math.abs(verticalSwipe) > Math.abs(horizontalSwipe)
       ) {
-        const direction = translationY < 0 ? "up" : "down";
-        handleSwipe(direction);
+        const direction = verticalSwipe < 0 ? "up" : "down";
+        runOnJS(handleSwipe)(direction);
       } else {
+        console.log("[MyVision] Pan gesture ignored");
+        speechInProgress.current = true;
         clearSpeechQueue().then(() => {
-          Speech.speak("Please swipe up or down.");
-          speechInProgress.current = true;
+          Speech.speak("Please swipe up or down.", {
+            language: "en-US",
+            rate: 0.85,
+            pitch: 1.0,
+            onDone: () => {
+              console.log("[MyVision] Invalid swipe direction speech done");
+              speechInProgress.current = false;
+            },
+            onError: (err) => {
+              console.log(
+                "[MyVision] Invalid swipe direction speech error:",
+                err,
+                {
+                  platform: Platform.OS,
+                }
+              );
+              speechInProgress.current = false;
+            },
+          });
         });
       }
-    },
-    [clearSpeechQueue, handleSwipe]
-  );
+    });
 
   const renderContent = () => {
     if (visionState.isCameraActive && !visionState.uri && permission?.granted) {
@@ -625,9 +665,10 @@ const MyVision = ({ navigation }) => {
                   ? { flex: 1, justifyContent: "center", alignItems: "center" }
                   : undefined
               }
-              scrollEnabled={true}>
+              scrollEnabled={true}
+            >
               {visionState.isLoading ? (
-                <BallIndicator color='white' size={80} count={9} />
+                <BallIndicator color="white" size={80} count={9} />
               ) : (
                 <Text style={styles.answer}>{visionState.answer}</Text>
               )}
@@ -701,7 +742,7 @@ const MyVision = ({ navigation }) => {
           <PrimaryButton
             title={visionState.uri ? "Retake" : "Take Picture"}
             backgroundColor={Colors.MainColor}
-            textColor='white'
+            textColor="white"
             isLoading={visionState.isLoading}
             onPress={visionState.uri ? handleRetake : handleTakePicture}
             disabled={!visionState.isCameraActive || !permission?.granted}
@@ -709,7 +750,7 @@ const MyVision = ({ navigation }) => {
           />
           {visionState.uri && (
             <PrimaryButton
-              title='Repeat'
+              title="Repeat"
               backgroundColor={Colors.green500}
               textColor={Colors.MainColor}
               isLoading={visionState.isLoading}
