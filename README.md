@@ -187,6 +187,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-Maintainer: [7atoom](mailto:ahmed.hatem.dev@gmail.com)
+Maintainer: [7atoom](mailto:ahmed.hatem.dev@gmail.com) & [Abdelsalam](mailto:abdelsalamebrahim21@gmail.com)
 
 For support or business inquiries, please contact the maintainer or open an issue on GitHub.
